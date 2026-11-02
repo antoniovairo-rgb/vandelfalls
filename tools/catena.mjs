@@ -49,9 +49,9 @@ const CATENE = {
 };
 CATENE.completa = [...CATENE.governo, ...CATENE.logica, ...CATENE.grafica];
 
-// D-257: ogni Chromium delle catene (lo eredita dall'ambiente) vede gli stessi caratteri di sistema e li disegna senza
-// hinting: larghezze dei testi uguali in locale e in CI (con l'hinting di serie della CI si arrotondavano al pixel).
-process.env.FONTCONFIG_FILE ??= new URL('./caratteri/fonts.conf', import.meta.url).pathname;
+// D-257: ogni Chromium delle catene vede gli stessi caratteri di sistema e li disegna senza hinting (fontconfig fisso
+// e --font-render-hinting=none, tools/caratteri.mjs): larghezze uguali in locale e in CI (lì si arrotondavano al pixel).
+(await import('./caratteri.mjs')).resaFissa();
 const nome = process.argv[2];
 if (!CATENE[nome]) {
   console.error(`Catena sconosciuta «${nome}». Disponibili: ${Object.keys(CATENE).join(', ')}`);

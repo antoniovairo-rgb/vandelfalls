@@ -78,6 +78,8 @@ export const PASSI_GRAFICA = {
         compiti.push(async () => { if (!a.controllaAltezze(await a.giraAltezze({ vps: [vp], rossi: r.split(','), parti: PARTE_ROSSO[r.split(',')[0]] ?? ['e01'] })).length) ciechi.push(`altezze/${r} è cieco`); }); }
     // D-257: senza i file di Inter (C254F01) il guardiano dei caratteri è rosso
     compiti.push(async () => { if (!(await (await import('./caratteri.mjs')).giraCaratteri('dist', ['C254F01'])).length) ciechi.push('caratteri/C254F01 è cieco'); });
+    // e con l'hinting acceso (C257H01, com'era la CI) la larghezza del campione cambia
+    compiti.push(async () => { if (!(await (await import('./caratteri.mjs')).giraCaratteri('dist', ['C257H01'])).some((e) => e.includes('larghezza campione'))) ciechi.push('caratteri/C257H01 è cieco'); });
     // C53-02: con la risposta in due messaggi (C193R01) la parte «risposte» (carte d'imprevisto e varianti) vede lo scorrimento
     if (larghezzeGiro().includes(360)) compiti.push(async () => { const a = await import('./sonda-altezze.mjs');
       if (!a.controllaAltezze(await a.giraAltezze({ vps: ['360x640'], rossi: ['C193R01'], parti: ['risposte'], limiteRisposte: 24 })).some((x) => x.includes('C53-02'))) ciechi.push('altezze/risposte C193R01 è cieco'); });

@@ -7,12 +7,25 @@
 //  (d) larghezza campione: Inter 400 a 15 px senza hinting, avanzamenti frazionari (telefono); con l'hinting di serie di
 //      una macchina Linux le larghezze si arrotondano al pixel e gli a capo cambiano (causa degli a capo diversi in CI).
 // Rosso C254F01: i file di Inter non arrivano (richieste bloccate), come senza il file.
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, writeFileSync, mkdtempSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
 import { chromium } from 'playwright-core';
 import { servi } from './foto.mjs';
 
 export const FONTCONFIG = resolve('tools/caratteri/fonts.conf');
+// D-257 (misura del 2026-11-02, CI su 9dd63e8): il Chromium completo prende l'hinting dal fontconfig, ma il «headless
+// shell» che la CI scarica (v1248) lo accende sempre (340,000 anche col fontconfig fisso) e lo spegne solo con
+// --font-render-hinting=none. Servono tutti e due: resaFissa() li mette per ogni Chromium del processo (le catene la
+// chiamano all'avvio); chi passa già un --font-render-hinting lo tiene (rosso C257H01).
+export const SENZA_HINTING = '--font-render-hinting=none';
+export function resaFissa() {
+  process.env.FONTCONFIG_FILE ??= FONTCONFIG;
+  if (chromium.launch.__resaFissa) return;
+  const lancia = chromium.launch.bind(chromium);
+  chromium.launch = (o = {}) => lancia({ ...o, args: (o.args ?? []).some((a) => a.startsWith('--font-render-hinting')) ? o.args : [...(o.args ?? []), SENZA_HINTING] });
+  chromium.launch.__resaFissa = true;
+}
 // misura del 2026-11-02 (container e fontconfig fisso, Chromium di /opt/pw-browsers): con l'hinting di serie 340.000
 export const CAMPIONE = { testo: 'Pattuglia in Via Roma, «subito» è già qui — 1234', larghezza: 340.484 };
 const PESI = [400, 500, 600, 700];
@@ -33,7 +46,11 @@ export async function giraCaratteri(dir = 'dist', rossi = []) {
   const errori = [];
   const percorso = process.env.VALMORA_CHROME ?? (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
   const srv = await servi(dir), url = `http://127.0.0.1:${srv.address().port}/`;
-  const browser = await chromium.launch({ executablePath: percorso, env: { ...process.env, FONTCONFIG_FILE: FONTCONFIG } });
+  // Rosso C257H01: hinting acceso nel fontconfig e nel Chromium (come la CI prima della correzione): 340,000.
+  const hinting = rossi.includes('C257H01') ? join(mkdtempSync(join(tmpdir(), 'c257h01-')), 'fonts.conf') : null;
+  if (hinting) writeFileSync(hinting, readFileSync(FONTCONFIG, 'utf8').replace('<bool>false</bool></edit>\n    <edit name="hintstyle"', '<bool>true</bool></edit>\n    <edit name="hintstyle"').replace('hintnone', 'hintfull'));
+  // Senza argomenti propri: misura con lo stesso lancio di tutte le altre sonde (resaFissa), così ne guarda anche quello.
+  const browser = await chromium.launch({ executablePath: percorso, ...(hinting ? { args: ['--font-render-hinting=full'], env: { ...process.env, FONTCONFIG_FILE: hinting } } : { env: { ...process.env, FONTCONFIG_FILE: FONTCONFIG } }) });
   try {
     const p = await browser.newPage({ viewport: { width: 360, height: 640 } });
     if (rossi.includes('C254F01')) await p.route(/inter-latin-[0-9]+-normal[^/]*\.woff2$/, (r) => r.abort());
@@ -69,6 +86,7 @@ export async function giraCaratteri(dir = 'dist', rossi = []) {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
+  resaFissa();
   const errori = await giraCaratteri('dist', (process.env.VALMORA_ROSSI ?? '').split(',').filter(Boolean));
   console.log(errori.length ? errori.join('\n') : 'caratteri: verde'); process.exitCode = errori.length ? 1 : 0;
 }
