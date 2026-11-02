@@ -385,4 +385,12 @@
 //   misura: prima di «Conferma» 0 costi sotto le opzioni, dopo il costo per radio; settori toccabili in chiamata (bersagli 44 px);
 //   mappa ferma a 279 px in 6 stati, sopra le teste ≥ 104 px e mappa 431 a 915; bundle +4,9 KB; bot 0 blocchi.
 //   guardiano: tools/foto-po152-a.mjs (rossi C241A01, C241M01), foto-po149 (rosso C242M01), C241N01 per i nomi a 412.
-export const GAME_VERSION = '0.58.0';
+// 0.59.0 – una mossa per chiamata (idea B, PO-152, D-241): fra una chiamata e l'altra si sposta una squadra sulla mappa.
+//   causa: il tester: «il gioco si sviluppa solo nella parte sotto»; la mappa in ondata si guardava soltanto.
+//   misura: una mossa per pausa (seconda rifiutata), salvata (SAVE_VERSION 4, migrazione 3→4 provata su un salvataggio vero 0.57);
+//   bot su 300 semi: 0 blocchi, esiti identici, l'attento muove 69 volte su 4.179 occasioni; scorrimento della risposta invariato.
+//   guardiano: tests/mossa-d241.test.ts e tools/foto-po152-b.mjs, rossi C241B01 (6) e C241M02.
+//   Nella stessa versione il bilanciamento della varietà (D-252): 951 risposte di carte e varianti misurate, oltre soglia 348 → 0 a
+//   360×640 (max 108 → 66), 241 → 0 a 375×667, 61 → 0 a 412×760; D-108 col seme 7 coppie rosse → 0; e24 «contenuto» raggiungibile
+//   (1 su 1000, casuale). Guardiani: parte «risposte» di sonda-altezze (rosso C193R01) e passo bot col seme (rosso C252B01).
+export const GAME_VERSION = '0.59.0';

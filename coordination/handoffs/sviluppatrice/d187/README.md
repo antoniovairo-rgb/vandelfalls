@@ -896,3 +896,39 @@ Strumenti: `foto-po152-a.mjs` e `foto-c52-nomi.mjs` usano la chiave nuova `varca
   carico ~20 su 4 core); nessuna soglia cambiata. Limite di tempo di partita-d241: la riga di D-251 (400 s).
 - Chiave di salvataggio nei guardiani nuovi: `vandelfalls-salvataggio`. Nomi: tests/nome-d244.test.ts 12/12.
 - Su 979d1530: grafica completa verde; 3 giri governo+logica verdi; CI 40955861303 verde su tutti i 10 job.
+
+## PO-152 idea B (D-241): una mossa per chiamata — S-11, 30/10
+
+Base: main 0.58.0 (72fafced). Scelte tecniche (dichiarate):
+- Logica in un modulo nuovo, `src/logica/mossa.ts` (missione.ts era a 320 righe, ora 328): `turnoMossa`, `mossaPossibile`,
+  `spostabili`, `sposta`. La mossa si fa fra una chiamata e l'altra: dopo almeno una risposta dell'ondata e solo se resta una
+  chiamata aperta (non dopo l'ultima, prima della chiusura). Si spostano unità dello schieramento dell'ondata non fisse (le
+  transenne no, D-082; quelle a riposo non sono schierate), verso un settore ammesso per quella risorsa (`settoriAmmessi`).
+- Una per chiamata: la mossa si segna in `in_corso.mosse` come «ondata:chiamata» dell'ultima risposta. SAVE_VERSION 4 con la
+  migrazione 3 → 4 (`mosse` vuoto anche in sconfitta e partenze) e controllo del campo (`src/salvataggi/salvataggio.ts`).
+  Salvataggio vero nuovo: `tests/salvataggi-reali/v3-0.57.0-e01-ondata2-in-corso.json` (build 0.57.0, `tools/salva-reale-057.mjs`).
+- La mossa entra nella disposizione: conta per «senza» delle chiamate dopo e per la chiusura dell'ondata.
+- Interfaccia: nella risposta (dopo «Conferma», prima della chiamata dopo) la mappa si tocca: tocco sull'unità (badge), poi
+  sul settore; con la tastiera Invio sui due pulsanti; Esc lascia l'unità; «Avanti» senza mossa resta il default. Il
+  trascinamento NON l'ho fatto: tocco-tocco basta anche per tastiera e lettore di schermo. L'indicazione («Puoi spostare una
+  squadra…», «Ora tocca il settore…», «Mossa fatta.») sta nel riquadro radio sopra la mappa (la pagina non si allunga): il
+  riquadro copre la fascia alta o bassa della mappa (vedi le foto). Etichette: «sposta squadre da …», «porta qui: …»,
+  `aria-pressed` sull'unità in mano. Testi nuovi in comune.json (`mossa.*`), stili solo da token (`stile-idee.css`).
+- Bot: `Giocatore.muovi` facoltativo, usato da `giocaMissione`; la strategia attenta muove solo se la prossima chiamata riguarda
+  un settore scoperto (nessuna unità, fisse comprese) e una mossa che porta lì un'unità abbassa la tensione stimata.
+
+FATTO MISURATO:
+- `tests/mossa-d241.test.ts` (7 prove): migrazione v3 → v4 del salvataggio vero della 0.57.0; la mossa cambia disposizione e
+  `mosse`; la seconda nella stessa pausa è rifiutata (rosso C241B01: passa); salvata e ripresa la mossa usata resta usata; non
+  prima della prima risposta né dopo l'ultima chiamata; le transenne non si spostano; il bot attento muove e finisce i 36 episodi.
+- Bot su 300 semi (`giraBot`), prima e dopo: casuale 3 473 su 10 800 vinte (32,2 %), attenta 10 800 (100 %, 3★ 2 700),
+  equilibrata 10 800 (100 %, 3★ 7 200), peggiore 0; 0 blocchi; identico prima e dopo in tutte le 56 righe (partenze comprese).
+  Il bot attento muove davvero: 69 mosse su 4 179 occasioni in 360 partite (36 episodi × 10 semi), senza cambiare gli esiti.
+- `tools/foto-po152-b.mjs` (sonda-altezze, parte «po152b», 360/375/412 × 640/667/760): verde; la risposta scorre quanto
+  senza il riquadro (62/35/0 a 360, 77/50/0 a 375, 71/44/0 a 412 per 640/667/760). Rossi a 360: C241B01 6 problemi (seconda
+  mossa possibile, niente «Mossa fatta»), C241M02 12 (niente indicazione, nessuna unità toccabile).
+- `foto-po152-a.mjs` resta verde a 360/375/412 col riquadro più alto.
+- Foto: `po152b/prima` (72fafced) e `po152b/dopo` (risposta, unità in mano, mossa fatta) a 360/375/412 × 640/760.
+
+Non verificato: telefono reale (tocco sui badge vicini, TalkBack), trascinamento (non fatto).
+- Su c2b3a38e: grafica completa verde (bracci C241B01 e C241M02 compresi); 3 giri governo+logica verdi; CI 40984991278 verde.

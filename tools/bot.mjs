@@ -42,15 +42,14 @@ export function giraBot(dati, semi = 1000) {
   for (const m of missioni) for (const { etichetta, variabili: partenza } of partenze(m, dich, iniziali)) for (const [nome, strategia] of Object.entries(STRATEGIE)) {
     const esiti = {}; const blocchi = []; const tensioni = []; const stelle = { 0: 0, 1: 0, 2: 0, 3: 0 };
     // D-089: una strategia deterministica gioca la stessa partita con ogni seme → una sola, contata «semi» volte (rosso __NO_C11D01)
-    // D-241: qui tutte le strategie giocano la partita classica (seme 0), la stessa misurata da D-108/D-154/D-162; le partite
-    // col seme le misura tools/misura-d241.mjs (blocchi, vittorie) e la campagna qui sotto (ogni chiamata compare).
-    // Misurato: col seme di partita il casuale sposta la quota di fallimento fino a ±6 punti e D-108 diventa rosso in 7
-    // coppie: lo riassorbe il bilanciamento col bot previsto da D-241 (dopo A, C, B).
+    // D-252 (bilanciamento della varietà): il giocatore casuale gioca ogni seme con un seme di partita suo (carta del mazzo,
+    // posto, varianti), come chi gioca davvero: D-108/D-154/D-162 misurano quindi le partite vere. Le strategie deterministiche
+    // giocano la partita classica (seme 0). Rosso __NO_C252B01: anche il casuale solo sulla classica, come prima.
     const una = DETERMINISTICHE.has(nome) && !spento('C11D01');
     for (let seme = 1; seme <= (una ? 1 : semi); seme++) {
       const volte = una ? semi : 1;
       try {
-        const r = giocaMissione(m, partenza, dich, strategia(creaCaso(`${m.id}:${nome}:${seme}`), dich), 0);
+        const r = giocaMissione(m, partenza, dich, strategia(creaCaso(`${m.id}:${nome}:${seme}`), dich), DETERMINISTICHE.has(nome) || spento('C252B01') ? 0 : semeDa(`${m.id}:${nome}:${seme}`));
         esiti[r.esito.id] = (esiti[r.esito.id] ?? 0) + volte;
         stelle[valutaEpisodio(m, r).stelle] += volte;
         for (let i = 0; i < volte; i++) tensioni.push(r.variabili.tensione_max);

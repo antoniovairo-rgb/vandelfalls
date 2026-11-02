@@ -14,6 +14,7 @@ import { applica, valuta } from './condizioni.ts';
 import { spento } from '../interruttori.ts';
 import { chiamateDellaPartita, conCarta, semeRipartenza } from './partita.ts';
 import { morsiDellOndata } from './dopo.ts';
+import { mossaPossibile, sposta, type Mossa } from './mossa.ts';
 import type { Chiamata, Condizione, Dichiarazione, Disposizione, Dopo, EffettoMissione, Esito, Missione, Opzione, Variabili } from './tipi.ts';
 
 export const VAR_TENSIONE = 'tensione_max';
@@ -50,6 +51,7 @@ export interface InCorso {
   fisse?: Disposizione;                 // unità fisse già piazzate, per risorsa e settore (D-082); assente nei salvataggi vecchi
   partenze?: Record<number, InCorso>;   // stato all'inizio di ogni ondata, per ripartire da lì (PO-060); assente nei salvataggi vecchi
   seme?: number;                        // D-241: seme di partita (partita.ts); 0 o assente = la partita classica
+  mosse?: string[];                     // D-241 idea B: «ondata:chiamata» dopo cui la mossa è stata fatta (mossa.ts); SAVE_VERSION 4
 }
 
 const ondataDi = (m: Missione, s: InCorso) => {
@@ -77,7 +79,7 @@ export function iniziaMissione(m: Missione, iniziali: Variabili, d: Dich, seme =
   const risorse = Object.keys(m.mappa.risorse);
   const s: InCorso = {
     missione: m.id, ondata: 1, tensione: zero(m.mappa.settori.map((x) => x.id)), riserva: zero(risorse), riposo: zero(risorse),
-    disposizione: null, modifiche: {}, risposte: {}, scelte: [], rapporti: [], variabili: fiduciaMinima({ ...iniziali, [VAR_TENSIONE]: 0 }, d), seme,
+    disposizione: null, modifiche: {}, risposte: {}, scelte: [], rapporti: [], variabili: fiduciaMinima({ ...iniziali, [VAR_TENSIONE]: 0 }, d), seme, mosse: [],
   };
   return { ...s, partenze: { 1: s } };
 }
@@ -307,13 +309,19 @@ export function concludiMissione(m: Missione, s: InCorso, d: Dich): EsitoMission
 export interface Giocatore {
   schiera(m: Missione, s: InCorso): Disposizione;
   scegli(m: Missione, s: InCorso, c: Chiamata): string;
+  /** D-241 idea B: la mossa fra una chiamata e l'altra, facoltativa (null = nessuna) */
+  muovi?(m: Missione, s: InCorso): Mossa | null;
 }
 
 export function giocaMissione(m: Missione, iniziali: Variabili, d: Dich, g: Giocatore, seme = 0): EsitoMissione {
   let s = iniziaMissione(m, iniziali, d, seme);
   while (!missioneFinita(m, s)) {
     s = schiera(m, s, g.schiera(m, s));
-    for (let c = chiamateAperte(m, s)[0]; c; c = chiamateAperte(m, s)[0]) s = rispondi(m, s, c.id, g.scegli(m, s, c), d);
+    for (let c = chiamateAperte(m, s)[0]; c; c = chiamateAperte(m, s)[0]) {
+      s = rispondi(m, s, c.id, g.scegli(m, s, c), d);
+      const x = g.muovi && mossaPossibile(m, s) ? g.muovi(m, s) : null;
+      if (x) s = sposta(m, s, x);
+    }
     s = chiudiOndata(m, s, d);
   }
   return concludiMissione(m, s, d);

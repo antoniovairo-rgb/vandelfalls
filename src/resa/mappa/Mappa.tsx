@@ -50,6 +50,8 @@ export interface MappaProps {
   onTogli?: (risorsa: string, settore: string) => void;
   /** PO-152 (D-241): senza onSettore il tocco su un settore apre la sua scheda di stato (scheda-settore.tsx) */
   schede?: boolean;
+  /** D-241 idea B (mossa-ui.tsx): si toccano solo le unità spostabili («risorsa@settore»), poi solo i settori ammessi */
+  mossa?: { spostabili: string[]; inMano: string | null; ammessi: string[] };
   /** PO-152 (D-241): rapporto radio del costo dopo «Conferma», sopra la mappa (RadioMappa) */
   radio?: ReactNode;
   /** D-165 (fischio dell'ultimo derby): settori già spenti, città vuota (niente folla né cortei), sala al buio */
@@ -142,9 +144,9 @@ export function Mappa(p: MappaProps) {
         return (
           <div key={s.id} ref={posiziona(s.pos.x, s.pos.y)} data-settore={s.id}
             className={`settore lato-${lato}${accesi.has(s.id) ? ' acceso' : ''}${liv !== null ? ` liv-${liv}` : ''}${p.vietati?.includes(s.id) ? ' vietato' : ''}${p.spenti?.includes(s.id) ? ' spento' : ''}`} data-vietato={p.vietati?.includes(s.id) ? 'si' : undefined}>
-            <button type="button" className="settore-punto" disabled={!p.onSettore && !schede} onClick={() => (p.onSettore ? p.onSettore(s.id) : setAperto((x) => (x === s.id ? null : s.id)))}
+            <button type="button" className="settore-punto" disabled={(!p.onSettore && !schede) || (!!p.mossa && !p.mossa.ammessi.includes(s.id))} onClick={() => (p.onSettore ? p.onSettore(s.id) : setAperto((x) => (x === s.id ? null : s.id)))}
               aria-haspopup={schede ? 'dialog' : undefined} aria-expanded={schede ? aperto === s.id : undefined}
-              aria-label={`${nome}${liv !== null ? `, situazione ${PAROLE[liv]}` : ''}${qui.length ? `, ${qui.map(([r, n]) => quante(n, r)).join(', ')}` : ''}`} />
+              aria-label={`${p.mossa?.ammessi.includes(s.id) ? `${t('mossa.porta_qui')}: ` : ''}${nome}${liv !== null ? `, situazione ${PAROLE[liv]}` : ''}${qui.length ? `, ${qui.map(([r, n]) => quante(n, r)).join(', ')}` : ''}`} />
             <span className="settore-nome" aria-hidden="true">{nome}</span>
             {(p.segni ?? []).some((x) => x.settore === s.id) && (
               <span className="segni-effetto" role="status">
@@ -163,8 +165,9 @@ export function Mappa(p: MappaProps) {
                   </span>
                 ))}
                 {qui.map(([r, n]) => (
-                  <button key={r} type="button" className={spento('C05R05') ? 'pastiglia-rossa' : 'tocco-pastiglia'} data-presenza={`${r}@${s.id}`} disabled={!p.onTogli}
-                    aria-label={`ritira ${t(`risorsa.${r}`)} da ${nome}`} onClick={() => p.onTogli?.(r, s.id)}>
+                  <button key={r} type="button" className={`${spento('C05R05') ? 'pastiglia-rossa' : 'tocco-pastiglia'}${p.mossa?.inMano === `${r}@${s.id}` ? ' in-mano' : ''}`} data-presenza={`${r}@${s.id}`}
+                    disabled={!p.onTogli || (!!p.mossa && !p.mossa.spostabili.includes(`${r}@${s.id}`))} aria-pressed={p.mossa ? p.mossa.inMano === `${r}@${s.id}` : undefined}
+                    aria-label={p.mossa ? `${t('mossa.sposta')} ${t(`risorsa.${r}`)} da ${nome}` : `ritira ${t(`risorsa.${r}`)} da ${nome}`} onClick={() => p.onTogli?.(r, s.id)}>
                     <span className="pastiglia"><Icona di={iconaRisorsa(r)} />{n}</span>
                   </button>
                 ))}

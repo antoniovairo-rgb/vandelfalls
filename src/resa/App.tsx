@@ -45,6 +45,7 @@ import { t } from './dati.ts';
 import { Fiducia } from './fiducia.tsx';
 import { useIndietroApp } from './indietro.ts';
 import { scenaOndata, type TestataApp } from './app-ondata.tsx';
+import { useMossa } from './mossa-ui.tsx';
 
 type Schermata = 'titolo' | 'crediti' | 'privacy' | 'conferma' | 'genere' | 'guida' | 'citta' | 'sala' | 'briefing' | 'gioco' | 'rapporto' | 'verbale' | 'fischio' | 'epilogo';
 
@@ -112,6 +113,8 @@ export function App() {
   const conIc = (ic: InCorso | null, extra: Partial<Salvataggio> = {}) => ultimo.current && aggiorna({ ...ultimo.current, in_corso: ic, bozza: null, ...(ic ? { sconfitta: null } : {}), ...extra });
 
   impostaGenere(sal?.genere ?? 'm');
+  // D-241 idea B: la mossa fra una chiamata e l'altra, nella risposta (mossa-ui.tsx)
+  const mossa = useMossa({ m: sal?.in_corso ? missione(sal.in_corso.missione) : null, ic: sal?.in_corso ?? null, attiva: schermata === 'gioco' && !!eco, icOra, conIc });
   const nuova = (genere: Genere) => {
     const seme = nuovoSeme();
     const s: Salvataggio = { save_version: SAVE_VERSION, game_version: GAME_VERSION, seme, caso: seme, variabili: variabiliIniziali(dichiarate.values()), missioni_concluse: [], episodi: {}, genere, in_corso: null, rapporto_aperto: null };
@@ -233,7 +236,8 @@ export function App() {
   else if (eco) {
     nome = 'risposta';
     testata = { etichetta: `Ondata ${ic.ondata}/${m.ondate.length} · la tua scelta`, titolo: t(m.titolo), info: infoOndata(m, ic.ondata, testoSe) };
-    mappa = { tensione: ic.tensione, presenze: ic.disposizione, fisse: spento('C09S02') ? null : ic.fisse, radio: <RapportoCosto m={m} ic={ic} o={eco} /> }; // PO-152 A
+    // PO-152 A: il costo per radio sopra la mappa; idea B: lì anche l'indicazione della mossa, e la mappa si tocca per farla
+    mappa = { tensione: ic.tensione, presenze: ic.disposizione, fisse: spento('C09S02') ? null : ic.fisse, radio: <><RapportoCosto m={m} ic={ic} o={eco} />{mossa?.indicazione}</>, ...mossa?.mappa };
     corpo = <Risposta m={m} ic={ic} o={eco} avanti={() => setEco(null)} />;
   } else {
     ({ nome, testata, mappa, corpo } = scenaOndata({ m, ic, titolo, bozza, scelta, avviso, riepilogoAperto, annulla: storia.length ? annulla : null,

@@ -1,0 +1,290 @@
+{
+  "save_version": 3,
+  "game_version": "0.57.0",
+  "seme": 1366370624,
+  "caso": 1366370624,
+  "variabili": {
+    "tensione_max": 0,
+    "credito": 5,
+    "informatore_pagato": false,
+    "presidente_incontrato": false,
+    "furgone_visto": false,
+    "rapporto_dessi": "neutro",
+    "testimone": "nessuno",
+    "busta": "nessuna",
+    "pista_cattura": "nessuna",
+    "fascicolo": "nessuno",
+    "sospetti_talpa": 0,
+    "carte": "nessuna"
+  },
+  "missioni_concluse": [],
+  "episodi": {},
+  "genere": "m",
+  "in_corso": {
+    "missione": "e01",
+    "ondata": 2,
+    "tensione": {
+      "curva_cinderwick": 1,
+      "curva_larkspire": 0,
+      "piazzale": 0,
+      "strada_cinderwick": 0,
+      "strada_larkspire": 0
+    },
+    "riserva": {
+      "squadre": 1,
+      "steward": -2,
+      "mediatore": 0
+    },
+    "riposo": {},
+    "disposizione": {
+      "squadre": {
+        "curva_cinderwick": 3,
+        "curva_larkspire": 2
+      },
+      "steward": {
+        "curva_cinderwick": 4,
+        "curva_larkspire": 1,
+        "piazzale": 1
+      },
+      "mediatore": {
+        "curva_cinderwick": 1
+      }
+    },
+    "modifiche": {
+      "curva_cinderwick": -1,
+      "piazzale": -1
+    },
+    "risposte": {
+      "fumogeni": "spegni",
+      "porta_servizio": "presidia"
+    },
+    "scelte": [
+      {
+        "ondata": 1,
+        "chiamata": "corteo_partito",
+        "opzione": "scorta"
+      },
+      {
+        "ondata": 1,
+        "chiamata": "ufficio_insiste_v",
+        "opzione": "ignora"
+      },
+      {
+        "ondata": 1,
+        "chiamata": "pullman",
+        "opzione": "conta"
+      },
+      {
+        "ondata": 1,
+        "chiamata": "imp_ambulanza",
+        "opzione": "scendete"
+      },
+      {
+        "ondata": 1,
+        "chiamata": "rinforzi",
+        "opzione": "chiedi"
+      },
+      {
+        "ondata": 1,
+        "chiamata": "striscione",
+        "opzione": "lascia"
+      },
+      {
+        "ondata": 2,
+        "chiamata": "fumogeni",
+        "opzione": "spegni"
+      },
+      {
+        "ondata": 2,
+        "chiamata": "porta_servizio",
+        "opzione": "presidia"
+      }
+    ],
+    "rapporti": [
+      {
+        "n": 1,
+        "scoperto": {
+          "curva_cinderwick": 0,
+          "curva_larkspire": 0,
+          "piazzale": 0,
+          "strada_cinderwick": 0,
+          "strada_larkspire": 0
+        },
+        "tensione": {
+          "curva_cinderwick": 0,
+          "curva_larkspire": 0,
+          "piazzale": 0,
+          "strada_cinderwick": 0,
+          "strada_larkspire": 0
+        },
+        "aRiposo": {},
+        "picco": {
+          "curva_cinderwick": 0,
+          "curva_larkspire": 0,
+          "piazzale": 0,
+          "strada_cinderwick": 0,
+          "strada_larkspire": 1
+        },
+        "fiducia": 1
+      }
+    ],
+    "variabili": {
+      "tensione_max": 1,
+      "credito": 5,
+      "informatore_pagato": false,
+      "presidente_incontrato": false,
+      "furgone_visto": false,
+      "rapporto_dessi": "neutro",
+      "testimone": "nessuno",
+      "busta": "nessuna",
+      "pista_cattura": "nessuna",
+      "fascicolo": "nessuno",
+      "sospetti_talpa": 0,
+      "carte": "nessuna"
+    },
+    "seme": 1036838189,
+    "partenze": {
+      "1": {
+        "missione": "e01",
+        "ondata": 1,
+        "tensione": {
+          "curva_cinderwick": 0,
+          "curva_larkspire": 0,
+          "piazzale": 0,
+          "strada_cinderwick": 0,
+          "strada_larkspire": 0
+        },
+        "riserva": {
+          "squadre": 0,
+          "steward": 0,
+          "mediatore": 0
+        },
+        "riposo": {
+          "squadre": 0,
+          "steward": 0,
+          "mediatore": 0
+        },
+        "disposizione": null,
+        "modifiche": {},
+        "risposte": {},
+        "scelte": [],
+        "rapporti": [],
+        "variabili": {
+          "tensione_max": 0,
+          "credito": 5,
+          "informatore_pagato": false,
+          "presidente_incontrato": false,
+          "furgone_visto": false,
+          "rapporto_dessi": "neutro",
+          "testimone": "nessuno",
+          "busta": "nessuna",
+          "pista_cattura": "nessuna",
+          "fascicolo": "nessuno",
+          "sospetti_talpa": 0,
+          "carte": "nessuna"
+        },
+        "seme": 1036838189
+      },
+      "2": {
+        "missione": "e01",
+        "ondata": 2,
+        "tensione": {
+          "curva_cinderwick": 0,
+          "curva_larkspire": 0,
+          "piazzale": 0,
+          "strada_cinderwick": 0,
+          "strada_larkspire": 0
+        },
+        "riserva": {
+          "squadre": 1,
+          "steward": 0,
+          "mediatore": 0
+        },
+        "riposo": {},
+        "disposizione": null,
+        "modifiche": {},
+        "risposte": {},
+        "scelte": [
+          {
+            "ondata": 1,
+            "chiamata": "corteo_partito",
+            "opzione": "scorta"
+          },
+          {
+            "ondata": 1,
+            "chiamata": "ufficio_insiste_v",
+            "opzione": "ignora"
+          },
+          {
+            "ondata": 1,
+            "chiamata": "pullman",
+            "opzione": "conta"
+          },
+          {
+            "ondata": 1,
+            "chiamata": "imp_ambulanza",
+            "opzione": "scendete"
+          },
+          {
+            "ondata": 1,
+            "chiamata": "rinforzi",
+            "opzione": "chiedi"
+          },
+          {
+            "ondata": 1,
+            "chiamata": "striscione",
+            "opzione": "lascia"
+          }
+        ],
+        "rapporti": [
+          {
+            "n": 1,
+            "scoperto": {
+              "curva_cinderwick": 0,
+              "curva_larkspire": 0,
+              "piazzale": 0,
+              "strada_cinderwick": 0,
+              "strada_larkspire": 0
+            },
+            "tensione": {
+              "curva_cinderwick": 0,
+              "curva_larkspire": 0,
+              "piazzale": 0,
+              "strada_cinderwick": 0,
+              "strada_larkspire": 0
+            },
+            "aRiposo": {},
+            "picco": {
+              "curva_cinderwick": 0,
+              "curva_larkspire": 0,
+              "piazzale": 0,
+              "strada_cinderwick": 0,
+              "strada_larkspire": 1
+            },
+            "fiducia": 1
+          }
+        ],
+        "variabili": {
+          "tensione_max": 1,
+          "credito": 5,
+          "informatore_pagato": false,
+          "presidente_incontrato": false,
+          "furgone_visto": false,
+          "rapporto_dessi": "neutro",
+          "testimone": "nessuno",
+          "busta": "nessuna",
+          "pista_cattura": "nessuna",
+          "fascicolo": "nessuno",
+          "sospetti_talpa": 0,
+          "carte": "nessuna"
+        },
+        "seme": 1036838189,
+        "fisse": {}
+      }
+    },
+    "fisse": {}
+  },
+  "rapporto_aperto": null,
+  "bozza": null,
+  "sconfitta": null
+}

@@ -296,7 +296,7 @@
             "effetti": [
               {
                 "pressione": "curva_larkspire",
-                "valore": -1
+                "valore": -2
               },
               {
                 "tensione": "curva_larkspire",

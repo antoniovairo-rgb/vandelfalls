@@ -11,7 +11,9 @@ import type { InCorso } from '../logica/missione.ts';
 //     nuovo campo «genere» del protagonista, scelto a inizio partita (D-063);
 //     nuovo campo «rapporto_aperto» (C-005 R04).
 // 3 – D-241: in_corso.seme, il seme di partita (src/logica/partita.ts), anche in «sconfitta» e nelle «partenze».
-export const SAVE_VERSION = 3;
+// 4 – D-241 idea B: in_corso.mosse, le chiamate dopo cui è stata fatta la mossa (src/logica/mossa.ts), anche in «sconfitta»
+//     e nelle «partenze».
+export const SAVE_VERSION = 4;
 
 export type ValoreVariabile = boolean | number | string;
 
@@ -64,7 +66,15 @@ export const MIGRAZIONI: Record<number, (s: Grezzo) => Grezzo> = {
   // l'unico seme che ridà la partita di prima (imprevisti al loro posto, nessuna variante), così chi riprende a metà
   // ondata ritrova le stesse chiamate e le risposte già date valgono ancora.
   2: (s) => ({ ...s, in_corso: conSeme(s.in_corso), ...('sconfitta' in s ? { sconfitta: conSeme(s.sconfitta) } : {}) }),
+  // v3 → v4 (D-241 idea B): nessuna mossa fatta. Chi riprende a metà ondata può muovere dalla prossima risposta in poi.
+  3: (s) => ({ ...s, in_corso: conMosse(s.in_corso), ...('sconfitta' in s ? { sconfitta: conMosse(s.sconfitta) } : {}) }),
 };
+
+function conMosse(ic: unknown): unknown {
+  if (!oggetto(ic)) return ic;
+  const partenze = oggetto(ic.partenze) ? { partenze: Object.fromEntries(Object.entries(ic.partenze).map(([n, p]) => [n, conMosse(p)])) } : {};
+  return { ...ic, mosse: Array.isArray(ic.mosse) ? ic.mosse : [], ...partenze };
+}
 
 function conSeme(ic: unknown): unknown {
   if (!oggetto(ic)) return ic;
@@ -82,6 +92,7 @@ function controllaInCorso(ic: Grezzo): string[] {
   if (ic.disposizione !== null && !oggetto(ic.disposizione)) p.push('in_corso.disposizione non è un oggetto né null');
   for (const k of ['scelte', 'rapporti']) if (!Array.isArray(ic[k])) p.push(`in_corso.${k} non è un elenco`);
   if (!isUint32(ic.seme)) p.push('in_corso.seme non uint32 (D-241)');
+  if (!Array.isArray(ic.mosse) || !(ic.mosse as unknown[]).every((x) => typeof x === 'string')) p.push('in_corso.mosse non è un elenco di testi (D-241 idea B)');
   return p;
 }
 

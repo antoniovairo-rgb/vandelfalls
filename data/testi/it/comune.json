@@ -145,5 +145,10 @@
   "scheda.corteo.nessuno": "nessun corteo",
   "scheda.chiamata_qui": "La chiamata in corso arriva da qui.",
   "scheda.chiamata_altrove": "La chiamata in corso non riguarda questo settore.",
-  "radio.costo": "Radio:"
+  "radio.costo": "Radio:",
+  "mossa.puoi": "Puoi spostare una squadra: tocca un'unità sulla mappa, poi il settore.",
+  "mossa.dove": "Ora tocca il settore dove portarla.",
+  "mossa.fatta": "Mossa fatta.",
+  "mossa.sposta": "sposta",
+  "mossa.porta_qui": "porta qui"
 }

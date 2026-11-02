@@ -4,6 +4,7 @@
 // in un browser senza WebGL: nome dentro la mappa con 5 px di margine, come il controllo R06 di tools/foto.mjs.
 import { existsSync } from 'node:fs';
 import { chromium } from 'playwright-core';
+import { pazienza } from './attese.mjs';
 import { servi } from './foto.mjs';
 
 /** Il salvataggio della città in foto, se mostra un nome (a 360 e 375 non c'è: D-123). */
@@ -15,8 +16,8 @@ export async function controllaCittaSenzaWebgl(stati, build = 'dist', rossi = []
   const p = [];
   if (!stati.length) return p;
   const srv = await servi(build), url = `http://127.0.0.1:${srv.address().port}/`;
-  const browser = await chromium.launch({ args: ['--disable-webgl', '--disable-3d-apis'],
-    executablePath: process.env.VALMORA_CHROME ?? (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined) });
+  const browser = pazienza(await chromium.launch({ args: ['--disable-webgl', '--disable-3d-apis'],
+    executablePath: process.env.VALMORA_CHROME ?? (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined) }));
   try {
     for (const [i, { larghezza, stato }] of stati.entries()) {
       const pagina = await browser.newPage({ viewport: { width: larghezza, height: 800 }, reducedMotion: 'reduce' });

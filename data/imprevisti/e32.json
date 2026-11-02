@@ -394,7 +394,7 @@
               },
               {
                 "tensione": "piazzale",
-                "valore": 1
+                "valore": 2
               }
             ],
             "risposta": "testi:e32.imp.semaforo_giallo.vigile.r"

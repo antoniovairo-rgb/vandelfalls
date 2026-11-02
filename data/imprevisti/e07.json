@@ -272,7 +272,7 @@
               },
               {
                 "tensione": "piazzale",
-                "valore": 1
+                "valore": 2
               }
             ],
             "risposta": "testi:e07.imp.vetro.camion_piazzale.r"
@@ -327,7 +327,7 @@
               },
               {
                 "tensione": "piazzale",
-                "valore": 1
+                "valore": 2
               }
             ],
             "risposta": "testi:e07.imp.chiavi_pulmino.cerca_tuoi.r"

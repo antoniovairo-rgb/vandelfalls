@@ -276,7 +276,7 @@
             "effetti": [
               {
                 "tensione": "strada_cinderwick",
-                "valore": 1
+                "valore": 2
               }
             ],
             "risposta": "testi:e30.imp.farina.spazzatrice.r"
@@ -327,7 +327,7 @@
               },
               {
                 "tensione": "quartiere",
-                "valore": 1
+                "valore": 2
               }
             ],
             "risposta": "testi:e30.imp.orologio_torre.corrente_torre.r"
@@ -382,7 +382,7 @@
               },
               {
                 "tensione": "piazzale",
-                "valore": 1
+                "valore": 2
               }
             ],
             "risposta": "testi:e30.imp.karaoke.microfono_karaoke.r"

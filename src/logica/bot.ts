@@ -3,7 +3,8 @@
 // contano, e a tarare i numeri (D-036).
 import type { Caso } from './caso.ts';
 import { spento } from '../interruttori.ts';
-import { chiamateAperte, chiudiOndata, disponibili, opzioniValide, rispondi, settoriAmmessi, type Giocatore, type InCorso } from './missione.ts';
+import { chiamateAperte, chiudiOndata, disponibili, inCampo, opzioniValide, rispondi, settoriAmmessi, type Giocatore, type InCorso } from './missione.ts';
+import { sposta, spostabili, type Mossa } from './mossa.ts';
 import type { Chiamata, Dichiarazione, Disposizione, Missione } from './tipi.ts';
 
 type Dich = Map<string, Dichiarazione>;
@@ -62,6 +63,19 @@ export const attenta: Strategia = (_caso, d) => ({
     return dd;
   },
   scegli: (m, s, c) => opzioneMigliore(m, s, c, d, 1),
+  // D-241 idea B: muove solo se la prossima chiamata riguarda un settore scoperto (nessuna unità, fisse comprese) e una
+  // mossa che porta lì un'unità abbassa la tensione stimata; altrimenti nessuna mossa. Regola semplice, non la mossa ottima.
+  muovi(m, s) {
+    const k = chiamateAperte(m, s)[0]?.settore;
+    if (!k || !s.disposizione || Object.values(inCampo(s, s.disposizione)).some((ps) => (ps[k] ?? 0) > 0)) return null;
+    let migliore: Mossa | null = null, voto = stima(m, s, d);
+    for (const x of spostabili(m, s)) {
+      if (!settoriAmmessi(m, x.risorsa).includes(k)) continue;
+      const mossa = { risorsa: x.risorsa, da: x.settore, a: k }, v = stima(m, sposta(m, s, mossa), d);
+      if (v < voto) { voto = v; migliore = mossa; }
+    }
+    return migliore;
+  },
 });
 
 /** Il giocatore peggiore che non esce dalle regole: tutto nel settore più calmo, risposte che alzano la tensione. */
