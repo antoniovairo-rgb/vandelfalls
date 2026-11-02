@@ -6,7 +6,7 @@ import { lazy, Suspense, useEffect, type ReactNode, useLayoutEffect, useMemo, us
 import { disponiEtichette } from './etichette.ts';
 
 // Interruttore rosso C05S08: nomi e unità restano al posto fisso (difetto C-008).
-const disponi = (el: HTMLElement) => { if (!spento('C05S08')) disponiEtichette(el); };
+const disponi = (el: HTMLElement) => { if (!spento('C05S08')) disponiEtichette(el); collocaRadio(el); }; // D-255: il riquadro radio dopo le unità
 import type { Disposizione, Missione } from '../../logica/tipi.ts';
 import { spento } from '../../interruttori.ts';
 import { club, t, quante } from '../dati.ts';
@@ -20,7 +20,7 @@ import { follaDellOndata } from './folla.ts';
 import { parolaSegno, simboloSegno, type Segno } from './segni.ts';
 import { useAdatta } from './adatta.ts';
 import { rigaFolla, SchedaSettore } from './scheda-settore.tsx';
-import { RadioMappa } from './radio-mappa.tsx';
+import { collocaRadio, RadioMappa } from './radio-mappa.tsx';
 
 // PixiJS pesa: si carica a parte, dopo il titolo, e solo se WebGL c'è.
 const StratoPixi = lazy(() => import('./StratoPixi.tsx').then((x) => ({ default: x.StratoPixi })));
@@ -176,7 +176,7 @@ export function Mappa(p: MappaProps) {
           </div>
         );
       })}
-      {p.radio && <RadioMappa settori={settori} segni={p.segni ?? []} home={p.home ? angolo : null}>{p.radio}</RadioMappa>}
+      {p.radio && <RadioMappa settori={settori} segni={p.segni ?? []} home={p.home ? angolo : null} evita={!!p.mossa} compatto={!!p.mossa?.inMano}>{p.radio}</RadioMappa>}
       {schede && aperto && settori.some((s) => s.id === aperto) && (() => {
         // C55-01 (D-255): la scheda ancorata in basso copriva i settori bassi (strade, parcheggi, piazzale): si apre dalla parte
         // opposta al settore toccato e, in alto, lascia libero il lato di «Home». Rosso C255S01: sempre in basso, come prima.

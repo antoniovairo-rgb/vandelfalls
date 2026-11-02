@@ -29,3 +29,10 @@ main:not(.rosso-c241n01) .mappa.citta .settore-nome { min-width: min-content; }
 .tocco-pastiglia.in-mano .pastiglia { outline: var(--bordo) solid var(--magenta); outline-offset: var(--spazio-px); }
 .radio-mappa .mossa-indicazione { margin: 0; font-weight: 700; }
 .radio-mappa .rapporto-costo + .mossa-indicazione { margin-top: var(--spazio-1); }
+/* D-255 punto 2: con la mossa il riquadro radio non copre unità e settori da toccare (radio-mappa.tsx, collocaRadio) */
+.radio-mappa.posto { top: calc(var(--radio-y) * var(--spazio-px)); bottom: auto; }
+.radio-mappa.meta-sx { right: calc(50% + var(--spazio-1)); }
+.radio-mappa.meta-dx { left: calc(50% + var(--spazio-1)); }
+.radio-mappa.compatto .rapporto-costo { display: none; }
+.radio-mappa.stretto .rapporto-costo { position: absolute; width: var(--spazio-px); height: var(--spazio-px); overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.radio-mappa:is(.compatto, .stretto) .rapporto-costo + .mossa-indicazione { margin-top: 0; }

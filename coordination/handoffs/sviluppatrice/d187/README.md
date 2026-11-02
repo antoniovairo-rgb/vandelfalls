@@ -932,3 +932,38 @@ FATTO MISURATO:
 
 Non verificato: telefono reale (tocco sui badge vicini, TalkBack), trascinamento (non fatto).
 - Su c2b3a38e: grafica completa verde (bracci C241B01 e C241M02 compresi); 3 giri governo+logica verdi; CI 40984991278 verde.
+
+## D-255: C55-01 (scheda del settore) e riquadro radio della mossa — 0.60.0 — S-11, 30/10 e 2/11
+
+Base: 9f32eea8 (0.59.0 della principale) unita in e5068acb.
+
+C55-01, la scheda del settore che copriva i settori bassi (`src/resa/mappa/Mappa.tsx`, `scheda-settore.tsx`):
+- La scheda si apre dalla parte opposta al settore toccato.
+- Quando si apre in alto, lascia libero il lato di «Home».
+- Rosso C255S01: la scheda torna sempre in basso, come prima.
+
+FATTO MISURATO per C55-01 (`tools/foto-po152-a.mjs`; per ogni settore, aperta la sua scheda, il centro del settore toccato resta in vista):
+- verde a 360, 375 e 412;
+- rosso C255S01 a 360: 10 problemi (piazzale, strada_cinderwick, strada_larkspire);
+- provate solo le due chiamate di e01.
+
+Riquadro radio della mossa, punto 2 (`src/resa/mappa/radio-mappa.tsx`, `collocaRadio`, chiamata da `disponi` di Mappa dopo le etichette):
+- Prima la sonda ha misurato, alla prima chiamata con mossa dei 36 episodi a 360×640, 210 stati su 241 in cui il riquadro copriva un bersaglio. Sono bersagli le unità toccabili e, con ogni unità in mano, i settori ammessi. Spostare solo la fascia non bastava: i bersagli stanno in tutte e due le metà, la mappa è alta 328 px e il riquadro 73-120 px.
+- Con la mossa il riquadro resta nella sua fascia se è libera. Altrimenti va nella posizione libera più vicina: prima a larghezza piena, poi a mezza larghezza, e mai con il testo tagliato. Fra il riquadro e i bersagli resta un filo d'aria di `--spazio-1`.
+- Con l'unità in mano («compatto») il riquadro mostra solo «Ora tocca il settore…».
+- Se anche prima di toccare il riquadro intero non trova posto («stretto»), resta solo l'indicazione e il rapporto del costo passa al solo lettore di schermo (stile `.solo-lettore`).
+- Tutto da token. Rosso C255R01: fascia fissa e rapporto sempre intero, come prima.
+
+FATTO MISURATO dopo (`tools/foto-po152-b.mjs`, `controllaRadio`, 36 episodi, 241 stati per finestra):
+- 360×640: 0 stati coperti; rapporto al solo lettore in 20 stati.
+- 375×667: 0 stati coperti; rapporto al solo lettore in 15 stati.
+- 412×760: 0 stati coperti; rapporto al solo lettore in 4 stati.
+- Rosso C255R01 a 360×640: 210 problemi.
+- Braccio in `passi-grafica`: C255R01 a 360×760, parte po152b.
+- Foto: `d255radio/prima` (e5068acb) e `d255radio/dopo`, e01 ed e36, stati «puoi» e «dove», a 360×640, 375×667 e 412×760.
+
+COSTO, inviato alla principale per una scelta del PO: negli stati «stretto» il rapporto del costo dell'idea A non si vede. Le alternative sono due:
+- B: il rapporto va nella risposta sotto la mappa, con la pagina più lunga;
+- C: il riquadro copre i bersagli finché il giocatore non tocca un'unità.
+
+Non verificato: chiamate oltre la prima con mossa di ogni episodio; telefono reale.
