@@ -147,8 +147,8 @@
   "e34.op.comando_glissa": "«Decide il comando»",
   "e34.op.comando_glissa.c": "La commissione voleva un'idea: costa fiducia.",
   "e34.op.comando_glissa.r": "«Già.» Il membro chiude il taccuino.",
-  "e34.dopo.mercato_spostato.lascia_mercato": "Il mercato non spostato è nel verbale della commissione: «organizzazione approssimativa».",
-  "e34.dopo.curva_ti_canta.ignora_coro": "La commissione mette a verbale il coro sul tuo nome: «troppa familiarità con la curva».",
+  "e34.dopo.mercato_spostato.lascia_mercato": "Il mercato non spostato blocca un'uscita: una squadra resta a gestire i furgoni fino a fine serata.",
+  "e34.dopo.curva_ti_canta.ignora_coro": "Il coro sul tuo nome continua, e la curva Kiln ci prende gusto: ora si gira verso la tribuna.",
   "e34.dopo.gol_quillhaven.lascia_cinderwick": "La curva Kiln girata verso la tribuna ci resta: la commissione mette a verbale i fischi.",
-  "e34.dopo.uscita_commissione.uscita_laterale": "La commissione, uscita di lato, scrive: «la città non ci è stata mostrata». Verbale chiuso."
+  "e34.dopo.uscita_commissione.uscita_laterale": "La commissione è uscita di lato; gli ospiti offesi in tribuna vogliono uscire anche loro, subito."
 }

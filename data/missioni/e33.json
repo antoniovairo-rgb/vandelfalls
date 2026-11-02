@@ -161,7 +161,7 @@
             },
             {
               "id": "ordini_puliti",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e33.dopo.ordini_segnati.ordini_puliti"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "curva_larkspire", "valore": 2}], "rapporto": "testi:e33.dopo.ordini_segnati.ordini_puliti"},
               "testo": "testi:e33.op.ordini_puliti",
               "costo": "testi:e33.op.ordini_puliti.c",
               "effetti": [],
@@ -304,7 +304,7 @@
           "id": "cori_larkspire",
           "tipo": "curva",
           "settore": "curva_larkspire",
-          "pressione": 4
+          "pressione": 3
         },
         {
           "id": "cori_mossgarth",
@@ -409,7 +409,7 @@
             },
             {
               "id": "cambia_dopo",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e33.dopo.frequenza.cambia_dopo"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "curva_larkspire", "valore": 3}], "rapporto": "testi:e33.dopo.frequenza.cambia_dopo"},
               "testo": "testi:e33.op.cambia_dopo",
               "costo": "testi:e33.op.cambia_dopo.c",
               "effetti": [],
@@ -672,7 +672,7 @@
           "id": "ritorno_mossgarth",
           "tipo": "corteo",
           "settore": "viale_stazione",
-          "pressione": 5
+          "pressione": 4
         },
         {
           "id": "treno_notte",

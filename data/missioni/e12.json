@@ -383,7 +383,7 @@
           "opzioni": [
             {
               "id": "cordone12",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e12.dopo.salvezza.cordone12"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"riserva": "squadre", "valore": -1}], "rapporto": "testi:e12.dopo.salvezza.cordone12"},
               "testo": "testi:e12.op.cordone12",
               "costo": "testi:e12.op.cordone12.c",
               "effetti": [
@@ -851,7 +851,7 @@
             },
             {
               "id": "chiudi_cancelli",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e12.dopo.rinforzi.chiudi_cancelli"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "piazzale", "valore": 1}], "rapporto": "testi:e12.dopo.rinforzi.chiudi_cancelli"},
               "testo": "testi:e12.op.chiudi_cancelli",
               "costo": "testi:e12.op.chiudi_cancelli.c",
               "effetti": [

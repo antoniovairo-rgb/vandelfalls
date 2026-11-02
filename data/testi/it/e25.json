@@ -122,7 +122,7 @@
   "e25.op.chiama_comando.c": "Il comando ti copre: la piazza si calma un poco e guadagni fiducia.",
   "e25.op.chiama_comando.r": "Il comando telefona alla Struttura. Il modulo B diventa facoltativo.",
   "e25.dopo.club_garantisce.lascia_al_club": "La curva «garantita dal club» non risponde più al club. La Struttura chiede chi l'ha permesso.",
-  "e25.dopo.voce_dessi.ignora_voce": "La voce del Fabbro ai varchi è in rete. La Struttura chiede perché non l'hai controllata.",
-  "e25.dopo.rigore_ospiti.steward_sedie": "Il Belltower non si ferma alla voce: reclamo alla Struttura per gli steward fra le auto.",
+  "e25.dopo.voce_dessi.ignora_voce": "Ai varchi della zona rossa il cappuccio non c'è più. Al suo posto, un gruppo che spinge.",
+  "e25.dopo.rigore_ospiti.steward_sedie": "Il Belltower, fatto scendere dai cofani, festeggia per terra: sul piazzale arrivano anche gli altri.",
   "e25.dopo.treno_orario.trattieni_treno": "Treno trattenuto: le ferrovie mandano il conto del ritardo alla Struttura, con il tuo nome."
 }

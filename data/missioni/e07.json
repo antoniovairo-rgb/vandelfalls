@@ -240,7 +240,7 @@
           "opzioni": [
             {
               "id": "banda_suona",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e07.dopo.banda.banda_suona"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "piazzale", "valore": 2}], "rapporto": "testi:e07.dopo.banda.banda_suona"},
               "testo": "testi:e07.op.banda_suona",
               "costo": "testi:e07.op.banda_suona.c",
               "effetti": [
@@ -341,7 +341,7 @@
           "id": "festa_curva",
           "tipo": "festa",
           "settore": "curva_ospiti",
-          "pressione": 5
+          "pressione": 4
         },
         {
           "id": "benvenuto7",
@@ -403,7 +403,7 @@
           "opzioni": [
             {
               "id": "spiega_coro",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e07.dopo.coro_imparato.spiega_coro"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "strada_larkspire", "valore": 3}], "rapporto": "testi:e07.dopo.coro_imparato.spiega_coro"},
               "testo": "testi:e07.op.spiega_coro",
               "costo": "testi:e07.op.spiega_coro.c",
               "effetti": [
@@ -641,7 +641,7 @@
           "id": "uscita7",
           "tipo": "folla",
           "settore": "piazzale",
-          "pressione": 4
+          "pressione": 3
         }
       ],
       "chiamate": [

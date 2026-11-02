@@ -259,7 +259,7 @@
             },
             {
               "id": "radio_centro",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e35.dopo.corso_chiuso.radio_centro"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "corso_centro", "valore": 1}], "rapporto": "testi:e35.dopo.corso_chiuso.radio_centro"},
               "testo": "testi:e35.op.radio_centro",
               "costo": "testi:e35.op.radio_centro.c",
               "effetti": [
@@ -432,7 +432,7 @@
             },
             {
               "id": "rimanda_comando",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e35.dopo.familiari.rimanda_comando"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"riserva": "squadre", "valore": -1}], "rapporto": "testi:e35.dopo.familiari.rimanda_comando"},
               "testo": "testi:e35.op.rimanda_comando",
               "costo": "testi:e35.op.rimanda_comando.c",
               "effetti": [
@@ -507,7 +507,7 @@
             },
             {
               "id": "ignora_treno",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e35.dopo.treno_notte.ignora_treno"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "stazione", "valore": 1}], "rapporto": "testi:e35.dopo.treno_notte.ignora_treno"},
               "testo": "testi:e35.op.ignora_treno",
               "costo": "testi:e35.op.ignora_treno.c",
               "effetti": [

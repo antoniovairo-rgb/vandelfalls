@@ -165,8 +165,8 @@
   "e05.imp.strada_sbagliata.passi": "Lascialo passare",
   "e05.imp.strada_sbagliata.passi.c": "Nessuno impegnato; il pullman trova da solo la strada.",
   "e05.imp.strada_sbagliata.passi.r": "Il pullman passa. In fondo alla strada lo salutano a modo loro.",
-  "e05.dopo.sindacato.impegno_firmato": "Il comando non riconosce l'impegno firmato a suo nome e chiede spiegazioni per iscritto.",
-  "e05.dopo.megafono.lascia_megafono": "Il discorso del picchetto al megafono è in rete. Il comando chiede chi l'ha permesso.",
+  "e05.dopo.sindacato.impegno_firmato": "Il comando non riconosce l'impegno firmato: ai tornelli il picchetto lo sa, e si scalda.",
+  "e05.dopo.megafono.lascia_megafono": "Il picchetto col megafono ha fatto proseliti: ai tornelli la coda si ferma ad ascoltare.",
   "e05.dopo.coro_steward.silenzio_rete": "Il coro del Domepark ha fatto il giro della rete, senza una risposta. Il club Skyfield protesta.",
   "e05.dopo.domattina.incontro_no": "Rimandato a fine stagione: il sindacato annuncia lo sciopero anche alla prossima partita."
 }

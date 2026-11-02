@@ -134,7 +134,7 @@
           "id": "fonderie",
           "tipo": "corteo",
           "settore": "strada_cinderwick",
-          "pressione": 5
+          "pressione": 4
         },
         {
           "id": "pullman",
@@ -153,7 +153,7 @@
           "opzioni": [
             {
               "id": "chiudi_mercato",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e04.dopo.arance.chiudi_mercato"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "mercato", "valore": 3}], "rapporto": "testi:e04.dopo.arance.chiudi_mercato"},
               "testo": "testi:e04.op.chiudi_mercato",
               "costo": "testi:e04.op.chiudi_mercato.c",
               "effetti": [
@@ -405,7 +405,7 @@
           "id": "banchi",
           "tipo": "folla",
           "settore": "mercato",
-          "pressione": 2
+          "pressione": 1
         }
       ],
       "chiamate": [
@@ -450,7 +450,7 @@
             },
             {
               "id": "occhio_chiuso",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e04.dopo.varchi_falsi.occhio_chiuso"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "piazzale", "valore": 3}], "rapporto": "testi:e04.dopo.varchi_falsi.occhio_chiuso"},
               "testo": "testi:e04.op.occhio_chiuso",
               "costo": "testi:e04.op.occhio_chiuso.c",
               "effetti": [
@@ -810,7 +810,7 @@
             },
             {
               "id": "parla_angolo",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e04.dopo.angolo.parla_angolo"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -2}], "rapporto": "testi:e04.dopo.angolo.parla_angolo"},
               "testo": "testi:e04.op.parla_angolo",
               "costo": "testi:e04.op.parla_angolo.c",
               "effetti": [

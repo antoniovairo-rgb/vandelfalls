@@ -171,7 +171,7 @@
             },
             {
               "id": "osserva",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e01.dopo.corteo_partito.osserva"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"riserva": "squadre", "valore": -1}], "rapporto": "testi:e01.dopo.corteo_partito.osserva"},
               "testo": "testi:e01.op.osserva",
               "costo": "testi:e01.op.osserva.c",
               "effetti": [
@@ -339,7 +339,7 @@
           "id": "cori_larkspire",
           "tipo": "curva",
           "settore": "curva_larkspire",
-          "pressione": 4
+          "pressione": 3
         },
         {
           "id": "attesa_piazzale",
@@ -482,7 +482,7 @@
             },
             {
               "id": "aspetti",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e01.dopo.presidente.aspetti"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "strada_cinderwick", "valore": 2}], "rapporto": "testi:e01.dopo.presidente.aspetti"},
               "testo": "testi:e01.op.aspetti",
               "costo": "testi:e01.op.aspetti.c",
               "effetti": [],
@@ -558,7 +558,7 @@
           "id": "deflusso_larkspire",
           "tipo": "deflusso",
           "settore": "strada_larkspire",
-          "pressione": 3
+          "pressione": 4
         },
         {
           "id": "uscita_piazzale",
@@ -701,7 +701,7 @@
             },
             {
               "id": "niente",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e01.dopo.troupe.niente"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "piazzale", "valore": 1}], "rapporto": "testi:e01.dopo.troupe.niente"},
               "testo": "testi:e01.op.niente",
               "costo": "testi:e01.op.niente.c",
               "effetti": [],

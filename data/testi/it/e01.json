@@ -173,7 +173,7 @@
   "e01.imp.tram.sostitutivo": "Aspetta il tram sostitutivo",
   "e01.imp.tram.sostitutivo.c": "Nessuno impegnato; il piazzale aspetta il tram di riserva.",
   "e01.imp.tram.sostitutivo.r": "Il sostitutivo arriva pieno. Il piazzale resta pieno anche lui.",
-  "e01.dopo.corteo_partito.osserva": "Il corteo lasciato passare è arrivato al piazzale senza scorta: il comando chiede chi l'ha deciso.",
-  "e01.dopo.presidente.aspetti": "Il presidente dello Skyfield ha aspettato. Ora chiama il comando: «Mi avete lasciato in tribuna».",
-  "e01.dopo.troupe.niente": "La troupe ha filmato lo stesso: in onda l'uscita, senza una parola del responsabile."
+  "e01.dopo.corteo_partito.osserva": "Il corteo lasciato passare ha bloccato un incrocio: una squadra è impegnata lì fino a fine serata.",
+  "e01.dopo.presidente.aspetti": "Il presidente dello Skyfield ha aspettato, poi l'ha detto in curva: la strada da Kiln lo sa già.",
+  "e01.dopo.troupe.niente": "La troupe senza intervista riprende l'uscita dal piazzale: gente ferma davanti alle telecamere."
 }

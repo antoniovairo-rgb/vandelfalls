@@ -211,7 +211,7 @@
           "opzioni": [
             {
               "id": "ignora21",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e21.dopo.nuovo_capo.ignora21"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "piazza_fonderie", "valore": 1}], "rapporto": "testi:e21.dopo.nuovo_capo.ignora21"},
               "testo": "testi:e21.op.ignora21",
               "costo": "testi:e21.op.ignora21.c",
               "effetti": [
@@ -427,7 +427,7 @@
             },
             {
               "id": "lascia_ospiti21",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e21.dopo.dov_e_il_capo.lascia_ospiti21"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "quartiere", "valore": 1}], "rapporto": "testi:e21.dopo.dov_e_il_capo.lascia_ospiti21"},
               "testo": "testi:e21.op.lascia_ospiti21",
               "costo": "testi:e21.op.lascia_ospiti21.c",
               "effetti": [

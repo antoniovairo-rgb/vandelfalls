@@ -233,7 +233,7 @@
             },
             {
               "id": "anticipo_ok",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e19.dopo.ora_prima.anticipo_ok"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "strada_cinderwick", "valore": 1}], "rapporto": "testi:e19.dopo.ora_prima.anticipo_ok"},
               "testo": "testi:e19.op.anticipo_ok",
               "costo": "testi:e19.op.anticipo_ok.c",
               "effetti": [
@@ -502,7 +502,7 @@
             },
             {
               "id": "aiuto_lavezzari19",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e19.dopo.lavezzari_radio.aiuto_lavezzari19"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "curva_cinderwick", "valore": 1}], "rapporto": "testi:e19.dopo.lavezzari_radio.aiuto_lavezzari19"},
               "testo": "testi:e19.op.aiuto_lavezzari19",
               "costo": "testi:e19.op.aiuto_lavezzari19.c",
               "effetti": [

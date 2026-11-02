@@ -173,7 +173,7 @@
             },
             {
               "id": "niente_pista",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e16.dopo.magazzino_sette.niente_pista"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "magazzino", "valore": 1}], "rapporto": "testi:e16.dopo.magazzino_sette.niente_pista"},
               "testo": "testi:e16.op.niente_pista",
               "costo": "testi:e16.op.niente_pista.c",
               "effetti": [
@@ -443,7 +443,7 @@
             },
             {
               "id": "oscura",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e16.dopo.annunci16.oscura"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "curva_ospiti", "valore": 3}], "rapporto": "testi:e16.dopo.annunci16.oscura"},
               "testo": "testi:e16.op.oscura",
               "costo": "testi:e16.op.oscura.c",
               "effetti": [
@@ -472,7 +472,7 @@
           "id": "cori_quill",
           "tipo": "curva",
           "settore": "curva_ospiti",
-          "pressione": 4
+          "pressione": 3
         },
         {
           "id": "carico",
@@ -554,7 +554,7 @@
             },
             {
               "id": "ringrazia16",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e16.dopo.lavezzari_curva.ringrazia16"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -2}], "rapporto": "testi:e16.dopo.lavezzari_curva.ringrazia16"},
               "testo": "testi:e16.op.ringrazia16",
               "costo": "testi:e16.op.ringrazia16.c",
               "effetti": [
@@ -692,7 +692,7 @@
             },
             {
               "id": "lascia_andare",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e16.dopo.fari_spenti.lascia_andare"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -2}], "rapporto": "testi:e16.dopo.fari_spenti.lascia_andare"},
               "testo": "testi:e16.op.lascia_andare",
               "costo": "testi:e16.op.lascia_andare.c",
               "effetti": [

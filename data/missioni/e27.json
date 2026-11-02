@@ -181,7 +181,7 @@
             },
             {
               "id": "lascia_camminare",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e27.dopo.fermata_prima.lascia_camminare"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "strada_cinderwick", "valore": 1}], "rapporto": "testi:e27.dopo.fermata_prima.lascia_camminare"},
               "testo": "testi:e27.op.lascia_camminare",
               "costo": "testi:e27.op.lascia_camminare.c",
               "effetti": [
@@ -302,7 +302,7 @@
           "id": "cori_gemellati",
           "tipo": "curva",
           "settore": "curva_gemellati",
-          "pressione": 3
+          "pressione": 2
         },
         {
           "id": "cori_rovers",
@@ -385,7 +385,7 @@
             },
             {
               "id": "lascia_video",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "curva_gemellati", "valore": 2}], "rapporto": "testi:e27.dopo.messaggio_dessi.lascia_video"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "curva_gemellati", "valore": 3}], "rapporto": "testi:e27.dopo.messaggio_dessi.lascia_video"},
               "testo": "testi:e27.op.lascia_video",
               "costo": "testi:e27.op.lascia_video.c",
               "effetti": [],

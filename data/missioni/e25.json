@@ -457,7 +457,7 @@
             },
             {
               "id": "ignora_voce",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e25.dopo.voce_dessi.ignora_voce"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "zona_rossa", "valore": 2}], "rapporto": "testi:e25.dopo.voce_dessi.ignora_voce"},
               "testo": "testi:e25.op.ignora_voce",
               "costo": "testi:e25.op.ignora_voce.c",
               "effetti": [
@@ -480,7 +480,7 @@
           "id": "rigore",
           "tipo": "folla",
           "settore": "piazzale",
-          "pressione": 4
+          "pressione": 3
         },
         {
           "id": "casa_sotto",
@@ -504,7 +504,7 @@
           "opzioni": [
             {
               "id": "steward_sedie",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e25.dopo.rigore_ospiti.steward_sedie"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "piazzale", "valore": 1}], "rapporto": "testi:e25.dopo.rigore_ospiti.steward_sedie"},
               "testo": "testi:e25.op.steward_sedie",
               "costo": "testi:e25.op.steward_sedie.c",
               "effetti": [

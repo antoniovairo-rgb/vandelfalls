@@ -6,7 +6,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { spento } from '../../interruttori.ts';
 import { opzioniEsaurite, opzioniValide, unitaFinita, type InCorso } from '../../logica/missione.ts';
 import { morsiDellOndata } from '../../logica/dopo.ts';
-import type { Chiamata as TChiamata, Missione, Opzione } from '../../logica/tipi.ts';
+import type { Chiamata as TChiamata, EffettoMissione, Missione, Opzione } from '../../logica/tipi.ts';
 import type { Decisione } from '../../logica/sospesa.ts';
 import { t } from '../dati.ts';
 import { Icona, iconaFonte } from '../icone.tsx';
@@ -170,6 +170,13 @@ export function Risposta(p: { m: Missione; ic: InCorso; o: Opzione; avanti: () =
   );
 }
 
+/** C54-04 (D-253): il costo di un morso in parole: tipo di effetto, segno e, per tensione e pressione, il settore. */
+const conSegno = (n: number) => (n > 0 ? `+${n}` : `−${-n}`);
+export const costoMorso = (e: EffettoMissione): string => ('tensione' in e ? `Tensione ${conSegno(e.valore)}, ${t(`settore.${e.tensione}`)}`
+  : 'pressione' in e ? `Pressione ${conSegno(e.valore)}, ${t(`settore.${e.pressione}`)}`
+  : 'riserva' in e ? `${t(`risorsa.${e.riserva}`)} ${conSegno(e.valore)}`
+  : 'aggiungi' in e && e.aggiungi === 'credito' ? `Fiducia ${conSegno(e.valore)}` : '');
+
 /** PO-152 (D-241): dopo «Conferma» il costo della risposta arriva per radio (D-078 rivisto: sempre nei dati, mostrato dopo),
  *  sulla mappa insieme ai segni ▲/▼ (Mappa, prop radio: sopra la mappa, la risposta non si allunga; a 360×640 restavano
  *  6 px prima della soglia di sonda-altezze). Rosso C241A01: niente, il costo era già sotto l'opzione. */
@@ -193,9 +200,13 @@ export function Chiusura(p: { m: Missione; ic: InCorso; chiudi: () => void }) {
   return (
     <>
       {morsi.length ? <Messaggio classe="radio ultimo" dati="radio-dopo">
-        <Mittente icona={Radio} nome="Centrale" timbro="In corso" />
+        {/* C54-01 (D-253): con due morsi il fumetto faceva scorrere la chiusura (54 px a 360×640, 27 a 375×667): senza la riga
+            del mittente, che il costo in testa a ogni messaggio sostituisce. Rosso C253C01: la riga resta. */}
+        {spento('C253C01') && <Mittente icona={Radio} nome="Centrale" timbro="In corso" />}
         {/* più morsi nello stesso fumetto: due fumetti a 360×760 facevano scorrere la pagina di 22 px (e02 ondata 4) */}
-        {morsi.map((x) => <p key={`${x.chiamata}/${x.opzione}`} className="testo-radio" data-radio-dopo>{t(x.dopo.rapporto)}</p>)}
+        {morsi.map((x) => <p key={`${x.chiamata}/${x.opzione}`} className={spento('C253C01') ? 'testo-radio' : 'costo'} data-radio-dopo>
+          {/* C54-04 (D-253): il morso dice cosa è costato, una parola sul tipo di effetto. Rosso C253C02: solo il racconto. */}
+          {!spento('C253C02') && <strong data-costo-morso>{x.dopo.effetti.map(costoMorso).join(' · ')}. </strong>}{t(x.dopo.rapporto)}</p>)}
       </Messaggio> : <Messaggio classe="radio ultimo">
         <Mittente icona={Radio} nome="Centrale" timbro="In corso" />
         <p className="testo-radio">La radio tace. Le unità sono ai loro posti: l'ondata fa il suo corso.</p>

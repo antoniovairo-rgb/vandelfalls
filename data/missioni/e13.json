@@ -178,7 +178,7 @@
             },
             {
               "id": "aspettino",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e13.dopo.viale_pieno.aspettino"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "viale_concerto", "valore": 2}], "rapporto": "testi:e13.dopo.viale_pieno.aspettino"},
               "testo": "testi:e13.op.aspettino",
               "costo": "testi:e13.op.aspettino.c",
               "effetti": [
@@ -337,7 +337,7 @@
           "id": "cori_casa",
           "tipo": "curva",
           "settore": "curva_cinderwick",
-          "pressione": 3
+          "pressione": 2
         },
         {
           "id": "banchi13a",
@@ -423,7 +423,7 @@
             },
             {
               "id": "foto_venditori",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e13.dopo.abbonamenti_finti.foto_venditori"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "piazza_concerto", "valore": 3}], "rapporto": "testi:e13.dopo.abbonamenti_finti.foto_venditori"},
               "testo": "testi:e13.op.foto_venditori",
               "costo": "testi:e13.op.foto_venditori.c",
               "effetti": [
@@ -591,7 +591,7 @@
           "opzioni": [
             {
               "id": "accetta_dessi",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e13.dopo.patto_dessi.accetta_dessi"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -2}], "rapporto": "testi:e13.dopo.patto_dessi.accetta_dessi"},
               "testo": "testi:e13.op.accetta_dessi",
               "costo": "testi:e13.op.accetta_dessi.c",
               "effetti": [

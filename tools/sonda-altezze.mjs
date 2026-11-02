@@ -8,6 +8,7 @@
 // Da solo: VP=360x640,360x760 [FOTO=cartella] node tools/sonda-altezze.mjs [build]
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
+import { pazienza } from './attese.mjs';
 import { existsSync, writeFileSync } from 'node:fs';
 import { servi, SEME_FOTO } from './foto.mjs';
 import { migra } from '../src/salvataggi/salvataggio.ts';
@@ -157,14 +158,31 @@ function campionaVersione() {
 }
 
 // D-207: parti = quali misure; i bracci rossi girano solo la parte che deve vederli rossi (prima 40 min di bracci)
-export const PARTI = ['e01', 'citta36', 'chiamate', 'rapporti', 'riepilogo', 'verbali', 'po149', 'po152a', 'c52nomi', 'po152b', 'risposte'];
+// C54-01 (D-253): per ogni episodio la chiusura dell'ultima ondata col massimo dei morsi (D-241 idea C): scelte comode nelle
+// ultime due ondate, le altre risposte e lo schieramento del bot attento, partita classica. Prima a 360×640 scorreva di 38-56 px
+// (collaudo C-054, e01-e08). Rosso C253C01 (fumetto con la riga del mittente e il testo grande).
+export function chiusureCostruite(dati, dich) {
+  const ms = Object.entries(dati).filter(([k]) => /^missioni\/e\d+\.json$/.test(k)).map(([, x]) => x).sort((a, b) => a.episodio - b.episodio), out = [];
+  const v = variabiliIniziali(dich.values());
+  for (const [i, m] of ms.entries()) {
+    const g = attenta(creaCaso(1), dich), n = m.ondate.length; let s = M.iniziaMissione(m, v, dich);
+    for (;;) { s = M.schiera(m, s, g.schiera(m, s));
+      for (let c = M.chiamateAperte(m, s)[0]; c; c = M.chiamateAperte(m, s)[0]) { const ok = M.opzioniValide(c, s, m), comoda = s.ondata >= n - 1 && ok.find((o) => o.effetti_dopo);
+        s = M.rispondi(m, s, c.id, comoda ? comoda.id : g.scegli(m, s, c), dich); }
+      if (s.ondata === n) break; s = M.chiudiOndata(m, s, dich); }
+    out.push({ ep: m.id, sal: JSON.stringify({ save_version: 2, game_version: GAME_VERSION, seme: 1, caso: 1, variabili: v, missioni_concluse: ms.slice(0, i).map((x) => x.id), episodi: {}, genere: 'm', in_corso: s, rapporto_aperto: null }) });
+  }
+  return out;
+}
+
+export const PARTI = ['e01', 'citta36', 'chiamate', 'rapporti', 'riepilogo', 'verbali', 'po149', 'po152a', 'c52nomi', 'po152b', 'risposte', 'chiusure'];
 // C53-02 (D-252): la risposta di ogni opzione di ogni carta d'imprevisto e di ogni variante, a queste finestre (soglie di SOGLIE)
 export const RISPOSTE_VP = ['360x640', '375x667', '412x760'];
-export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi = [], cartella = '', parti = PARTI, limiteRisposte = Infinity }) {
+export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi = [], cartella = '', parti = PARTI, limiteRisposte = Infinity, chiusureMax = Infinity }) {
   const dati = leggiDati(dirDati), dich = new Map(dati['stato.json'].variabili.map((d) => [d.id, d])), e01 = dati['missioni/e01.json'];
   const srv = await servi(build), url = `http://127.0.0.1:${srv.address().port}/`;
   const percorso = process.env.VALMORA_CHROME ?? (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
-  const b = await chromium.launch({ executablePath: percorso }); const ris = [], errori = [], sopra = [], chiamate = [], risposte = [];
+  const b = pazienza(await chromium.launch({ executablePath: percorso })); const ris = [], errori = [], sopra = [], chiamate = [], risposte = [];
   try {
     for (const vp of vps) {
       const [w, h] = vp.split('x').map(Number);
@@ -173,7 +191,9 @@ export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi
       if (rossi.length) await p.addInitScript((xs) => { for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi);
       await p.addInitScript((x) => { globalThis.__VALMORA_SECONDO_MS = 1; globalThis.__VALMORA_SEME_PARTITA = x; }, SEME); // come foto.mjs (PO-121, D-241): niente attese reali, seme di partita fisso
       p.on('pageerror', (e) => errori.push(`${vp}: ${e.message}`));
-      const c = async (sel) => { if (await p.locator(sel).count()) { await p.locator(sel).first().click(); await p.waitForTimeout(120); await lento(p); return true; } return false; };
+      // strumento instabile (30/10, CI «360 bracci»: clic fermo 30 s con i bracci in parallelo, come 464820e per epilogo e c41):
+      // il clic attende fino a 60 s. È un'attesa, non una soglia
+      const c = async (sel) => { if (await p.locator(sel).count()) { await p.locator(sel).first().click({ timeout: 60_000 }); await p.waitForTimeout(120); await lento(p); return true; } return false; };
       const rileva = async (nome) => { const x = await misura(p); ris.push({ vp, nome, ...x }); if (cartella) await p.screenshot({ path: join(cartella, `${vp}-${nome}-${ris.filter((r) => r.vp === vp && r.nome === nome).length}.png`), fullPage: true }); };
       await p.goto(url); await p.evaluate(() => localStorage.clear()); await p.reload(); await lento(p); await p.waitForTimeout(400);
       await rileva('titolo');
@@ -310,6 +330,17 @@ export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi
         if (righe !== 5 || !avviso) errori.push(`${vp} riepilogo ${c.ep}: ${righe} settori e ${avviso ? '' : 'senza '}avviso, attesi 5 con l'avviso (D-218)`);
         // S-21 anche qui, bloccante (D-219: «Home» copriva il nome di curva_cinderwick in e36 a 360 e 375, 56 px²; rosso C219H01)
         ris.push({ vp, nome: `riepilogo ${c.ep}`, ...(await misura(q)) }); if (cartella) await q.screenshot({ path: join(cartella, `${vp}-riepilogo-${c.ep}.png`), fullPage: true });
+        await q.close();
+      }
+      if (parti.includes('chiusure')) for (const c of chiusureCostruite(dati, dich).slice(0, chiusureMax)) { // C54-01 (D-253): a ogni altezza
+        const q = await b.newPage({ viewport: { width: w, height: h }, hasTouch: true, reducedMotion: 'reduce' });
+        if (rossi.length) await q.addInitScript((xs) => { for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi);
+        await q.goto(url); await q.evaluate((x) => localStorage.setItem('vandelfalls-salvataggio', x), c.sal); await q.reload();
+        await q.getByRole('button', { name: 'Riprendi' }).click();
+        if (!(await q.waitForSelector('[data-azione="rapporto"]', { timeout: 8000 }).then(() => true).catch(() => false))) { errori.push(`${vp}: chiusura ${c.ep} non si apre (C54-01)`); await q.close(); continue; }
+        await lento(q); await q.waitForTimeout(250);
+        if (!(await q.locator('[data-radio-dopo]').count())) errori.push(`${vp}: chiusura ${c.ep} senza morsi (C54-01)`);
+        ris.push({ vp, nome: `chiusura ${c.ep}`, ...(await misura(q)) }); if (cartella) await q.screenshot({ path: join(cartella, `${vp}-chiusura-${c.ep}.png`), fullPage: true });
         await q.close();
       }
       if (vp === '360x760' && parti.includes('rapporti')) for (const c of rapportiCostruiti(dati, dich)) { // C45-06 (D-203)

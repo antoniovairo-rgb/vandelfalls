@@ -182,7 +182,7 @@
             },
             {
               "id": "lascia_mercato",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e34.dopo.mercato_spostato.lascia_mercato"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"riserva": "squadre", "valore": -1}], "rapporto": "testi:e34.dopo.mercato_spostato.lascia_mercato"},
               "testo": "testi:e34.op.lascia_mercato",
               "costo": "testi:e34.op.lascia_mercato.c",
               "effetti": [
@@ -342,7 +342,7 @@
           "opzioni": [
             {
               "id": "ignora_coro",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e34.dopo.curva_ti_canta.ignora_coro"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "curva_cinderwick", "valore": 1}], "rapporto": "testi:e34.dopo.curva_ti_canta.ignora_coro"},
               "testo": "testi:e34.op.ignora_coro",
               "costo": "testi:e34.op.ignora_coro.c",
               "effetti": [],
@@ -821,7 +821,7 @@
             },
             {
               "id": "uscita_laterale",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e34.dopo.uscita_commissione.uscita_laterale"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "tribuna_autorita", "valore": 1}], "rapporto": "testi:e34.dopo.uscita_commissione.uscita_laterale"},
               "testo": "testi:e34.op.uscita_laterale",
               "costo": "testi:e34.op.uscita_laterale.c",
               "effetti": [],

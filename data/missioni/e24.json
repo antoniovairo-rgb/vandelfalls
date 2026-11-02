@@ -169,7 +169,7 @@
             },
             {
               "id": "dopo_busta",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "piazza_municipio", "valore": 2}], "rapporto": "testi:e24.dopo.busta.dopo_busta"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"riserva": "squadre", "valore": -1}], "rapporto": "testi:e24.dopo.busta.dopo_busta"},
               "testo": "testi:e24.op.dopo_busta",
               "costo": "testi:e24.op.dopo_busta.c",
               "effetti": [],
@@ -565,7 +565,7 @@
             },
             {
               "id": "riattacca",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "piazza_municipio", "valore": 2}], "rapporto": "testi:e24.dopo.foglio.riattacca"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "piazza_municipio", "valore": 1}], "rapporto": "testi:e24.dopo.foglio.riattacca"},
               "testo": "testi:e24.op.riattacca",
               "costo": "testi:e24.op.riattacca.c",
               "effetti": [],

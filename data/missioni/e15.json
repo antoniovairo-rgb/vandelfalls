@@ -170,7 +170,7 @@
             },
             {
               "id": "lasciali15",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e15.dopo.treno_amici.lasciali15"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "stazione", "valore": 1}], "rapporto": "testi:e15.dopo.treno_amici.lasciali15"},
               "testo": "testi:e15.op.lasciali15",
               "costo": "testi:e15.op.lasciali15.c",
               "effetti": [
@@ -432,7 +432,7 @@
             },
             {
               "id": "fidati15",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e15.dopo.salutarli.fidati15"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "curva_ospiti", "valore": 1}], "rapporto": "testi:e15.dopo.salutarli.fidati15"},
               "testo": "testi:e15.op.fidati15",
               "costo": "testi:e15.op.fidati15.c",
               "effetti": [

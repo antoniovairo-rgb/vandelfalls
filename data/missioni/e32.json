@@ -128,7 +128,7 @@
           "id": "corteo_larkspire",
           "tipo": "corteo",
           "settore": "strada_larkspire",
-          "pressione": 4
+          "pressione": 3
         },
         {
           "id": "appuntamento",
@@ -259,7 +259,7 @@
             },
             {
               "id": "ignora_piazzale",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e32.dopo.piazzale_anonimo.ignora_piazzale"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "piazzale", "valore": 1}], "rapporto": "testi:e32.dopo.piazzale_anonimo.ignora_piazzale"},
               "testo": "testi:e32.op.ignora_piazzale",
               "costo": "testi:e32.op.ignora_piazzale.c",
               "effetti": [],
@@ -374,7 +374,7 @@
             },
             {
               "id": "sospendi",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e32.dopo.fumogeni_cinderwick.sospendi"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"riserva": "squadre", "valore": -2}], "rapporto": "testi:e32.dopo.fumogeni_cinderwick.sospendi"},
               "testo": "testi:e32.op.sospendi",
               "costo": "testi:e32.op.sospendi.c",
               "effetti": [
@@ -769,7 +769,7 @@
             },
             {
               "id": "nessun_nome",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e32.dopo.verbale_derby.nessun_nome"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "strada_cinderwick", "valore": 1}], "rapporto": "testi:e32.dopo.verbale_derby.nessun_nome"},
               "testo": "testi:e32.op.nessun_nome",
               "costo": "testi:e32.op.nessun_nome.c",
               "effetti": [],

@@ -221,7 +221,7 @@
             },
             {
               "id": "fidati18",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e18.dopo.biglietti_rete18.fidati18"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "curva_ospiti", "valore": 1}], "rapporto": "testi:e18.dopo.biglietti_rete18.fidati18"},
               "testo": "testi:e18.op.fidati18",
               "costo": "testi:e18.op.fidati18.c",
               "effetti": [
@@ -428,7 +428,7 @@
             },
             {
               "id": "lascia_verdi18",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e18.dopo.fumo18.lascia_verdi18"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "curva_ospiti", "valore": 1}], "rapporto": "testi:e18.dopo.fumo18.lascia_verdi18"},
               "testo": "testi:e18.op.lascia_verdi18",
               "costo": "testi:e18.op.lascia_verdi18.c",
               "effetti": [

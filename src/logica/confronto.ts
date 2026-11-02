@@ -12,7 +12,8 @@ export const SEMI_CONFRONTO = 200;
 /** D-174: tabelle precalcolate (src/logica/confronti.json, `node tools/confronti.mjs`): per episodio, per `chiamata/opzione`,
  *  [n, nAltre, falliteSe, falliteAltre, tensioneSe, tensioneAltre, saldo]. Un guardiano le confronta col calcolo. */
 export interface TabellaConfronti { semi: number; episodi: Record<string, Record<string, number[]>> }
-const tondo = (x: number) => Math.round(x * 100) / 100;
+// D-247: + 0 toglie il −0 (Math.round(−0,004 · 100) = −0): nel JSON della tabella diventa 0 e il guardiano D-174 li distingueva
+const tondo = (x: number) => Math.round(x * 100) / 100 + 0;
 
 interface Conta { n: number; ko: number; tens: number }
 const cache = new Map<string, Map<string, Confronto>>();

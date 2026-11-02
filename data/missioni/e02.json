@@ -134,7 +134,7 @@
           "id": "bandiere",
           "tipo": "corteo",
           "settore": "viale_stazione",
-          "pressione": 3
+          "pressione": 2
         }
       ],
       "chiamate": [
@@ -211,7 +211,7 @@
             },
             {
               "id": "non_fidarti",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e02.dopo.responsabile.non_fidarti"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "viale_stazione", "valore": 3}], "rapporto": "testi:e02.dopo.responsabile.non_fidarti"},
               "testo": "testi:e02.op.non_fidarti",
               "costo": "testi:e02.op.non_fidarti.c",
               "effetti": [],
@@ -353,7 +353,7 @@
             },
             {
               "id": "normale",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e02.dopo.secondo_treno.normale"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"riserva": "squadre", "valore": -2}], "rapporto": "testi:e02.dopo.secondo_treno.normale"},
               "testo": "testi:e02.op.normale",
               "costo": "testi:e02.op.normale.c",
               "effetti": [
@@ -573,7 +573,7 @@
             },
             {
               "id": "ignora_str",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e02.dopo.striscione_ospiti.ignora_str"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "curva_ospiti", "valore": 3}], "rapporto": "testi:e02.dopo.striscione_ospiti.ignora_str"},
               "testo": "testi:e02.op.ignora_str",
               "costo": "testi:e02.op.ignora_str.c",
               "effetti": [],
@@ -783,7 +783,7 @@
             },
             {
               "id": "rifiuta_saluto",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e02.dopo.responsabile_saluta.rifiuta_saluto"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -2}], "rapporto": "testi:e02.dopo.responsabile_saluta.rifiuta_saluto"},
               "testo": "testi:e02.op.rifiuta_saluto",
               "costo": "testi:e02.op.rifiuta_saluto.c",
               "effetti": [],

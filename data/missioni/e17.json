@@ -130,7 +130,7 @@
           "id": "raduno_piazzale",
           "tipo": "raduno",
           "settore": "piazzale",
-          "pressione": 3
+          "pressione": 2
         }
       ],
       "chiamate": [
@@ -255,7 +255,7 @@
             },
             {
               "id": "promessa17",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e17.dopo.sotto_casa.promessa17"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "quartiere", "valore": 2}], "rapporto": "testi:e17.dopo.sotto_casa.promessa17"},
               "testo": "testi:e17.op.promessa17",
               "costo": "testi:e17.op.promessa17.c",
               "effetti": [
@@ -363,7 +363,7 @@
             },
             {
               "id": "apri_recinto",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e17.dopo.cancelli.apri_recinto"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "tornelli", "valore": 2}], "rapporto": "testi:e17.dopo.cancelli.apri_recinto"},
               "testo": "testi:e17.op.apri_recinto",
               "costo": "testi:e17.op.apri_recinto.c",
               "effetti": [

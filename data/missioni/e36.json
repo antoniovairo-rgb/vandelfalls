@@ -184,7 +184,7 @@
             },
             {
               "id": "niente_cantiere",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e36.dopo.cantiere_festa.niente_cantiere"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "cantiere_stadio_nuovo", "valore": 1}], "rapporto": "testi:e36.dopo.cantiere_festa.niente_cantiere"},
               "testo": "testi:e36.op.niente_cantiere",
               "costo": "testi:e36.op.niente_cantiere.c",
               "effetti": [
@@ -369,7 +369,7 @@
           "opzioni": [
             {
               "id": "portavoce_smentisce",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e36.dopo.messaggio_carcere.portavoce_smentisce"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "curva_cinderwick", "valore": 1}], "rapporto": "testi:e36.dopo.messaggio_carcere.portavoce_smentisce"},
               "testo": "testi:e36.op.portavoce_smentisce",
               "costo": "testi:e36.op.portavoce_smentisce.c",
               "effetti": [
