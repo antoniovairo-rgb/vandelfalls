@@ -18,6 +18,7 @@ const ecc = (p) => p.evaluate(() => document.scrollingElement.scrollHeight - inn
 const coperti = (p) => p.evaluate(() => {
   const q = document.querySelector('.mappa [data-radio-mappa]'), r = q?.getBoundingClientRect();
   if (!r) return { xs: [], stretto: false };
+  if (q.classList.contains('muto')) return { xs: [], stretto: true, muto: true }; // al solo lettore: non copre niente
   const sop = (x) => Math.max(0, Math.min(r.right, x.right) - Math.max(r.left, x.left)) * Math.max(0, Math.min(r.bottom, x.bottom) - Math.max(r.top, x.top));
   return { stretto: q.classList.contains('stretto'), xs: [...document.querySelectorAll('.mappa [data-presenza]:not(:disabled), .mappa [data-settore] .settore-punto:not(:disabled)')]
     .map((e) => [e.dataset.presenza ?? e.closest('[data-settore]').dataset.settore, sop(e.getBoundingClientRect())]).filter(([, a]) => a > 0.5).map(([k, a]) => `${k} ${Math.round(a)} px²`) };
@@ -88,7 +89,7 @@ export async function controllaPo152b(browser, url, larghezza, rossi = [], carte
 
 /** D-255 punto 2: prima chiamata con mossa di ogni episodio; stati «puoi» e «dove» (ogni unità in mano). */
 async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
-  const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'radio', episodi: 0, stati: 0, stretti: 0 };
+  const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'radio', episodi: 0, stati: 0, stretti: 0, muti: 0 };
   for (const ep of [...new Set(tutte.map((c) => c.ep))]) for (const c of tutte.filter((x) => x.ep === ep)) {
     const ch = dati[`missioni/${ep}.json`].ondate.flatMap((o) => o.chiamate ?? []).find((x) => x.id === c.id);
     const p = await browser.newPage({ viewport: { width: larghezza, height: h }, hasTouch: true, reducedMotion: 'reduce' });
@@ -101,7 +102,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
     const pronta = ok && await p.waitForSelector('.mappa [data-mossa="puoi"]', { timeout: 15000 }).then(() => true).catch(() => false);
     if (!pronta) { await p.close(); continue; } // nessuna mossa dopo questa chiamata (ultima dell'ondata): la prossima
     await p.waitForTimeout(300);
-    const giu = async (dove) => { const x = await coperti(p); conto.stati++; if (x.stretto) conto.stretti++;
+    const giu = async (dove) => { const x = await coperti(p); conto.stati++; if (x.muto) conto.muti++; else if (x.stretto) conto.stretti++;
       if (x.xs.length) male.push(`${vp} ${ep} ${c.id} ${dove}: il riquadro radio copre ${x.xs.join(', ')} (D-255)`); };
     await giu('«puoi spostare»');
     for (const id of await p.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza))) {
@@ -111,7 +112,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
     }
     conto.episodi++; await p.close(); break;
   }
-  console.log(`radio della mossa ${vp}: ${conto.episodi} episodi, ${conto.stati} stati, rapporto al solo lettore in ${conto.stretti}`);
+  console.log(`radio della mossa ${vp}: ${conto.episodi} episodi, ${conto.stati} stati, rapporto al solo lettore in ${conto.stretti}, riquadro al solo lettore in ${conto.muti}`);
   if (conto.episodi < 30) male.push(`${vp}: radio della mossa provata solo in ${conto.episodi} episodi (D-255)`);
   return { ris: conto, male };
 }

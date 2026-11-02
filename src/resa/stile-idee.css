@@ -34,5 +34,5 @@ main:not(.rosso-c241n01) .mappa.citta .settore-nome { min-width: min-content; }
 .radio-mappa.meta-sx { right: calc(50% + var(--spazio-1)); }
 .radio-mappa.meta-dx { left: calc(50% + var(--spazio-1)); }
 .radio-mappa.compatto .rapporto-costo { display: none; }
-.radio-mappa.stretto .rapporto-costo { position: absolute; width: var(--spazio-px); height: var(--spazio-px); overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.radio-mappa.muto, .radio-mappa.stretto .rapporto-costo { position: absolute; width: var(--spazio-px); height: var(--spazio-px); overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .radio-mappa:is(.compatto, .stretto) .rapporto-costo + .mossa-indicazione { margin-top: 0; }
