@@ -59,7 +59,6 @@ export function App() {
   const [schermata, setSchermata] = useState<Schermata>('titolo');
   const [visti, setVisti] = useState(0);
   const [mappaNascosta, setMappaNascosta] = useState(false); // D-191: rapporto senza mappa, «Home» nella testata
-  const [casaFuori, setCasaFuori] = useState(false); // D-261: risposta con la mossa, mappa abbassata, «Home» nella testata
   const [bozza, setBozza] = useState<Disposizione>({});
   // S-12 (PO-061): ogni mossa dello schieramento si può annullare («Annulla l'ultima»).
   const [storia, setStoria] = useState<Disposizione[]>([]);
@@ -255,9 +254,9 @@ export function App() {
   return (
     <MotionConfig reducedMotion="user">
       <main data-schermata={nome} data-ondata={ic?.ondata ?? 0} className={ROSSI_CSS.filter((x) => spento(x)).map((x) => `rosso-${x.toLowerCase()}`).join(' ')}>
-        {mappa && m && testata && <Testata numero={due(m.episodio)} etichetta={testata.etichetta} titolo={testata.titolo} info={testata.info} home={mappaNascosta || casaFuori ? home : undefined} />}
+        {mappa && m && testata && <Testata numero={due(m.episodio)} etichetta={testata.etichetta} titolo={testata.titolo} info={testata.info} home={mappaNascosta ? home : undefined} casaRiserva={schermata === 'gioco' && eco && mossa && !spento('C261H01') ? home : undefined} />}
         {fiducia !== null && <Fiducia valore={fiducia} max={Number(dichiarate.get('credito')?.max ?? 10)} />}
-        {mappa && m && <Mappa m={m} home={home} nascosta={setMappaNascosta} casaFuori={setCasaFuori} segni={segni} ondata={schermata === 'rapporto' ? ic?.rapporti.at(-1)?.n : Math.min(ic?.ondata ?? 1, m.ondate.length)} {...mappa} />}
+        {mappa && m && <Mappa m={m} home={home} nascosta={setMappaNascosta} segni={segni} ondata={schermata === 'rapporto' ? ic?.rapporti.at(-1)?.n : Math.min(ic?.ondata ?? 1, m.ondate.length)} {...mappa} />}
         <Voli voli={voli} finito={(id) => setVoli((v) => v.filter((x) => x.id !== id))} />
         {/* PO-097: versione su ogni schermata, in basso a destra, piccola e non toccabile. Rosso C38V01: niente. */}
         {!spento('C38V01') && <small className="versione-angolo" data-versione-angolo aria-hidden="true">v{GAME_VERSION}</small>}

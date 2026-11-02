@@ -58,8 +58,6 @@ export interface MappaProps {
   spenti?: string[]; vuota?: boolean; buio?: boolean;
   /** D-191: il rapporto nasconde la mappa che non ci sta; App mette «Home» nella testata */
   nascosta?: (si: boolean) => void;
-  /** D-261: «Home» passa nella testata (risposta con la mossa, mappa abbassata) */
-  casaFuori?: (si: boolean) => void;
 }
 
 /** Posizione del settore in percentuale, passata al CSS come variabili (niente stili in linea). */
@@ -100,7 +98,7 @@ export function Mappa(p: MappaProps) {
   // Nomi e unità al posto che non copre niente (C-008): a ogni disegno, quando la mappa cambia misura e
   // quando arrivano i caratteri.
   useLayoutEffect(() => { if (contenitore.current) disponi(contenitore.current); });
-  useAdatta(contenitore, disponi, p.nascosta, p.casaFuori); // D-187, D-191, D-261
+  useAdatta(contenitore, disponi, p.nascosta); // D-187, D-191
   // PO-152: una scheda alla volta; si chiude da sola quando cambia la chiamata. Chiusa dalla tastiera, il fuoco torna al settore.
   const schede = !!p.schede && !p.onSettore;
   const [aperto, setAperto] = useState<string | null>(null);

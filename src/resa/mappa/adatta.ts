@@ -27,7 +27,6 @@ const NASCONDIBILE = /^(apertura|esito|ondata)-/;
 
 let avvisa: (nascosta: boolean) => void = () => {};
 let ridisponi: (m: HTMLElement) => void = () => {};
-let avvisaCasa: (fuori: boolean) => void = () => {};
 
 // Ultima situazione misurata: schermata, finestra e altezza di ciò che sta fuori dalla mappa. Se non cambia, il risultato è
 // lo stesso: niente rifacimento (il ResizeObserver risponde anche al cambio d'altezza fatto da qui; ogni giro in più
@@ -40,11 +39,11 @@ function adatta(m: HTMLElement) {
   const chiave = `${main?.dataset.schermata}|${deroga}|${innerHeight}|${Math.round((main?.getBoundingClientRect().height ?? 0) - m.getBoundingClientRect().height)}`;
   if (ultima.get(m) === chiave) return;
   ultima.set(m, chiave);
-  const era = m.hasAttribute('data-nascosta'), eraFuori = m.hasAttribute('data-casa-fuori');
+  const era = m.hasAttribute('data-nascosta');
   m.removeAttribute('data-adatta'); m.removeAttribute('data-nascosta'); m.removeAttribute('data-casa-fuori'); m.style.removeProperty('--mappa-alta');
   const schermata = main?.dataset.schermata ?? '';
   const fine = (nascosta: boolean, fuori = false) => { if (nascosta) m.setAttribute('data-nascosta', ''); if (nascosta !== era) avvisa(nascosta);
-    if (fuori) m.setAttribute('data-casa-fuori', ''); if (fuori !== eraFuori) avvisaCasa(fuori); };
+    if (fuori) m.setAttribute('data-casa-fuori', ''); }; // D-261: la «Home» di riserva della testata compare col CSS
   if (spento('C187M01') || !main || ESCLUSE.has(schermata) || (ESCLUSE_D197.has(schermata) && !spento('C197R01') && !deroga)) return fine(false);
   // eccedenza della pagina, con le vignette nascondibili come nascoste e quelle che si riempiono al loro minimo
   const eccedenza = () => {
@@ -85,8 +84,8 @@ function adatta(m: HTMLElement) {
 }
 
 /** Si rifà quando la pagina cambia (passi, testi, caratteri) e quando cambia la finestra. */
-export function useAdatta(el: RefObject<HTMLDivElement | null>, disponi: (m: HTMLElement) => void, nascosta?: (si: boolean) => void, casaFuori?: (si: boolean) => void) {
-  ridisponi = disponi; avvisa = nascosta ?? (() => {}); avvisaCasa = casaFuori ?? (() => {});
+export function useAdatta(el: RefObject<HTMLDivElement | null>, disponi: (m: HTMLElement) => void, nascosta?: (si: boolean) => void) {
+  ridisponi = disponi; avvisa = nascosta ?? (() => {});
   useLayoutEffect(() => {
     const m = el.current, main = m?.closest('main');
     if (!m || !main) return;
@@ -95,6 +94,6 @@ export function useAdatta(el: RefObject<HTMLDivElement | null>, disponi: (m: HTM
     const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => { const ora = `${innerHeight}:${Math.round(main.getBoundingClientRect().height)}`; if (ora !== ultimo) { ultimo = ora; fai(); } });
     fai(); ro?.observe(main);
     addEventListener('resize', fai); void document.fonts?.ready.then(fai);
-    return () => { ro?.disconnect(); removeEventListener('resize', fai); avvisa(false); avvisaCasa(false); };
+    return () => { ro?.disconnect(); removeEventListener('resize', fai); avvisa(false); };
   }, [el]);
 }

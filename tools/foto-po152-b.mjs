@@ -29,7 +29,7 @@ const coperti = (p) => p.evaluate(() => {
   const ecc = document.scrollingElement.scrollHeight - innerHeight, sotto = !!document.querySelector('.rapporto-sotto')?.checkVisibility();
   const mappa = Math.round(document.querySelector('.mappa').getBoundingClientRect().height); // D-259: quanto si abbassa
   // D-261: una sola «Home» visibile (sulla mappa o nella testata); bersagli della mossa col bordo dell'evidenziazione
-  const case_ = [...document.querySelectorAll('[data-azione="home"]')].filter((e) => e.checkVisibility()).length, fuori = !!document.querySelector('.mappa[data-casa-fuori]');
+  const case_ = [...document.querySelectorAll('[data-azione^="home"]')].filter((e) => e.checkVisibility({ visibilityProperty: true })).length, fuori = !!document.querySelector('.mappa[data-casa-fuori]');
   const senzaBordo = [...document.querySelectorAll('.mappa.mossa [data-presenza]:not(:disabled) .pastiglia, .mappa.mossa .settore-punto:not(:disabled)')]
     .filter((e) => getComputedStyle(e).outlineStyle === 'none').map((e) => e.closest('[data-presenza]')?.dataset.presenza ?? e.closest('[data-settore]').dataset.settore);
   if (q.classList.contains('muto')) return { xs: [], stretto: true, muto: true, costo, ecc, sotto, mappa, case_, fuori, senzaBordo }; // al solo lettore: non copre niente
@@ -114,7 +114,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
     let n0 = conto.stati;
     const ok = ch && await p.waitForSelector(`[data-messaggio="chiamata-${c.id}"]`, { timeout: 15000 }).then(() => true).catch(() => false);
     if (ok) { await p.click(`[data-opzione="${ch.opzioni[0].id}"]`); await p.click('[data-conferma]').catch(() => {}); }
-    const pronta = ok && await p.waitForSelector('.mappa [data-mossa="puoi"]', { timeout: 15000 }).then(() => true).catch(() => false);
+    const pronta = ok && await p.waitForSelector('.mappa [data-mossa="puoi"]', { timeout: 15000, state: 'attached' }).then(() => true).catch(() => false);
     if (!pronta) { await p.close(); continue; } // nessuna mossa dopo questa chiamata (ultima dell'ondata): la prossima
     await p.waitForTimeout(300);
     const giu = async (dove) => { const x = await coperti(p); conto.stati++; if (x.muto) conto.muti++; else if (x.stretto) conto.stretti++;
