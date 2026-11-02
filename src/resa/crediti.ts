@@ -11,7 +11,7 @@ export const CREDITI: Credito[] = [
   { nome: 'Lucide (lucide-react)', uso: 'icone dell\'interfaccia', licenza: 'ISC (alcune icone MIT, dal progetto Feather)', autori: '© 2026 Lucide Icons and Contributors; Feather © 2013-present Cole Bemis', fonte: 'https://github.com/lucide-icons/lucide' },
   { nome: 'Capacitor (@capacitor/core, @capacitor/android)', uso: 'app Android', licenza: 'MIT', autori: '© 2017-present Drifty Co.', fonte: 'https://github.com/ionic-team/capacitor' },
   { nome: 'Space Grotesk (@fontsource/space-grotesk)', uso: 'carattere dei titoli', licenza: 'SIL Open Font License 1.1', autori: '© 2020 The Space Grotesk Project Authors', fonte: 'https://github.com/floriankarsten/space-grotesk' },
-  { nome: 'Inter (@fontsource/inter)', uso: 'carattere dei testi', licenza: 'SIL Open Font License 1.1', autori: '© 2016 The Inter Project Authors', fonte: 'https://github.com/rsms/inter' },
+  { nome: 'Inter (@fontsource/inter)', uso: 'carattere dei testi e dei simboli (Inter 4.1.1 per → ≤ ≥ ▲ ▼ ★ ☆)', licenza: 'SIL Open Font License 1.1', autori: '© 2016 The Inter Project Authors', fonte: 'https://github.com/rsms/inter' },
   { nome: 'Ajv (ajv)', uso: 'controllo dei dati di gioco', licenza: 'MIT', autori: '© 2015-2021 Evgeny Poberezkin', fonte: 'https://github.com/ajv-validator/ajv' },
 ];
 

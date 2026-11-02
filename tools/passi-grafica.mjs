@@ -45,6 +45,8 @@ export const PASSI_GRAFICA = {
   },
   // D-187 (PO-052, PO-058): scorrimento di ogni schermata di e01 alle altezze dei telefoni della larghezza del giro
   altezze: async () => { const a = await import('./sonda-altezze.mjs'); return a.controllaAltezze(await a.giraAltezze({ vps: larghezzeGiro().flatMap((w) => a.VP_PER_LARGHEZZA[w] ?? []) })); },
+  // D-257: caratteri inclusi, anche su una macchina senza Inter; resa senza hinting (tools/caratteri.mjs)
+  caratteri: async () => (await import('./caratteri.mjs')).giraCaratteri('dist'),
   // S-22 (C14-01): il gioco installato funziona offline (service worker), su http://localhost
   offline: () => giraOffline('dist'),
   'bracci-rossi-grafica': async () => {
@@ -74,6 +76,8 @@ export const PASSI_GRAFICA = {
       // compatta i 12 px in più di C201C01+C230C01 ci stanno: gira con C242M01 (la scheda di prima; da solo 0, insieme 12 px); C52-03: il nome dell'episodio fuori dalla mappa a 412 (C241N01); idea B: mosse illimitate (B01), mappa che non si tocca fra le chiamate (M02).
       for (const [r, vp] of [['C187M01', '360x760'], ['C187V01', '360x760'], ['C191R01', '360x760'], ['C191L01', '360x640'], ['C191C01', '360x640'], ['C191H01', '360x640'], ['C193R01', '360x640'], ['C193S01', '360x640'], ['C197R01', '360x640'], ['C201R01', '412x760'], ['C201C01,C230C01,C242M01', '360x760'], ['C203R01', '360x760'], ['C206I01', '360x760'], ['C215L01,C241A01', '360x760'], ['C210C01', '360x760'], ['C210G01', '360x760'], ['C218R01,C221R01', '360x760'], ['C218S01', '360x760'], ['C219H01,C221R01', '360x760'], ['C221R01', '360x640'], ['C230C01', '360x640'], ['C234V01', '360x640'], ['C237S01', '360x760'], ['C237P01', '360x760'], ['C241A01', '360x760'], ['C241M01', '360x760'], ['C242M01', '360x760'], ['C241N01', '412x760'], ['C241B01', '360x760'], ['C241M02', '360x760']])
         compiti.push(async () => { if (!a.controllaAltezze(await a.giraAltezze({ vps: [vp], rossi: r.split(','), parti: PARTE_ROSSO[r.split(',')[0]] ?? ['e01'] })).length) ciechi.push(`altezze/${r} è cieco`); }); }
+    // D-257: senza i file di Inter (C254F01) il guardiano dei caratteri è rosso
+    compiti.push(async () => { if (!(await (await import('./caratteri.mjs')).giraCaratteri('dist', ['C254F01'])).length) ciechi.push('caratteri/C254F01 è cieco'); });
     // C53-02: con la risposta in due messaggi (C193R01) la parte «risposte» (carte d'imprevisto e varianti) vede lo scorrimento
     if (larghezzeGiro().includes(360)) compiti.push(async () => { const a = await import('./sonda-altezze.mjs');
       if (!a.controllaAltezze(await a.giraAltezze({ vps: ['360x640'], rossi: ['C193R01'], parti: ['risposte'], limiteRisposte: 24 })).some((x) => x.includes('C53-02'))) ciechi.push('altezze/risposte C193R01 è cieco'); });

@@ -211,7 +211,7 @@
   --home-vignetta-max: 210px; /* PO-140: oltre, a 360 il ritaglio taglierebbe Malvasi (vignetta 320×180 in slice) */
   --home-vignetta-min: 96px;
 
-  --font-titoli: "Space Grotesk", system-ui, sans-serif;
+  --font-titoli: "Space Grotesk", Inter, system-ui, sans-serif; /* D-257: i simboli che Space Grotesk non ha (▲ ▼ ★) da Inter, non dal sistema */
   --font: Inter, system-ui, sans-serif;
 }
 

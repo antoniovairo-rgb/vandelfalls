@@ -45,10 +45,13 @@ const PASSI = {
 const CATENE = {
   governo: ['documenti', 'backlog', 'segreti', 'versione', 'store', 'modello', 'bracci-rossi', 'governo.html'],
   logica: ['tipi', 'confini', 'schema', 'test', 'bot', 'storia', 'salvataggi-reali', 'bracci-rossi-logica'],
-  grafica: ['token', 'build', 'email', 'foto', 'schieramenti', 'offline', 'altezze', 'bracci-rossi-grafica'],
+  grafica: ['token', 'build', 'email', 'foto', 'schieramenti', 'offline', 'caratteri', 'altezze', 'bracci-rossi-grafica'],
 };
 CATENE.completa = [...CATENE.governo, ...CATENE.logica, ...CATENE.grafica];
 
+// D-257: ogni Chromium delle catene (lo eredita dall'ambiente) vede gli stessi caratteri di sistema e li disegna senza
+// hinting: larghezze dei testi uguali in locale e in CI (con l'hinting di serie della CI si arrotondavano al pixel).
+process.env.FONTCONFIG_FILE ??= new URL('./caratteri/fonts.conf', import.meta.url).pathname;
 const nome = process.argv[2];
 if (!CATENE[nome]) {
   console.error(`Catena sconosciuta «${nome}». Disponibili: ${Object.keys(CATENE).join(', ')}`);
