@@ -233,7 +233,7 @@
               },
               {
                 "tensione": "stazione",
-                "valore": 2
+                "valore": 1
               }
             ],
             "risposta": "testi:e02.imp.banda.banda_stazione.r"
@@ -245,7 +245,7 @@
             "effetti": [
               {
                 "pressione": "viale_stazione",
-                "valore": -1
+                "valore": -2
               },
               {
                 "tensione": "viale_stazione",
@@ -288,7 +288,7 @@
               },
               {
                 "tensione": "viale_stazione",
-                "valore": 2
+                "valore": 1
               }
             ],
             "risposta": "testi:e02.imp.piccione.libera_gabbiotto.r"

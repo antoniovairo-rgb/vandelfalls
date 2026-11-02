@@ -245,7 +245,7 @@
             "effetti": [
               {
                 "pressione": "curva_ospiti",
-                "valore": -1
+                "valore": -2
               },
               {
                 "tensione": "curva_ospiti",
@@ -284,7 +284,7 @@
             "effetti": [
               {
                 "pressione": "curva_larkspire",
-                "valore": -1
+                "valore": -2
               },
               {
                 "tensione": "curva_ospiti",
@@ -398,7 +398,7 @@
               },
               {
                 "tensione": "strada_larkspire",
-                "valore": 2
+                "valore": 1
               }
             ],
             "risposta": "testi:e18.imp.schiuma.scope_strada.r"

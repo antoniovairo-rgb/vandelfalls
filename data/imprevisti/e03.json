@@ -22,7 +22,7 @@
               },
               {
                 "tensione": "parcheggi",
-                "valore": 2
+                "valore": 1
               }
             ],
             "risposta": "testi:e03.imp.carro.sblocca.r"
@@ -122,7 +122,7 @@
             "effetti": [
               {
                 "pressione": "quartiere",
-                "valore": -1
+                "valore": -2
               },
               {
                 "tensione": "parcheggi",
@@ -229,7 +229,7 @@
               },
               {
                 "tensione": "parcheggi",
-                "valore": 2
+                "valore": 1
               }
             ],
             "risposta": "testi:e03.imp.irrigatori.acqua_custode.r"
@@ -296,7 +296,7 @@
             "effetti": [
               {
                 "pressione": "quartiere",
-                "valore": -1
+                "valore": -2
               },
               {
                 "tensione": "quartiere",
@@ -335,7 +335,7 @@
             "effetti": [
               {
                 "pressione": "parcheggi",
-                "valore": -1
+                "valore": -2
               },
               {
                 "tensione": "quartiere",

@@ -8,8 +8,9 @@
 // Da solo: VP=360x640,360x760 [FOTO=cartella] node tools/sonda-altezze.mjs [build]
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
-import { existsSync } from 'node:fs';
+import { existsSync, writeFileSync } from 'node:fs';
 import { servi, SEME_FOTO } from './foto.mjs';
+import { migra } from '../src/salvataggi/salvataggio.ts';
 import { chiamateDellaPartita, semeDa } from '../src/logica/partita.ts';
 // D-241: la partita e01 col seme delle foto (VALMORA_SEME_PARTITA per provarne un altro); lo schieramento si calcola sulla stessa partita
 const SEME = Number(process.env.VALMORA_SEME_PARTITA ?? SEME_FOTO);
@@ -80,6 +81,14 @@ export function verbaliCostruiti(dati, dich) {
 // Rosso C206I01. Mai alzarle per far passare una modifica.
 export const CHIAMATE_NORMALI_MAX = 664, IMPREVISTI_MAX = 339, IMPREVISTI_MEDIANA = 285;
 const semeCon = (m, o, id) => { for (let i = 1; ; i++) { const s = semeDa(`altezze:${m.id}:${i}`); if (chiamateDellaPartita(m, o, s).some((x) => x.id === id)) return s; } };
+/** C53-02: un salvataggio per ogni opzione valida di ogni carta d'imprevisto e di ogni variante, con la chiamata aperta. */
+export function risposteCostruite(dati, dich) {
+  const ms = new Map(Object.entries(dati).filter(([k]) => k.startsWith('missioni/')).map(([, x]) => [x.id, x]));
+  return chiamateCostruite(dati, dich).filter((c) => c.imprevisto || c.variante).flatMap((c) => {
+    const m = ms.get(c.ep), s = migra(JSON.parse(c.sal)).in_corso, ch = M.chiamateAperte(m, s).find((x) => x.id === c.id);
+    return ch ? M.opzioniValide(ch, s, m).map((o) => ({ ...c, op: o.id })) : [];
+  });
+}
 export function chiamateCostruite(dati, dich) {
   const ms = Object.entries(dati).filter(([k]) => k.startsWith('missioni/')).map(([, x]) => x).sort((a, b) => a.episodio - b.episodio), out = [];
   let v = variabiliIniziali(dich.values());
@@ -91,7 +100,7 @@ export function chiamateCostruite(dati, dich) {
     for (const seme of semi) { const g = attenta(creaCaso(1), dich); let s = M.iniziaMissione(m, v, dich, seme);
       if (seme && !m.ondate.some((o) => chiamateDellaPartita(m, o, seme).some(mancano))) continue;
       while (!M.missioneFinita(m, s)) { s = M.schiera(m, s, g.schiera(m, s)); for (let c = M.chiamateAperte(m, s)[0]; c; c = M.chiamateAperte(m, s)[0]) {
-        if (!viste.has(c.id)) { viste.add(c.id); out.push({ ep: m.id, id: c.id, imprevisto: !!c.imprevisto, sal: JSON.stringify({ save_version: 2, game_version: GAME_VERSION, seme: 1, caso: 1, variabili: v, missioni_concluse: ms.slice(0, i).map((x) => x.id), episodi: {}, genere: 'm', in_corso: s, rapporto_aperto: null }) }); }
+        if (!viste.has(c.id)) { viste.add(c.id); out.push({ ep: m.id, id: c.id, imprevisto: !!c.imprevisto, variante: !!c.variante_di, sal: JSON.stringify({ save_version: 2, game_version: GAME_VERSION, seme: 1, caso: 1, variabili: v, missioni_concluse: ms.slice(0, i).map((x) => x.id), episodi: {}, genere: 'm', in_corso: s, rapporto_aperto: null }) }); }
         s = M.rispondi(m, s, c.id, g.scegli(m, s, c), dich); } s = M.chiudiOndata(m, s, dich); }
       if (!seme) fine = M.concludiMissione(m, s, dich).variabili; }
     v = fine; }
@@ -148,12 +157,14 @@ function campionaVersione() {
 }
 
 // D-207: parti = quali misure; i bracci rossi girano solo la parte che deve vederli rossi (prima 40 min di bracci)
-export const PARTI = ['e01', 'citta36', 'chiamate', 'rapporti', 'riepilogo', 'verbali', 'po149', 'po152a', 'c52nomi', 'po152b'];
-export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi = [], cartella = '', parti = PARTI }) {
+export const PARTI = ['e01', 'citta36', 'chiamate', 'rapporti', 'riepilogo', 'verbali', 'po149', 'po152a', 'c52nomi', 'po152b', 'risposte'];
+// C53-02 (D-252): la risposta di ogni opzione di ogni carta d'imprevisto e di ogni variante, a queste finestre (soglie di SOGLIE)
+export const RISPOSTE_VP = ['360x640', '375x667', '412x760'];
+export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi = [], cartella = '', parti = PARTI, limiteRisposte = Infinity }) {
   const dati = leggiDati(dirDati), dich = new Map(dati['stato.json'].variabili.map((d) => [d.id, d])), e01 = dati['missioni/e01.json'];
   const srv = await servi(build), url = `http://127.0.0.1:${srv.address().port}/`;
   const percorso = process.env.VALMORA_CHROME ?? (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
-  const b = await chromium.launch({ executablePath: percorso }); const ris = [], errori = [], sopra = [], chiamate = [];
+  const b = await chromium.launch({ executablePath: percorso }); const ris = [], errori = [], sopra = [], chiamate = [], risposte = [];
   try {
     for (const vp of vps) {
       const [w, h] = vp.split('x').map(Number);
@@ -227,6 +238,47 @@ export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi
             chiamate.push({ vp, ep: c.ep, id: c.id, imprevisto: c.imprevisto, ecc: await q.evaluate(() => document.scrollingElement.scrollHeight - innerHeight) });
             if (cartella && c.imprevisto) await q.screenshot({ path: join(cartella, `${vp}-chiamata-${c.ep}-${c.id}.png`), fullPage: true }); }
           await q.close(); })); }
+      if (RISPOSTE_VP.includes(vp) && parti.includes('risposte') && !process.env.RISPOSTE_VERE) { // C53-02, veloce: una risposta vera per
+        // episodio e tipo (carta o variante), poi nella stessa scena (stessi CSS, caratteri e mappa) i testi di ogni opzione al
+        // posto dei suoi, e si misura. Confrontata con la misura una per una (RISPOSTE_VERE=1) su 150 risposte: stesse altezze.
+        const tutte = risposteCostruite(dati, dich).slice(0, limiteRisposte), T = Object.assign({}, ...Object.entries(dati).filter(([k]) => k.startsWith('testi/it/')).map(([, v]) => v));
+        const tx = (k) => (k ? T[k.replace(/^testi:/, '')] ?? null : null);
+        const ms = new Map(Object.entries(dati).filter(([k]) => k.startsWith('missioni/')).map(([, x]) => [x.id, x]));
+        const opz = (c) => ms.get(c.ep).ondate.flatMap((o) => o.chiamate ?? []).find((x) => x.id === c.id).opzioni.find((o) => o.id === c.op);
+        // un'opzione che cambia una variabile (fiducia…) ha nella sua scena un segno che sparisce dopo ~2 s e alza la pagina di
+        // 2 px (misurato su e03 laser_v/annuncio: 28 → 26): quella si misura da sola, nella sua scena vera; le altre in gruppo
+        const variabili = (c) => opz(c).effetti.some((e) => 'aggiungi' in e || 'imposta' in e);
+        const tipo = (c) => (variabili(c) ? `${c.ep}|${c.id}|${c.op}` : c.ep);
+        const coda = [...new Set(tutte.map(tipo))].map((k) => tutte.filter((c) => tipo(c) === k));
+        await Promise.all(Array.from({ length: 4 }, async () => { const q = await b.newPage({ viewport: { width: w, height: h }, hasTouch: true, reducedMotion: 'reduce' });
+          if (rossi.length) await q.addInitScript((xs) => { for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi);
+          await q.addInitScript(() => { globalThis.__VALMORA_SECONDO_MS = 1; }); await q.goto(url);
+          while (coda.length) { const gruppo = coda.shift(), c = gruppo.find((x) => opz(x).risposta) ?? gruppo[0];
+            await q.evaluate((x) => localStorage.setItem('vandelfalls-salvataggio', x), c.sal); await q.reload(); await q.getByRole('button', { name: 'Riprendi' }).click();
+            const ok = await q.waitForSelector(`[data-opzione="${c.op}"]`, { timeout: 8000 }).then(() => true, () => false); await lento(q);
+            if (ok) { await q.click(`[data-opzione="${c.op}"]`); await q.click('[data-conferma]'); }
+            const visto = ok && await q.waitForSelector('.scena[data-scena="risposta"]', { timeout: 8000 }).then(() => true, () => false); await lento(q);
+            if (!visto) { errori.push(`${vp}: risposta ${c.ep} ${c.id}/${c.op} non si apre`); continue; }
+            for (const x of gruppo) { const o = opz(x);
+              const ecc = await q.evaluate(([etichetta, intanto]) => { const sc = document.querySelector('.scena [data-scelta]'), it = document.querySelector('.scena .intanto');
+                if (sc) sc.textContent = etichetta; if (it) { it.lastChild.textContent = intanto ?? ''; it.hidden = !intanto; }
+                return document.scrollingElement.scrollHeight - innerHeight; }, [tx(o.testo), tx(o.risposta)]);
+              risposte.push({ vp, ep: x.ep, id: x.id, op: x.op, ecc }); }
+            if (process.env.AVANZAMENTO) console.log(`${vp} risposte: ${risposte.length}`); }
+          await q.close(); })); }
+      if (RISPOSTE_VP.includes(vp) && parti.includes('risposte') && process.env.RISPOSTE_VERE) { const coda = risposteCostruite(dati, dich).slice(0, limiteRisposte); // C53-02, una per una (lenta)
+        await Promise.all(Array.from({ length: 4 }, async () => { const q = await b.newPage({ viewport: { width: w, height: h }, hasTouch: true, reducedMotion: 'reduce' });
+          if (rossi.length) await q.addInitScript((xs) => { for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi);
+          await q.addInitScript(() => { globalThis.__VALMORA_SECONDO_MS = 1; }); await q.goto(url);
+          while (coda.length) { const c = coda.shift(); await q.evaluate((x) => localStorage.setItem('vandelfalls-salvataggio', x), c.sal); await q.reload();
+            await q.getByRole('button', { name: 'Riprendi' }).click();
+            const ok = await q.waitForSelector(`[data-opzione="${c.op}"]`, { timeout: 8000 }).then(() => true, () => false); await lento(q);
+            if (ok) { await q.click(`[data-opzione="${c.op}"]`); await q.click('[data-conferma]'); }
+            const visto = ok && await q.waitForSelector('.scena[data-scena="risposta"]', { timeout: 8000 }).then(() => true, () => false); await lento(q);
+            if (!visto) { errori.push(`${vp}: risposta ${c.ep} ${c.id}/${c.op} non si apre`); continue; }
+            risposte.push({ vp, ep: c.ep, id: c.id, op: c.op, ecc: await q.evaluate(() => document.scrollingElement.scrollHeight - innerHeight) });
+            if (process.env.AVANZAMENTO && risposte.length % 50 === 0) console.log(`${vp} risposte: ${risposte.length}, ne restano ${coda.length}`); }
+          await q.close(); })); }
       if (h === 760 && parti.includes('po149')) { const { controllaPo149 } = await import('./foto-po149.mjs'); // PO-149 (D-237): 640/667/760/915 a questa larghezza
         const g = await controllaPo149(b, url, w, rossi, cartella); errori.push(...g.male); }
       if (h === 760 && parti.includes('po152a')) { const { controllaPo152a } = await import('./foto-po152-a.mjs'); // PO-152 A (D-241): 640 e 760
@@ -270,11 +322,11 @@ export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi
       }
     }
   } finally { await b.close(); srv.close(); }
-  return { ris, errori, sopra, chiamate };
+  return { ris, errori, sopra, chiamate, risposte };
 }
 
 /** Problemi: scorrimento oltre la soglia per schermata, errori di pagina, blocchi, versione sopra le lettere. */
-export function controllaAltezze({ ris, errori, sopra, chiamate = [] }) {
+export function controllaAltezze({ ris, errori, sopra, chiamate = [], risposte = [] }) {
   const max = {};
   for (const r of ris) if (!libera(r)) { const k = `${r.vp}|${r.nome}`; if (!max[k] || r.ecc > max[k].ecc) max[k] = r; }
   const male = Object.values(max).filter((r) => r.ecc > (SOGLIE[r.vp]?.[r.nome] ?? 0))
@@ -290,7 +342,11 @@ export function controllaAltezze({ ris, errori, sopra, chiamate = [] }) {
   const lunghe = [...imp.filter((c) => c.ecc > Math.min(lim, IMPREVISTI_MAX)).map((c) => `${c.vp} imprevisto ${c.ep} ${c.id}: la chiamata scorre di ${c.ecc} px (soglia ${Math.min(lim, IMPREVISTI_MAX)}, D-207)`),
     ...norm.filter((c) => c.ecc > CHIAMATE_NORMALI_MAX).map((c) => `${c.vp} chiamata ${c.ep} ${c.id}: scorre di ${c.ecc} px (massimo misurato ${CHIAMATE_NORMALI_MAX}, D-114)`)];
   if (imp.length && mediana(imp.map((c) => c.ecc)) > IMPREVISTI_MEDIANA) lunghe.push(`360x760: mediana degli imprevisti ${mediana(imp.map((c) => c.ecc))} px (soglia ${IMPREVISTI_MEDIANA}, D-207)`);
-  return [...male, ...d210, ...casa, ...salti.slice(0, 3), ...lunghe.slice(0, 5), ...errori, ...sopra];
+  // C53-02: le risposte delle carte d'imprevisto e delle varianti, con le soglie della risposta di e01 (0 dove non c'è soglia)
+  const rl = risposte.filter((r) => r.ecc > (SOGLIE[r.vp]?.risposta ?? 0));
+  const rlunghe = rl.slice(0, 8).map((r) => `${r.vp} risposta ${r.ep} ${r.id}/${r.op}: scorre di ${r.ecc} px (soglia ${SOGLIE[r.vp]?.risposta ?? 0}, C53-02)`);
+  if (rl.length > 8) rlunghe.push(`… e altre ${rl.length - 8} risposte oltre soglia (C53-02)`);
+  return [...male, ...d210, ...casa, ...salti.slice(0, 3), ...lunghe.slice(0, 5), ...rlunghe, ...errori, ...sopra];
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
@@ -300,6 +356,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   for (const [k, v] of Object.entries(max)) console.log(`${k}: ${v}`);
   console.log(`nomi sopra i segni, massimo: ${Math.max(0, ...g.ris.map((r) => r.segni))} px²`);
   for (const [k, xs] of [['imprevisti', g.chiamate.filter((c) => c.imprevisto)], ['normali', g.chiamate.filter((c) => !c.imprevisto)]]) if (xs.length) console.log(`chiamate ${k}: ${xs.length}, massimo ${Math.max(...xs.map((c) => c.ecc))} px, mediana ${mediana(xs.map((c) => c.ecc))} px`);
+  for (const vp of RISPOSTE_VP) { const xs = g.risposte.filter((r) => r.vp === vp); if (xs.length) console.log(`risposte ${vp}: ${xs.length}, oltre soglia ${xs.filter((r) => r.ecc > (SOGLIE[vp]?.risposta ?? 0)).length}, massimo ${Math.max(...xs.map((r) => r.ecc))} px, mediana ${mediana(xs.map((r) => r.ecc))} px`); }
+  if (process.env.RISPOSTE_JSON) writeFileSync(process.env.RISPOSTE_JSON, JSON.stringify(g.risposte));
   const male = controllaAltezze(g); console.log(male.length ? `ROSSO (${male.length}):\n${male.join('\n')}` : 'VERDE');
   process.exit(male.length ? 1 : 0);
 }

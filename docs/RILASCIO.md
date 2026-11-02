@@ -25,7 +25,7 @@ Legenda dello stato: **fatto** · **da fare dal PO** · **da fare da noi** (sess
 ### Regola della versione (D-212)
 
 `versionCode = maggiore × 1 000 000 + minore × 1 000 + correzione` (ognuno 0-999), `versionName = GAME_VERSION`.
-0.46.0 → 46000 · 0.47.0 → 47000 · 1.0.0 → 1000000. **Versione corrente: 0.58.0 → versionCode 58000** (src/versione.ts, letta il 2026-10-27). Cresce sempre se GAME_VERSION cresce; il massimo (999.999.999 → 999999999) resta sotto 2100000000.
+0.46.0 → 46000 · 0.47.0 → 47000 · 1.0.0 → 1000000. **Versione corrente: 0.59.0 → versionCode 59000** (src/versione.ts, letta il 2026-10-27). Cresce sempre se GAME_VERSION cresce; il massimo (999.999.999 → 999999999) resta sotto 2100000000.
 Vale solo per il rilascio: l'APK di debug del job «apk» resta `versionCode 1`, `versionName "1.0"` (android/app/build.gradle:41-48).
 
 ## 2. Guida passo passo per il PO
