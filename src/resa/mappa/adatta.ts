@@ -14,6 +14,10 @@ const ESCLUSE_D197 = new Set(['risposta']);
 // D-191: dove la mappa non si tocca (risposta, sala, briefing) può scendere fino a --mappa-altezza-min-lettura (160 px).
 // Rosso C191L01: il minimo di sempre.
 const LETTURA = new Set(['risposta', 'sala', 'briefing']); // «risposta» vale solo col rosso C197R01
+// D-259 (opzione 1 del PO, deroga a D-197): nella risposta, quando il costo non ha posto sopra la mappa e sta nella risposta
+// (riquadro della mossa compatto, stretto o muto: radio-mappa.tsx), la mappa si abbassa fino a --mappa-altezza-min (si tocca
+// ancora: 200 px, non quello di lettura). Rosso C259A01: mappa piena anche lì, come D-197.
+const COSTO_SOTTO = '.radio-mappa:is(.compatto, .stretto, .muto)';
 // D-191: nel rapporto, se la pagina scorre anche con la mappa al minimo, la mappa non si mostra (resta la scheda dei
 // settori, che dice lo stato di ognuno) e «Home» passa nella testata. Rosso C191R01: la mappa resta.
 const SENZA_MAPPA = new Set(['rapporto']);
@@ -29,14 +33,15 @@ const ultima = new WeakMap<HTMLElement, string>();
 
 function adatta(m: HTMLElement) {
   const main = m.closest('main');
-  const chiave = `${main?.dataset.schermata}|${innerHeight}|${Math.round((main?.getBoundingClientRect().height ?? 0) - m.getBoundingClientRect().height)}`;
+  const deroga = main?.dataset.schermata === 'risposta' && !!m.querySelector(COSTO_SOTTO) && !spento('C259A01');
+  const chiave = `${main?.dataset.schermata}|${deroga}|${innerHeight}|${Math.round((main?.getBoundingClientRect().height ?? 0) - m.getBoundingClientRect().height)}`;
   if (ultima.get(m) === chiave) return;
   ultima.set(m, chiave);
   const era = m.hasAttribute('data-nascosta');
   m.removeAttribute('data-adatta'); m.removeAttribute('data-nascosta'); m.style.removeProperty('--mappa-alta');
   const schermata = main?.dataset.schermata ?? '';
   const fine = (nascosta: boolean) => { if (nascosta) m.setAttribute('data-nascosta', ''); if (nascosta !== era) avvisa(nascosta); };
-  if (spento('C187M01') || !main || ESCLUSE.has(schermata) || (ESCLUSE_D197.has(schermata) && !spento('C197R01'))) return fine(false);
+  if (spento('C187M01') || !main || ESCLUSE.has(schermata) || (ESCLUSE_D197.has(schermata) && !spento('C197R01') && !deroga)) return fine(false);
   // eccedenza della pagina, con le vignette nascondibili come nascoste e quelle che si riempiono al loro minimo
   const eccedenza = () => {
     let e = (document.scrollingElement ?? document.documentElement).scrollHeight - innerHeight;
@@ -52,7 +57,7 @@ function adatta(m: HTMLElement) {
   let ecc = eccedenza();
   if (ecc <= 0) return fine(false);
   const radice = getComputedStyle(document.documentElement);
-  const min = parseFloat(radice.getPropertyValue(LETTURA.has(schermata) && !spento('C191L01') ? '--mappa-altezza-min-lettura' : '--mappa-altezza-min')) || 0;
+  const min = parseFloat(radice.getPropertyValue(LETTURA.has(schermata) && !deroga && !spento('C191L01') ? '--mappa-altezza-min-lettura' : '--mappa-altezza-min')) || 0;
   const nat = m.getBoundingClientRect().height;
   let alta = Math.max(min, nat - ecc);
   // S-21: il pulsante «Home» nell'angolo non deve coprire punti e nomi dei settori (CI rossa a 375: il rapporto abbassato portava
