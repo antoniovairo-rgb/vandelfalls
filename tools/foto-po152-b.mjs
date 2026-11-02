@@ -6,6 +6,8 @@
 // D-255 punto 2: il riquadro radio non copre mai un bersaglio della mossa (unità toccabili, poi settori ammessi con ogni unità
 // in mano), nella prima chiamata con mossa di ognuno dei 36 episodi, all'altezza più bassa della larghezza (RADIO_VP).
 // Rosso C255R01 (fascia fissa e rapporto intero, come prima): a 360×640 210 stati coperti.
+// D-258 (opzione B del PO): in ogni stato il costo dopo «Conferma» si vede, nel riquadro o nella risposta sotto la mappa, e la
+// risposta scorre entro la soglia di sonda-altezze (SOGLIE[vp].risposta, 0 se manca). Rosso C258S01: niente copia sotto.
 import { join } from 'node:path';
 import { chiamateCostruite, SOGLIE } from './sonda-altezze.mjs';
 
@@ -18,9 +20,13 @@ const ecc = (p) => p.evaluate(() => document.scrollingElement.scrollHeight - inn
 const coperti = (p) => p.evaluate(() => {
   const q = document.querySelector('.mappa [data-radio-mappa]'), r = q?.getBoundingClientRect();
   if (!r) return { xs: [], stretto: false };
-  if (q.classList.contains('muto')) return { xs: [], stretto: true, muto: true }; // al solo lettore: non copre niente
+  // D-258: il costo si vede (un rapporto col testo del costo, mostrato e non ritagliato) e quanto scorre la pagina
+  const costo = [...document.querySelectorAll('[data-rapporto-costo]')].some((e) => { const b = e.getBoundingClientRect(), c = e.closest('.radio-mappa');
+    return e.checkVisibility() && b.height > 2 && b.width > 2 && !c?.classList.contains('muto') && !!e.querySelector('[data-costo]')?.textContent.trim(); });
+  const ecc = document.scrollingElement.scrollHeight - innerHeight;
+  if (q.classList.contains('muto')) return { xs: [], stretto: true, muto: true, costo, ecc }; // al solo lettore: non copre niente
   const sop = (x) => Math.max(0, Math.min(r.right, x.right) - Math.max(r.left, x.left)) * Math.max(0, Math.min(r.bottom, x.bottom) - Math.max(r.top, x.top));
-  return { stretto: q.classList.contains('stretto'), xs: [...document.querySelectorAll('.mappa [data-presenza]:not(:disabled), .mappa [data-settore] .settore-punto:not(:disabled)')]
+  return { costo, ecc, stretto: q.classList.contains('stretto'), xs: [...document.querySelectorAll('.mappa [data-presenza]:not(:disabled), .mappa [data-settore] .settore-punto:not(:disabled)')]
     .map((e) => [e.dataset.presenza ?? e.closest('[data-settore]').dataset.settore, sop(e.getBoundingClientRect())]).filter(([, a]) => a > 0.5).map(([k, a]) => `${k} ${Math.round(a)} px²`) };
 });
 const stato = (p) => p.evaluate(() => {
@@ -89,7 +95,7 @@ export async function controllaPo152b(browser, url, larghezza, rossi = [], carte
 
 /** D-255 punto 2: prima chiamata con mossa di ogni episodio; stati «puoi» e «dove» (ogni unità in mano). */
 async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
-  const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'radio', episodi: 0, stati: 0, stretti: 0, muti: 0 };
+  const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'radio', episodi: 0, stati: 0, stretti: 0, muti: 0, conCosto: 0, senzaCosto: 0, scorreMax: 0 }, soglia = SOGLIE[vp]?.risposta ?? 0;
   for (const ep of [...new Set(tutte.map((c) => c.ep))]) for (const c of tutte.filter((x) => x.ep === ep)) {
     const ch = dati[`missioni/${ep}.json`].ondate.flatMap((o) => o.chiamate ?? []).find((x) => x.id === c.id);
     const p = await browser.newPage({ viewport: { width: larghezza, height: h }, hasTouch: true, reducedMotion: 'reduce' });
@@ -103,7 +109,10 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
     if (!pronta) { await p.close(); continue; } // nessuna mossa dopo questa chiamata (ultima dell'ondata): la prossima
     await p.waitForTimeout(300);
     const giu = async (dove) => { const x = await coperti(p); conto.stati++; if (x.muto) conto.muti++; else if (x.stretto) conto.stretti++;
-      if (x.xs.length) male.push(`${vp} ${ep} ${c.id} ${dove}: il riquadro radio copre ${x.xs.join(', ')} (D-255)`); };
+      if (x.xs.length) male.push(`${vp} ${ep} ${c.id} ${dove}: il riquadro radio copre ${x.xs.join(', ')} (D-255)`);
+      conto.scorreMax = Math.max(conto.scorreMax, x.ecc);
+      if (x.ecc > soglia) male.push(`${vp} ${ep} ${c.id} ${dove}: la risposta scorre di ${x.ecc} px (soglia ${soglia}, D-258)`);
+      if (ch.opzioni[0].costo) { conto.conCosto++; if (!x.costo) { conto.senzaCosto++; male.push(`${vp} ${ep} ${c.id} ${dove}: dopo «Conferma» il costo non si vede (D-258)`); } } };
     await giu('«puoi spostare»');
     for (const id of await p.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza))) {
       await p.locator(`.mappa [data-presenza="${id}"]`).click({ force: true }); await p.waitForTimeout(80);
@@ -112,7 +121,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
     }
     conto.episodi++; await p.close(); break;
   }
-  console.log(`radio della mossa ${vp}: ${conto.episodi} episodi, ${conto.stati} stati, rapporto al solo lettore in ${conto.stretti}, riquadro al solo lettore in ${conto.muti}`);
+  console.log(`radio della mossa ${vp}: ${conto.episodi} episodi, ${conto.stati} stati, rapporto al solo lettore in ${conto.stretti}, riquadro al solo lettore in ${conto.muti}; con costo ${conto.conCosto}, costo non visibile in ${conto.senzaCosto}; scorrimento massimo ${conto.scorreMax} px (soglia ${soglia})`);
   if (conto.episodi < 30) male.push(`${vp}: radio della mossa provata solo in ${conto.episodi} episodi (D-255)`);
   return { ris: conto, male };
 }

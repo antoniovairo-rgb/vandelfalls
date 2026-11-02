@@ -83,17 +83,18 @@ export async function controllaPo152a(browser, url, larghezza, rossi = [], carte
     await p.click(`[data-opzione="${c.opzione}"]`); await p.click('[data-conferma]').catch(() => {});
     if (!(await p.waitForSelector('[data-messaggio="risposta"]', { timeout: 8000 }).then(() => true).catch(() => false))) { male.push(`${dove}: dopo «Conferma» la risposta non arriva (PO-152 A)`); await p.close(); continue; }
     await p.waitForTimeout(300);
-    const radio = await p.evaluate((o) => { const e = document.querySelector(`[data-rapporto-costo="${o}"]`); if (!e || !e.getClientRects().length) return null;
+    // D-258: il rapporto visibile, nel riquadro sopra la mappa o (senza posto) nella risposta sotto; quello sotto non ha i controlli del riquadro
+    const radio = await p.evaluate((o) => { const e = [...document.querySelectorAll(`[data-rapporto-costo="${o}"]`)].find((x) => x.getClientRects().length && x.checkVisibility()); if (!e) return null;
       const r = (x) => x.getBoundingClientRect(), b = e.closest('[data-radio-mappa]') ?? e, rb = r(b), rm = b.closest('.mappa') ? r(b.closest('.mappa')) : null;
       const tocca = (q) => q.left < rb.right && q.right > rb.left && q.top < rb.bottom && q.bottom > rb.top;
       return { costo: e.querySelector('[data-costo]')?.textContent.trim() ?? '', quando: e.querySelector('[data-quando]')?.textContent.trim() ?? '', tagliato: b.scrollHeight > b.clientHeight + 1,
-        dentro: !!rm && rb.left >= rm.left - 0.5 && rb.right <= rm.right + 0.5 && rb.top >= rm.top - 0.5 && rb.bottom <= rm.bottom + 0.5, segni: [...document.querySelectorAll('[data-segno]')].filter((x) => tocca(r(x))).length }; }, c.opzione);
+        sotto: e.hasAttribute('data-sotto'), dentro: !!rm && rb.left >= rm.left - 0.5 && rb.right <= rm.right + 0.5 && rb.top >= rm.top - 0.5 && rb.bottom <= rm.bottom + 0.5, segni: [...document.querySelectorAll('[data-segno]')].filter((x) => tocca(r(x))).length }; }, c.opzione);
     if (!radio || !radio.costo) male.push(`${dove}: dopo «Conferma» nessun rapporto radio col costo di «${c.opzione}» (PO-152 A)`);
     else {
       if (/\d/.test(radio.costo)) male.push(`${dove}: il costo per radio contiene numeri («${radio.costo}», D-078)`);
       if (!radio.quando) male.push(`${dove}: «${c.opzione}» impegna unità ma il rapporto radio non dice quante (PO-152 A)`);
-      if (!radio.dentro || radio.tagliato) male.push(`${dove}: il rapporto radio ${radio.dentro ? 'è tagliato' : 'esce dalla mappa'} (PO-152 A)`);
-      if (radio.segni) male.push(`${dove}: il rapporto radio sta sotto ${radio.segni} segni ▲/▼ (PO-152 A)`);
+      if (radio.sotto) { /* nella risposta: niente controlli del riquadro */ } else if (!radio.dentro || radio.tagliato) male.push(`${dove}: il rapporto radio ${radio.dentro ? 'è tagliato' : 'esce dalla mappa'} (PO-152 A)`);
+      if (!radio.sotto && radio.segni) male.push(`${dove}: il rapporto radio sta sotto ${radio.segni} segni ▲/▼ (PO-152 A)`);
     }
     // il rapporto radio non allunga la risposta: scorrimento entro la soglia di sonda-altezze, o non più di senza rapporto
     const er = await ecc(p), senza = await p.evaluate(() => { const e = document.querySelector('[data-rapporto-costo]'); if (e) e.style.display = 'none'; const x = document.scrollingElement.scrollHeight - innerHeight; if (e) e.style.display = ''; return x; });

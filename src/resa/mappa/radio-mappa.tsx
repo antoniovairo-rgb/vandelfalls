@@ -5,9 +5,9 @@
 // D-255 punto 2 (idea B): con la mossa il riquadro copriva le unità e i settori da toccare (sonda a 360×640, prima chiamata
 // dei 36 episodi: 210 stati coperti). Con la mossa («evita») il riquadro resta nella sua fascia se è libera, altrimenti va
 // nella posizione libera più vicina (larghezza piena, poi mezza); con l'unità in mano («compatto») mostra solo
-// l'indicazione, il rapporto del costo è già stato letto; se anche prima di toccare il riquadro intero non trova posto
-// («stretto») resta solo l'indicazione e il rapporto passa al solo lettore di schermo; se non c'è posto neanche così
-// («muto») tutto il riquadro passa al solo lettore di schermo. I segni ▲/▼ contano come ostacoli (PO-152 A).
+// l'indicazione; se anche prima di toccare il riquadro intero non trova posto
+// («stretto») resta solo l'indicazione e il rapporto va nella risposta sotto la mappa (D-258, opzione B del PO; anche con
+// «compatto»); se non c'è posto neanche così («muto») l'indicazione passa al solo lettore di schermo. I segni ▲/▼ contano come ostacoli (PO-152 A).
 // Rosso C255R01: fascia fissa e rapporto sempre intero, come prima.
 import { useState, type ReactNode } from 'react';
 import { spento } from '../../interruttori.ts';
