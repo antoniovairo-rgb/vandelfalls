@@ -91,7 +91,7 @@ async function controllaAltro(p, atteso, dove, foto, conSalvataggio = true) {
 export async function homeRossaVista(build = 'dist') {
   const { servi } = await import('./foto.mjs'); const { chromium } = await import('playwright-core'); const { existsSync } = await import('node:fs');
   const srv = await servi(build), percorso = process.env.VALMORA_CHROME ?? (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
-  const browser = await chromium.launch({ executablePath: percorso });
+  const browser = (await import('./attese.mjs')).pazienza(await chromium.launch({ executablePath: percorso }));
   const visto = {};
   // D-230: col titolo più stretto C187C01 da solo non scorre più a 760 (cieco); con C230C01 sì (4 px)
   try { for (const r of ['C140H01', 'C187C01,C230C01', 'C224A01']) { const male = []; await controllaHomeA(browser, `http://127.0.0.1:${srv.address().port}/`, '', (c, ok) => { if (!ok) male.push(c); }, r.split(','), 360); visto[r] = male.length > 0; } }

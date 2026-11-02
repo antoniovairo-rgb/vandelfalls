@@ -8,6 +8,7 @@ import { createServer } from 'node:http';
 import { readFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, extname } from 'node:path';
 import { chromium } from 'playwright-core';
+import { pazienza } from './attese.mjs';
 import { leggiDati } from './dati-disco.mjs';
 import { pianoAttento } from './foto.mjs';
 
@@ -29,7 +30,7 @@ export async function giraC41(cartella = 'out/foto', build = 'dist', larghezze =
   mkdirSync(cartella, { recursive: true });
   const srv = await new Promise((ok) => { const s = createServer((q, r) => { const u = decodeURIComponent(q.url.split('?')[0]); const p = join(build, u === '/' ? 'index.html' : u);
     if (!existsSync(p)) { r.writeHead(404); return r.end(); } r.writeHead(200, { 'content-type': TIPI[extname(p)] ?? 'application/octet-stream' }); r.end(readFileSync(p)); }); s.listen(0, '127.0.0.1', () => ok(s)); });
-  const browser = await chromium.launch({ executablePath: process.env.VALMORA_CHROME ?? (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined) });
+  const browser = pazienza(await chromium.launch({ executablePath: process.env.VALMORA_CHROME ?? (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined) }));
   const stati = EPISODI_C41.map((id) => [id, salvataggioFallito(id)]), giri = [];
   try {
     for (const larghezza of larghezze) {

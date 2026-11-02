@@ -101,8 +101,10 @@ export const PASSI_LOGICA = {
     const m8 = structuredClone(d['missioni/e02.json']); m8.ondate[1].eventi[1].pressione = 4; m8.ondate[2].eventi[0].pressione = 5; // e02 prima di D-108
     const d8 = { 'stato.json': d['stato.json'], 'missioni/e01.json': d['missioni/e01.json'], 'missioni/e02.json': m8, 'missioni/e03.json': d['missioni/e03.json'] };
     if (!controllaDifficolta(giraBot(d8, 1000), d8).length) ciechi.push('bot/difficoltà della stagione 1 è cieco');
-    // D-154: e21 prima della ritaratura (faida in ondata 2 a 4) scende sotto e20 di più di un punto nella stagione 2
-    const m9 = structuredClone(d['missioni/e21.json']); for (const e of m9.ondate[1].eventi) if (e.id.startsWith('faida_')) e.pressione -= 1;
+    // D-154: e21 resa più facile (faida in ondata 2 abbassata) scende sotto e20 di più di un punto nella stagione 2.
+    // D-247-T: coi morsi vari di e20/e21 la faida a −1 dava e21 71,3% contro e20 72,3% (dentro la tolleranza: braccio cieco,
+    // CI 1576d81); a −2 e21 65,1% contro 72,3% (sulla principale 9f32eea8: 61,8% contro 69,0%). La soglia non cambia.
+    const m9 = structuredClone(d['missioni/e21.json']); for (const e of m9.ondate[1].eventi) if (e.id.startsWith('faida_')) e.pressione -= 2;
     const d9 = { 'stato.json': d['stato.json'], 'missioni/e20.json': d['missioni/e20.json'], 'missioni/e21.json': m9 };
     if (!controllaDifficolta(giraBot(d9, 1000), d9, 2).length) ciechi.push('bot/difficoltà delle stagioni 2-3 è cieco');
     // D-162: stagione 3 resa più facile della 2 (quote vere, stagione 3 ridotta di 10 punti) → segnalata

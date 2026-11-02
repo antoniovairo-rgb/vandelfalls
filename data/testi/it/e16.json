@@ -129,8 +129,8 @@
   "e16.op.ringrazia16.c": "Lavezzari parla coi capi: la curva Kiln si calma un po'.",
   "e16.op.ringrazia16.r": "«Ci mancherebbe, siamo qui per questo.» Lavezzari è sempre gentile. Sempre.",
   "e16.ch.lavezzari_curva.vice": "«Appena salutato. Nella curva dove il binocolo non lo trova. Interessante.»",
-  "e16.dopo.magazzino_sette.niente_pista": "Magazzino sette: due furgoni in pieno ingresso. Il comando chiede perché la pista è stata lasciata.",
-  "e16.dopo.annunci16.oscura": "Annunci oscurati: chi aveva pagato i biglietti a metà prezzo se la prende col comando, in rete.",
+  "e16.dopo.magazzino_sette.niente_pista": "Al magazzino sette due furgoni entrano ed escono in pieno ingresso. Al cancello c'è tensione.",
+  "e16.dopo.annunci16.oscura": "Chi aveva pagato i biglietti a metà prezzo è arrivato in curva ospiti senza posto.",
   "e16.dopo.lavezzari_curva.ringrazia16": "Lavezzari racconta in giro che la curva l'ha calmata lui, «su richiesta». Il comando non gradisce.",
   "e16.dopo.fari_spenti.lascia_andare": "Il furgone lasciato andare a fari spenti: il comando legge l'ora nel rapporto e chiede perché."
 }

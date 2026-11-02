@@ -162,7 +162,7 @@
             },
             {
               "id": "silenzio10",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e10.dopo.foto_cerchiate.silenzio10"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "strada_cinderwick", "valore": 1}], "rapporto": "testi:e10.dopo.foto_cerchiate.silenzio10"},
               "testo": "testi:e10.op.silenzio10",
               "costo": "testi:e10.op.silenzio10.c",
               "effetti": [
@@ -351,7 +351,7 @@
             },
             {
               "id": "lascia_coreografie",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e10.dopo.due_coreografie.lascia_coreografie"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"riserva": "squadre", "valore": -1}], "rapporto": "testi:e10.dopo.due_coreografie.lascia_coreografie"},
               "testo": "testi:e10.op.lascia_coreografie",
               "costo": "testi:e10.op.lascia_coreografie.c",
               "effetti": [
@@ -687,7 +687,7 @@
             },
             {
               "id": "steward_scavalca",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e10.dopo.scavalca.steward_scavalca"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "curva_larkspire", "valore": 1}], "rapporto": "testi:e10.dopo.scavalca.steward_scavalca"},
               "testo": "testi:e10.op.steward_scavalca",
               "costo": "testi:e10.op.steward_scavalca.c",
               "effetti": [

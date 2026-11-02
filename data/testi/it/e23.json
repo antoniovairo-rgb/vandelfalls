@@ -129,8 +129,8 @@
   "e23.op.aiuto_lavezzari23.c": "Lavezzari parla coi capi: la curva Kiln si calma un po'.",
   "e23.op.aiuto_lavezzari23.r": "«Subito.» Lavezzari scende in curva, stringe mani, sorride. La curva si siede.",
   "e23.ch.lavezzari_porto.vice": "«Due ore fa non sapeva cosa voleva dire il saluto. Ora garantisce da dove arriva.»",
-  "e23.dopo.traghetto_extra.annota23": "Traghetto extra confermato: i camion dei traslochi sono già al casello, fra i pullman.",
+  "e23.dopo.traghetto_extra.annota23": "Traghetto extra confermato e annotato soltanto: in comune chiedono perché il porto lo sa da te.",
   "e23.dopo.sirena.lascia_sirena": "La sirena da nave è finita negli esposti dei residenti. Il comune chiede spiegazioni.",
-  "e23.dopo.non_affar_suo.obbedisci": "Il camion dei traslochi è passato dal casello fra i pullman. Il comando lo legge sul giornale.",
-  "e23.dopo.imbarco.chiama_porto": "La richiesta al porto è arrivata in comune: «fuori dalla sua competenza». Richiamo scritto."
+  "e23.dopo.non_affar_suo.obbedisci": "Allo stadio, come chiesto dal comune. Ma sul piazzale si racconta che il porto è stato lasciato.",
+  "e23.dopo.imbarco.chiama_porto": "Il porto controlla il camion e ferma l'imbarco: al casello i pullman restano in coda."
 }

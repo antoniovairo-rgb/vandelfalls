@@ -144,8 +144,8 @@
   "e31.op.testimone_firma": "Rispondi che il testimone ha già firmato",
   "e31.op.testimone_firma.c": "Il fascicolo regge da solo: guadagni fiducia, senza muovere nessuno.",
   "e31.op.testimone_firma.r": "Silenzio dalla segreteria. Il testimone protetto vale più di una cartella.",
-  "e31.dopo.comando_vuole.copia_prima": "Il comando aspetta ancora la copia dell'indice. Telefona in tribuna, davanti a tutti.",
-  "e31.dopo.costruttore_saluta.manda_vice": "Varrone non ha gradito il vice: in comune si dice che l'hai snobbato. Telefonata in arrivo.",
+  "e31.dopo.comando_vuole.copia_prima": "Il comando aspetta ancora la copia dell'indice e telefona in tribuna, davanti a tutti.",
+  "e31.dopo.costruttore_saluta.manda_vice": "Varrone non ha gradito il vice e chiede «protezione» per i suoi ospiti: una squadra è in tribuna.",
   "e31.dopo.cronista_cartella.dai_cronista": "La notizia del fascicolo è in rete prima del fischio. Il comando la legge lì, e chiama.",
-  "e31.dopo.segreteria_chiede.rifiuta_segreteria": "Segreteria a mani vuote: in comune qualcuno racconta che «il responsabile nasconde le carte»."
+  "e31.dopo.segreteria_chiede.rifiuta_segreteria": "Segreteria a mani vuote: chi voleva il fascicolo manda gente in tribuna a chiederlo di persona."
 }

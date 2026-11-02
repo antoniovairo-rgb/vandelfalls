@@ -189,7 +189,7 @@
             },
             {
               "id": "libero20",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e20.dopo.viso_scoperto.libero20"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "strada_cinderwick", "valore": 1}], "rapporto": "testi:e20.dopo.viso_scoperto.libero20"},
               "testo": "testi:e20.op.libero20",
               "costo": "testi:e20.op.libero20.c",
               "effetti": [
@@ -371,7 +371,7 @@
             },
             {
               "id": "pausa20",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e20.dopo.fumo_arancio.pausa20"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "curva_cinderwick", "valore": 1}], "rapporto": "testi:e20.dopo.fumo_arancio.pausa20"},
               "testo": "testi:e20.op.pausa20",
               "costo": "testi:e20.op.pausa20.c",
               "effetti": [
@@ -723,7 +723,7 @@
             },
             {
               "id": "silenzio20",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e20.dopo.lo_avete_preso.silenzio20"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -2}], "rapporto": "testi:e20.dopo.lo_avete_preso.silenzio20"},
               "testo": "testi:e20.op.silenzio20",
               "costo": "testi:e20.op.silenzio20.c",
               "effetti": [

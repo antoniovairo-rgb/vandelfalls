@@ -156,7 +156,7 @@
             },
             {
               "id": "lascia_vendere14",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e14.dopo.doppioni.lascia_vendere14"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "biglietteria", "valore": 1}], "rapporto": "testi:e14.dopo.doppioni.lascia_vendere14"},
               "testo": "testi:e14.op.lascia_vendere14",
               "costo": "testi:e14.op.lascia_vendere14.c",
               "effetti": [
@@ -350,7 +350,7 @@
           "opzioni": [
             {
               "id": "in_piedi",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e14.dopo.seduti.in_piedi"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "curva_larkspire", "valore": 1}], "rapporto": "testi:e14.dopo.seduti.in_piedi"},
               "testo": "testi:e14.op.in_piedi",
               "costo": "testi:e14.op.in_piedi.c",
               "effetti": [

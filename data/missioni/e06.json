@@ -195,7 +195,7 @@
           "opzioni": [
             {
               "id": "chiama_impresa",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e06.dopo.sponsor.chiama_impresa"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "piazza_concerto", "valore": 1}], "rapporto": "testi:e06.dopo.sponsor.chiama_impresa"},
               "testo": "testi:e06.op.chiama_impresa",
               "costo": "testi:e06.op.chiama_impresa.c",
               "effetti": [
@@ -438,7 +438,7 @@
             },
             {
               "id": "lascia_cantante",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e06.dopo.saluto_cantante.lascia_cantante"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "curva_cinderwick", "valore": 1}], "rapporto": "testi:e06.dopo.saluto_cantante.lascia_cantante"},
               "testo": "testi:e06.op.lascia_cantante",
               "costo": "testi:e06.op.lascia_cantante.c",
               "effetti": [

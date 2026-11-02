@@ -129,8 +129,8 @@
   "e35.verbale_contenuto": "Una rapina, tre ingressi, nessuna città svegliata male. Ostaggi a casa, corso riaperto all'alba, e carte che portano tutte alla Varrone & Figli. Malvasi scrive sul fascicolo: «Fine».",
   "e35.verbale_a_fatica": "Una notte lunga davvero: nastro, corso bloccato, stazione, porto. Ostaggi fuori tutti; le carte, quasi tutte. Malvasi: «Quasi è la nostra parola».",
   "e35.verbale_degenerato": "La notte ci è scappata di mano. Gli ostaggi stanno bene. La rapina ha fatto il suo lavoro.",
-  "e35.dopo.corso_chiuso.radio_centro": "L'annuncio alle radio ha allarmato la città: il centralino del comune è intasato. Il comune chiama.",
-  "e35.dopo.familiari.rimanda_comando": "I familiari rimandati al comando ci sono andati davvero. Il comando chiama te.",
-  "e35.dopo.treno_notte.ignora_treno": "Il posto a nome della ditta è diventato dieci. Il comando chiede perché non hai controllato.",
-  "e35.dopo.rapporto_notte.un_imprenditore": "«Un imprenditore»: in rete il nome intero gira lo stesso. La stampa parla di protezione."
+  "e35.dopo.corso_chiuso.radio_centro": "L'annuncio alle radio ha allarmato la città: sul corso arrivano i familiari, di corsa.",
+  "e35.dopo.familiari.rimanda_comando": "I familiari rimandati al comando ci sono andati: una squadra resta lì con loro fino all'alba.",
+  "e35.dopo.treno_notte.ignora_treno": "Dieci posti a nome della ditta: uomini del cantiere in stazione.",
+  "e35.dopo.rapporto_notte.un_imprenditore": "Il nome intero gira lo stesso."
 }

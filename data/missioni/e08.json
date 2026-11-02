@@ -246,7 +246,7 @@
           "opzioni": [
             {
               "id": "gruppo_si",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e08.dopo.quello_la.gruppo_si"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "piazzale", "valore": 1}], "rapporto": "testi:e08.dopo.quello_la.gruppo_si"},
               "testo": "testi:e08.op.gruppo_si",
               "costo": "testi:e08.op.gruppo_si.c",
               "effetti": [
@@ -423,7 +423,7 @@
             },
             {
               "id": "lascia_nome",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e08.dopo.striscione_nome.lascia_nome"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "curva_cinderwick", "valore": 1}], "rapporto": "testi:e08.dopo.striscione_nome.lascia_nome"},
               "testo": "testi:e08.op.lascia_nome",
               "costo": "testi:e08.op.lascia_nome.c",
               "effetti": [

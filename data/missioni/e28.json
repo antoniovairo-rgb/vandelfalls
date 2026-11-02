@@ -174,7 +174,7 @@
             },
             {
               "id": "ignora_anonimo",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e28.dopo.voce_magazzino.ignora_anonimo"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "magazzino_fonderie", "valore": 3}], "rapporto": "testi:e28.dopo.voce_magazzino.ignora_anonimo"},
               "testo": "testi:e28.op.ignora_anonimo",
               "costo": "testi:e28.op.ignora_anonimo.c",
               "effetti": [],
@@ -541,7 +541,7 @@
           "opzioni": [
             {
               "id": "smentisci",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e28.dopo.cronista_voci.smentisci"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "strada_cinderwick", "valore": 2}], "rapporto": "testi:e28.dopo.cronista_voci.smentisci"},
               "testo": "testi:e28.op.smentisci",
               "costo": "testi:e28.op.smentisci.c",
               "effetti": [],
@@ -647,7 +647,7 @@
           "id": "deflusso_casa",
           "tipo": "corteo",
           "settore": "strada_cinderwick",
-          "pressione": 4
+          "pressione": 3
         },
         {
           "id": "ospiti_auto",
@@ -743,7 +743,7 @@
             },
             {
               "id": "fonti_protette",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e28.dopo.rapporto_comando.fonti_protette"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -2}], "rapporto": "testi:e28.dopo.rapporto_comando.fonti_protette"},
               "testo": "testi:e28.op.fonti_protette",
               "costo": "testi:e28.op.fonti_protette.c",
               "effetti": [],

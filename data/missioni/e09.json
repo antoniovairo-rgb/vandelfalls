@@ -182,7 +182,7 @@
             },
             {
               "id": "uno_dei_dodici",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e09.dopo.furgone_coinvolto.uno_dei_dodici"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "tangenziale", "valore": 1}], "rapporto": "testi:e09.dopo.furgone_coinvolto.uno_dei_dodici"},
               "testo": "testi:e09.op.uno_dei_dodici",
               "costo": "testi:e09.op.uno_dei_dodici.c",
               "effetti": [],
@@ -505,7 +505,7 @@
             },
             {
               "id": "lascia_torce9",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e09.dopo.torce9.lascia_torce9"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"riserva": "squadre", "valore": -1}], "rapporto": "testi:e09.dopo.torce9.lascia_torce9"},
               "testo": "testi:e09.op.lascia_torce9",
               "costo": "testi:e09.op.lascia_torce9.c",
               "effetti": [
@@ -565,7 +565,7 @@
             },
             {
               "id": "ignora_foto",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e09.dopo.due_furgoni.ignora_foto"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "piazzale", "valore": 1}], "rapporto": "testi:e09.dopo.due_furgoni.ignora_foto"},
               "testo": "testi:e09.op.ignora_foto",
               "costo": "testi:e09.op.ignora_foto.c",
               "effetti": [],

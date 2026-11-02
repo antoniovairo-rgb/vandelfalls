@@ -393,4 +393,6 @@
 //   Nella stessa versione il bilanciamento della varietà (D-252): 951 risposte di carte e varianti misurate, oltre soglia 348 → 0 a
 //   360×640 (max 108 → 66), 241 → 0 a 375×667, 61 → 0 a 412×760; D-108 col seme 7 coppie rosse → 0; e24 «contenuto» raggiungibile
 //   (1 su 1000, casuale). Guardiani: parte «risposte» di sonda-altezze (rosso C193R01) e passo bot col seme (rosso C252B01).
+//   Anche i morsi vari (D-247/D-253): 3-4 tipi di effetto per episodio, chiusure senza scorrimento, la comoda non domina più (1,19★ e
+//   7,3% fallite contro 1,24★ e 13,9%); guardiano pocoVari e rosso C253C01. In tutto: SAVE_VERSION 4, bot 0 blocchi su 86.400.
 export const GAME_VERSION = '0.59.0';

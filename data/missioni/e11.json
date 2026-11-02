@@ -201,7 +201,7 @@
           "opzioni": [
             {
               "id": "pattuglia_fissa",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e11.dopo.pattuglia.pattuglia_fissa"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "quartiere", "valore": 3}], "rapporto": "testi:e11.dopo.pattuglia.pattuglia_fissa"},
               "testo": "testi:e11.op.pattuglia_fissa",
               "costo": "testi:e11.op.pattuglia_fissa.c",
               "effetti": [
@@ -339,7 +339,7 @@
           "id": "fonderie11b",
           "tipo": "assembramento",
           "settore": "piazza_fonderie",
-          "pressione": 4
+          "pressione": 3
         },
         {
           "id": "strada11",
@@ -443,7 +443,7 @@
             },
             {
               "id": "allontana_curiosi",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e11.dopo.dirette.allontana_curiosi"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "strada_cinderwick", "valore": 3}], "rapporto": "testi:e11.dopo.dirette.allontana_curiosi"},
               "testo": "testi:e11.op.allontana_curiosi",
               "costo": "testi:e11.op.allontana_curiosi.c",
               "effetti": [
@@ -472,7 +472,7 @@
           "id": "fiamme11c",
           "tipo": "incendio",
           "settore": "strada_cinderwick",
-          "pressione": 4
+          "pressione": 3
         },
         {
           "id": "fonderie11c",
@@ -491,7 +491,7 @@
           "opzioni": [
             {
               "id": "posti_blocco",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e11.dopo.non_di_qui.posti_blocco"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -2}], "rapporto": "testi:e11.dopo.non_di_qui.posti_blocco"},
               "testo": "testi:e11.op.posti_blocco",
               "costo": "testi:e11.op.posti_blocco.c",
               "effetti": [
@@ -587,7 +587,7 @@
           "opzioni": [
             {
               "id": "paga_comune",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e11.dopo.chi_paga.paga_comune"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -2}], "rapporto": "testi:e11.dopo.chi_paga.paga_comune"},
               "testo": "testi:e11.op.paga_comune",
               "costo": "testi:e11.op.paga_comune.c",
               "effetti": [

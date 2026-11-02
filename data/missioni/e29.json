@@ -133,7 +133,7 @@
           "id": "piazzale_attesa",
           "tipo": "folla",
           "settore": "piazzale",
-          "pressione": 2
+          "pressione": 1
         },
         {
           "id": "porto_quiete",
@@ -184,7 +184,7 @@
             },
             {
               "id": "silenzio",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e29.dopo.foto_vecchie.silenzio"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "piazzale", "valore": 3}], "rapporto": "testi:e29.dopo.foto_vecchie.silenzio"},
               "testo": "testi:e29.op.silenzio",
               "costo": "testi:e29.op.silenzio.c",
               "effetti": [
@@ -680,7 +680,7 @@
           "opzioni": [
             {
               "id": "sospendi_partita",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e29.dopo.notizia_in_curva.sospendi_partita"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "curva_cinderwick", "valore": 3}], "rapporto": "testi:e29.dopo.notizia_in_curva.sospendi_partita"},
               "testo": "testi:e29.op.sospendi_partita",
               "costo": "testi:e29.op.sospendi_partita.c",
               "effetti": [
@@ -902,7 +902,7 @@
             },
             {
               "id": "in_fondo",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e29.dopo.conferenza.in_fondo"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -2}], "rapporto": "testi:e29.dopo.conferenza.in_fondo"},
               "testo": "testi:e29.op.in_fondo",
               "costo": "testi:e29.op.in_fondo.c",
               "effetti": [],

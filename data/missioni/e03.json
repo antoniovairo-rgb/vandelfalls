@@ -398,7 +398,7 @@
             },
             {
               "id": "lascia_laser",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e03.dopo.laser.lascia_laser"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"riserva": "squadre", "valore": -1}], "rapporto": "testi:e03.dopo.laser.lascia_laser"},
               "testo": "testi:e03.op.lascia_laser",
               "costo": "testi:e03.op.lascia_laser.c",
               "risposta": "testi:e03.op.lascia_laser.r",
@@ -591,7 +591,7 @@
             },
             {
               "id": "tieni_duro",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e03.dopo.supplementari.tieni_duro"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "quartiere", "valore": 1}], "rapporto": "testi:e03.dopo.supplementari.tieni_duro"},
               "testo": "testi:e03.op.tieni_duro",
               "costo": "testi:e03.op.tieni_duro.c",
               "risposta": "testi:e03.op.tieni_duro.r",
@@ -886,7 +886,7 @@
             },
             {
               "id": "niente_commento",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e03.dopo.troupe_notte.niente_commento"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -2}], "rapporto": "testi:e03.dopo.troupe_notte.niente_commento"},
               "testo": "testi:e03.op.niente_commento",
               "costo": "testi:e03.op.niente_commento.c",
               "risposta": "testi:e03.op.niente_commento.r",

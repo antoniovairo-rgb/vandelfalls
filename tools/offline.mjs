@@ -10,6 +10,7 @@ import { createServer } from 'node:http';
 import { readFileSync, existsSync } from 'node:fs';
 import { join, extname, resolve } from 'node:path';
 import { chromium } from 'playwright-core';
+import { pazienza } from './attese.mjs';
 
 const TIPI = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.woff': 'font/woff', '.webmanifest': 'application/manifest+json' };
 
@@ -28,7 +29,7 @@ export async function giraOffline(build = 'dist', rossi = (process.env.VALMORA_R
   await new Promise((ok) => srv.listen(0, '127.0.0.1', ok));
   const URL = `http://localhost:${srv.address().port}/`;
   const percorso = process.env.VALMORA_CHROME ?? (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
-  const browser = await chromium.launch({ executablePath: percorso });
+  const browser = pazienza(await chromium.launch({ executablePath: percorso }));
   const problemi = [];
   const atteso = (cosa, ok) => { if (!ok) problemi.push(`offline: ${cosa}`); };
   const scena = (p, n) => p.waitForFunction((n) => { const s = document.querySelectorAll('.scena'); return s.length === 1 && s[0].dataset.scena === n && getComputedStyle(s[0]).opacity === '1'; }, n, { timeout: 8000 });

@@ -150,7 +150,7 @@
           "opzioni": [
             {
               "id": "impegno_firmato",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e05.dopo.sindacato.impegno_firmato"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "tornelli", "valore": 2}], "rapporto": "testi:e05.dopo.sindacato.impegno_firmato"},
               "testo": "testi:e05.op.impegno_firmato",
               "costo": "testi:e05.op.impegno_firmato.c",
               "effetti": [
@@ -367,7 +367,7 @@
           "opzioni": [
             {
               "id": "lascia_megafono",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e05.dopo.megafono.lascia_megafono"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "tornelli", "valore": 2}], "rapporto": "testi:e05.dopo.megafono.lascia_megafono"},
               "testo": "testi:e05.op.lascia_megafono",
               "costo": "testi:e05.op.lascia_megafono.c",
               "effetti": [
@@ -506,7 +506,7 @@
           "id": "cori_ospiti5b",
           "tipo": "curva",
           "settore": "curva_ospiti",
-          "pressione": 3
+          "pressione": 2
         },
         {
           "id": "piazzale5",
@@ -536,7 +536,7 @@
             },
             {
               "id": "silenzio_rete",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e05.dopo.coro_steward.silenzio_rete"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -2}], "rapporto": "testi:e05.dopo.coro_steward.silenzio_rete"},
               "testo": "testi:e05.op.silenzio_rete",
               "costo": "testi:e05.op.silenzio_rete.c",
               "effetti": [
@@ -712,7 +712,7 @@
             },
             {
               "id": "incontro_no",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e05.dopo.domattina.incontro_no"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -2}], "rapporto": "testi:e05.dopo.domattina.incontro_no"},
               "testo": "testi:e05.op.incontro_no",
               "costo": "testi:e05.op.incontro_no.c",
               "effetti": [

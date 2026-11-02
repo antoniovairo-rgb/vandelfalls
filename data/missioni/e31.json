@@ -234,7 +234,7 @@
             },
             {
               "id": "copia_prima",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e31.dopo.comando_vuole.copia_prima"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "tribuna_autorita", "valore": 1}], "rapporto": "testi:e31.dopo.comando_vuole.copia_prima"},
               "testo": "testi:e31.op.copia_prima",
               "costo": "testi:e31.op.copia_prima.c",
               "effetti": [],
@@ -308,7 +308,7 @@
           "id": "cori_casa",
           "tipo": "folla",
           "settore": "piazzale",
-          "pressione": 4
+          "pressione": 3
         },
         {
           "id": "cori_ospiti",
@@ -349,7 +349,7 @@
             },
             {
               "id": "manda_vice",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e31.dopo.costruttore_saluta.manda_vice"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"riserva": "squadre", "valore": -2}], "rapporto": "testi:e31.dopo.costruttore_saluta.manda_vice"},
               "testo": "testi:e31.op.manda_vice",
               "costo": "testi:e31.op.manda_vice.c",
               "effetti": [
@@ -519,7 +519,7 @@
           "opzioni": [
             {
               "id": "dai_cronista",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e31.dopo.cronista_cartella.dai_cronista"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -2}], "rapporto": "testi:e31.dopo.cronista_cartella.dai_cronista"},
               "testo": "testi:e31.op.dai_cronista",
               "costo": "testi:e31.op.dai_cronista.c",
               "effetti": [
@@ -692,7 +692,7 @@
           "opzioni": [
             {
               "id": "rifiuta_segreteria",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e31.dopo.segreteria_chiede.rifiuta_segreteria"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "tribuna_autorita", "valore": 3}], "rapporto": "testi:e31.dopo.segreteria_chiede.rifiuta_segreteria"},
               "testo": "testi:e31.op.rifiuta_segreteria",
               "costo": "testi:e31.op.rifiuta_segreteria.c",
               "effetti": [],

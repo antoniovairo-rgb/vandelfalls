@@ -221,7 +221,7 @@
             },
             {
               "id": "annota23",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "casello", "valore": 2}], "rapporto": "testi:e23.dopo.traghetto_extra.annota23"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e23.dopo.traghetto_extra.annota23"},
               "testo": "testi:e23.op.annota23",
               "costo": "testi:e23.op.annota23.c",
               "effetti": [],
@@ -623,7 +623,7 @@
           "opzioni": [
             {
               "id": "obbedisci",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e23.dopo.non_affar_suo.obbedisci"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "piazzale", "valore": 1}], "rapporto": "testi:e23.dopo.non_affar_suo.obbedisci"},
               "testo": "testi:e23.op.obbedisci",
               "costo": "testi:e23.op.obbedisci.c",
               "effetti": [
@@ -690,7 +690,7 @@
           "opzioni": [
             {
               "id": "chiama_porto",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e23.dopo.imbarco.chiama_porto"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "casello", "valore": 1}], "rapporto": "testi:e23.dopo.imbarco.chiama_porto"},
               "testo": "testi:e23.op.chiama_porto",
               "costo": "testi:e23.op.chiama_porto.c",
               "effetti": [

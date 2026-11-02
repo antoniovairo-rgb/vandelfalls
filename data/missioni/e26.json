@@ -129,7 +129,7 @@
           "id": "pullman",
           "tipo": "arrivo",
           "settore": "parcheggi",
-          "pressione": 4
+          "pressione": 3
         },
         {
           "id": "auto_blu",
@@ -170,7 +170,7 @@
             },
             {
               "id": "lascia_parcheggiare",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e26.dopo.pullman_sparsi.lascia_parcheggiare"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"pressione": "parcheggi", "valore": 2}], "rapporto": "testi:e26.dopo.pullman_sparsi.lascia_parcheggiare"},
               "testo": "testi:e26.op.lascia_parcheggiare",
               "costo": "testi:e26.op.lascia_parcheggiare.c",
               "effetti": [
@@ -310,7 +310,7 @@
           "opzioni": [
             {
               "id": "steward_fumogeni",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e26.dopo.fumogeni_finale.steward_fumogeni"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"riserva": "squadre", "valore": -2}], "rapporto": "testi:e26.dopo.fumogeni_finale.steward_fumogeni"},
               "testo": "testi:e26.op.steward_fumogeni",
               "costo": "testi:e26.op.steward_fumogeni.c",
               "effetti": [
@@ -721,7 +721,7 @@
             },
             {
               "id": "niente_foto",
-              "effetti_dopo": {"ondate": 1, "effetti": [{"aggiungi": "credito", "valore": -1}], "rapporto": "testi:e26.dopo.foto_coppa.niente_foto"},
+              "effetti_dopo": {"ondate": 1, "effetti": [{"tensione": "tribuna_autorita", "valore": 1}], "rapporto": "testi:e26.dopo.foto_coppa.niente_foto"},
               "testo": "testi:e26.op.niente_foto",
               "costo": "testi:e26.op.niente_foto.c",
               "effetti": [],
