@@ -42,8 +42,8 @@ export function Testata(p: { numero: string; etichetta: string; titolo: ReactNod
       <div className="testata-n" aria-hidden="true">{p.numero}</div>
       <div className="testata-t"><small>{p.etichetta}</small><h1>{p.titolo}</h1>{p.info && <InfoOndata key={p.info} testo={p.info} />}</div>
       {p.home && <TastoHome vai={p.home} />}
-      {/* D-261: nella risposta con la mossa «Home» di riserva, al suo posto ma invisibile finché la mappa abbassata non la
-          manda qui (.mappa[data-casa-fuori], adatta.ts): solo CSS, la testata non cambia altezza */}
+      {/* D-261: nella risposta con la mossa «Home» di riserva, nascosta finché la mappa abbassata non la manda qui
+          (.mappa[data-casa-fuori], adatta.ts): solo CSS, niente stato (con lo stato le «Home» visibili erano 0 o 2) */}
       {!p.home && p.casaRiserva && <span className="casa-riserva"><TastoHome vai={p.casaRiserva} riserva /></span>}
     </header>
   );

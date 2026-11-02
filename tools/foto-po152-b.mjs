@@ -117,7 +117,10 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
     const pronta = ok && await p.waitForSelector('.mappa [data-mossa="puoi"]', { timeout: 15000, state: 'attached' }).then(() => true).catch(() => false);
     if (!pronta) { await p.close(); continue; } // nessuna mossa dopo questa chiamata (ultima dell'ondata): la prossima
     await p.waitForTimeout(300);
-    const giu = async (dove) => { const x = await coperti(p); conto.stati++; if (x.muto) conto.muti++; else if (x.stretto) conto.stretti++;
+    // la pagina ferma: la mappa che si abbassa (D-259) e i nomi si ridispongono dopo il tocco; due letture uguali a 100 ms, al più 3 s
+    // (e30 raduno_silenzio a 375: 79 px a 80 ms, 0 a 250 ms)
+    const ferma = async () => { let prima = ''; for (let i = 0; i < 30; i++) { const ora = await p.evaluate(() => `${document.scrollingElement.scrollHeight}|${document.querySelector('.mappa')?.getBoundingClientRect().height}|${document.querySelector('.radio-mappa')?.className}`); if (ora === prima) return; prima = ora; await p.waitForTimeout(100); } };
+    const giu = async (dove) => { await ferma(); const x = await coperti(p); conto.stati++; if (x.muto) conto.muti++; else if (x.stretto) conto.stretti++;
       if (x.xs.length) male.push(`${vp} ${ep} ${c.id} ${dove}: il riquadro radio copre ${x.xs.join(', ')} (D-255)`);
       conto.scorreMax = Math.max(conto.scorreMax, x.ecc);
       if (x.fuori) conto.casaFuori++;

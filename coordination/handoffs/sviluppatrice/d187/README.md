@@ -974,3 +974,46 @@ COSTO, inviato alla principale per una scelta del PO: negli stati «stretto» il
 - C: il riquadro copre i bersagli finché il giocatore non tocca un'unità.
 
 Non verificato: chiamate oltre la prima con mossa di ogni episodio; telefono reale.
+
+### D-258, D-259 e D-261: il costo si vede sempre, la mappa della risposta si abbassa, «Home» nella testata — S-11, 2/11
+
+Scelte del PO e della principale. D-258 è l'opzione B: il costo va sotto la mappa. D-259 è l'opzione 1: la mappa si abbassa. D-261 allarga la deroga a ogni risposta con la mossa e porta «Home» nella testata.
+- **Costo sotto la mappa** (`Ondata.tsx`, `RapportoCosto sotto`). Nella risposta c'è una copia del rapporto del costo. Si vede solo quando il riquadro della mossa non lo mostra («compatto», «stretto», «muto»), e lì il rapporto del riquadro si nasconde: il lettore di schermo non lo legge due volte. Rosso C258S01.
+- **Mappa più bassa** (`adatta.ts`, deroga a D-197). In ogni risposta con la mossa, anche dopo la mossa, se la pagina scorre la mappa si abbassa fino a `--mappa-altezza-min` (200 px; si tocca ancora). Rosso C259A01.
+- **«Home» nella testata.** Con la deroga, se la mappa abbassata porterebbe «Home» sopra un settore, «Home» passa nella testata. Nella testata c'è una «Home» di riserva, mostrata solo dal CSS con `.mappa[data-casa-fuori]`. Prima l'avevo comandata con uno stato di React, e le «Home» visibili erano 0 per 1,25 s, poi 2 (e35 imp_tram_chiuso). Poi la riserva era invisibile ma occupava posto: la testata si alzava fino a 102 px ed e13 viale_pieno scorreva 82 px. Ora è `display: none` e l'attributo resta durante la misura. Rosso C261H01.
+- **Evidenziazione** (punto 4). Con la mossa, unità e settori toccabili hanno un bordo magenta tratteggiato, l'unità in mano un bordo pieno. Tutto da token. Rosso C261E01 (CSS).
+
+FATTO MISURATO (`tools/foto-po152-b.mjs`, `controllaRadio`; prima chiamata con mossa dei 36 episodi, 277 stati per finestra con «puoi», «dove» e «mossa fatta»). Il guardiano controlla:
+- il costo è visibile;
+- nessun bersaglio è coperto;
+- la risposta resta entro `SOGLIE[vp].risposta`, 0 se manca;
+- c'è una sola «Home» visibile;
+- i bersagli hanno il bordo;
+- ogni unità spostabile per la logica è toccabile.
+
+| Finestra | Esito | Mappa con costo sotto | Riquadro al solo lettore | Scorrimento massimo (soglia) | «Home» nella testata |
+|---|---|---|---|---|---|
+| 360×640 | verde | 239 stati, da 200 a 235 px | 118 | 58 px (68) | 14 |
+| 375×667 | verde | 240 stati, da 200 a 281 px | 73 | 8 px (56) | 6 |
+| 412×760 | verde | 219 stati, da 320 a 380 px | 2 | 0 px (0) | 0 |
+
+Bracci rossi a 360×640:
+- C255R01: 231 problemi;
+- C258S01: 236 problemi (costo non visibile in 236 stati: è il «prima» della richiesta);
+- C259A01: 234 problemi (fino a 210 px);
+- C261E01: 246 problemi;
+- C261H01: 6 problemi (e35 perimetro, 80 px).
+
+I bracci C255R01, C258S01, C259A01 e C261E01 sono stati misurati prima dell'ultimo ritocco di «Home», ma sono indipendenti da quel ritocco; i bracci della catena li rifanno.
+
+Punto 5, gli stati provati che erano 240 invece di 241. È stato misurato con il dettaglio per episodio confrontato col rosso C259A01.
+- Nel riquadro «muto» l'indicazione è un elemento 1×1 px ritagliato. `waitForSelector` di Playwright lo considera invisibile e scade dopo 15 s.
+- Il guardiano allora passava alla chiamata dopo, con meno stati. È successo in 10 episodi (es. e01 corteo_partito → ufficio_insiste).
+- Correzione: si aspetta l'elemento presente (`state: 'attached'`).
+
+Strumento: e30 raduno_silenzio a 375×667 era misurato a 80 ms dal tocco, quando scorreva 79 px; a 250 ms scorre 0 px. Ora il guardiano aspetta la pagina ferma: due letture uguali a 100 ms di distanza, al massimo 3 s.
+
+Foto in `d261/dopo` e `d261/rosso-C261E01`:
+- e01 «muto» a 360, 375 e 412;
+- e13 con il costo sotto a 360;
+- e35 con «Home» nella testata a 360.

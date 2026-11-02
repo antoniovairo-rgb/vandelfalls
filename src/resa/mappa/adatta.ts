@@ -40,10 +40,11 @@ function adatta(m: HTMLElement) {
   if (ultima.get(m) === chiave) return;
   ultima.set(m, chiave);
   const era = m.hasAttribute('data-nascosta');
-  m.removeAttribute('data-adatta'); m.removeAttribute('data-nascosta'); m.removeAttribute('data-casa-fuori'); m.style.removeProperty('--mappa-alta');
+  m.removeAttribute('data-adatta'); m.removeAttribute('data-nascosta'); m.style.removeProperty('--mappa-alta');
   const schermata = main?.dataset.schermata ?? '';
   const fine = (nascosta: boolean, fuori = false) => { if (nascosta) m.setAttribute('data-nascosta', ''); if (nascosta !== era) avvisa(nascosta);
-    if (fuori) m.setAttribute('data-casa-fuori', ''); }; // D-261: la «Home» di riserva della testata compare col CSS
+    m.toggleAttribute('data-casa-fuori', fuori); }; // D-261: la «Home» di riserva della testata compare col CSS; l'attributo resta
+    // durante la misura (la testata con la casa è più alta: la misura la conta); la casa della mappa è solo invisibile, «sotto» la vede
   if (spento('C187M01') || !main || ESCLUSE.has(schermata) || (ESCLUSE_D197.has(schermata) && !spento('C197R01') && !deroga)) return fine(false);
   // eccedenza della pagina, con le vignette nascondibili come nascoste e quelle che si riempiono al loro minimo
   const eccedenza = () => {
