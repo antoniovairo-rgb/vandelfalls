@@ -140312,6 +140312,44 @@
         }
       ],
       "esito": "verde"
+    },
+    {
+      "catena": "grafica",
+      "data": "2026-11-02T21:30:37.915Z",
+      "commit": "468a8778",
+      "modifiche_non_committate": false,
+      "larghezze": "375",
+      "passi_scelti": "token,build,email",
+      "passi": [
+        {
+          "passo": "token",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "build",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            5.2
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "email",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0.4
+          ],
+          "problemi": []
+        }
+      ],
+      "esito": "verde"
     }
   ]
 }
