@@ -952,12 +952,19 @@ Riquadro radio della mossa, punto 2 (`src/resa/mappa/radio-mappa.tsx`, `collocaR
 - Con la mossa il riquadro resta nella sua fascia se è libera. Altrimenti va nella posizione libera più vicina: prima a larghezza piena, poi a mezza larghezza, e mai con il testo tagliato. Fra il riquadro e i bersagli resta un filo d'aria di `--spazio-1`.
 - Con l'unità in mano («compatto») il riquadro mostra solo «Ora tocca il settore…».
 - Se anche prima di toccare il riquadro intero non trova posto («stretto»), resta solo l'indicazione e il rapporto del costo passa al solo lettore di schermo (stile `.solo-lettore`).
+- Se non c'è posto nemmeno per la riga sola («muto»), tutto il riquadro passa al solo lettore di schermo.
+- I segni ▲/▼ contano come ostacoli.
 - Tutto da token. Rosso C255R01: fascia fissa e rapporto sempre intero, come prima.
 
-FATTO MISURATO dopo (`tools/foto-po152-b.mjs`, `controllaRadio`, 36 episodi, 241 stati per finestra):
-- 360×640: 0 stati coperti; rapporto al solo lettore in 20 stati.
-- 375×667: 0 stati coperti; rapporto al solo lettore in 15 stati.
-- 412×760: 0 stati coperti; rapporto al solo lettore in 4 stati.
+Primo giro di grafica su 6f059cea: ROSSO in 3 tentativi su 3, quindi non instabile.
+- Il riquadro spostato andava sopra i segni (PO-152 A, e01 porta_servizio a 360×640 e 360×760).
+- In e25 nulla_osta a 375×667 copriva zona_rossa (107 px²). Un registro dentro collocaRadio ha mostrato che non c'era nessuna fascia libera nemmeno per la riga sola (24 px liberi contro 30): era scattato il ripiego del «meno coperto».
+- Corretto in 5cb80844: segni come ostacoli e ripiego «muto» al posto del «meno coperto».
+
+FATTO MISURATO dopo (`tools/foto-po152-b.mjs`, `controllaRadio`, 36 episodi, 241 stati per finestra; via giraAltezze con le parti po152a e po152b, verdi):
+- 360×640: 0 stati coperti; rapporto al solo lettore in 21 stati; riquadro intero al solo lettore in 0.
+- 375×667: 0 stati coperti; rapporto al solo lettore in 16 stati; riquadro intero al solo lettore in 0.
+- 412×760: 0 stati coperti; rapporto al solo lettore in 5 stati; riquadro intero al solo lettore in 0.
 - Rosso C255R01 a 360×640: 210 problemi.
 - Braccio in `passi-grafica`: C255R01 a 360×760, parte po152b.
 - Foto: `d255radio/prima` (e5068acb) e `d255radio/dopo`, e01 ed e36, stati «puoi» e «dove», a 360×640, 375×667 e 412×760.
