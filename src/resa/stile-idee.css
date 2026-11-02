@@ -41,3 +41,10 @@ main:not(.rosso-c241n01) .mappa.citta .settore-nome { min-width: min-content; }
 main:has(.mappa .radio-mappa:is(.compatto, .stretto, .muto)) .rapporto-sotto { display: block; }
 .radio-mappa.muto { position: absolute; width: var(--spazio-px); height: var(--spazio-px); overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .radio-mappa:is(.compatto, .stretto) .rapporto-costo + .mossa-indicazione { margin-top: 0; }
+/* D-261: «Home» nella testata quando la risposta con la mossa abbassa la mappa e la casa coprirebbe un settore (adatta.ts) */
+.mappa[data-casa-fuori] > .tasto-home { display: none; }
+/* D-261 punto 4: con la mossa l'evidenziazione basta da sola (anche col riquadro al solo lettore): unità e settori toccabili
+   hanno un bordo tratteggiato magenta, l'unità in mano pieno. Rosso C261E01: niente bordo, come prima. */
+main:not(.rosso-c261e01) .mappa.mossa .tocco-pastiglia:not(:disabled) .pastiglia { outline: var(--bordo) dashed var(--magenta); outline-offset: var(--spazio-px); }
+main:not(.rosso-c261e01) .mappa.mossa .tocco-pastiglia.in-mano .pastiglia { outline-style: solid; }
+main:not(.rosso-c261e01) .mappa.mossa .settore-punto:not(:disabled) { outline: var(--bordo) dashed var(--magenta); outline-offset: var(--spazio-1); }
