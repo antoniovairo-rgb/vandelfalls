@@ -139745,6 +139745,173 @@
         }
       ],
       "esito": "verde"
+    },
+    {
+      "catena": "grafica",
+      "data": "2026-11-02T16:03:10.104Z",
+      "commit": "6f059cea",
+      "modifiche_non_committate": false,
+      "passi": [
+        {
+          "passo": "token",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "build",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            3
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "email",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0.5
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "foto",
+          "esito": "instabile",
+          "tentativi": 2,
+          "secondi": [
+            1543.3,
+            1340.6
+          ],
+          "problemi": [],
+          "precedenti": [
+            [
+              "360px: e01 sala a 375×667: vignetta «apertura-…» alta 127 px (minimo 56) con la pagina che scorre di 144 px: va nascosta (D-126 d)",
+              "360px: e01 sala a 375×667: vignetta «apertura-…» mostrata a 126.6 px, va nascosta (C26-03)",
+              "360px: errore di console: TypeError: Cannot read properties of null (reading 'addChild')\n    at http://127.0.0.1:41695/assets/StratoPixi-BSrFUryv.js:204:8076\n    at Er (http://127.0.0.1:41695/assets/sfondo-BFAlX5de.js:238:60202)\n    at ri (http://127.0.0.1:41695/assets/sfondo-BFAlX5de.js:238:72020)\n    at ni (http://127.0.0.1:41695/assets/sfondo-BFAlX5de.js:238:71904)\n    at ri (http://127.0.0.1:41695/assets/sfondo-BFAlX5de.js:238:72698)\n    at ni (http://127.0.0.1:41695/assets/sfondo-BFAlX5de.js:238:71904)\n    at ri (http://127.0.0.1:41695/assets/sfondo-BFAlX5de.js:238:72698)\n    at ni (http://127.0.0.1:41695/assets/sfondo-BFAlX5de.js:238:71904)\n    at ri (http://127.0.0.1:41695/assets/sfondo-BFAlX5de.js:238:72698)\n    at ni (http://127.0.0.1:41695/assets/sfondo-BFAlX5de.js:238:71904) {componentStack: \n    at Ae (http://127.0.0.1:41695/assets/StratoPi….0.0.1:41695/assets/sfondo-BFAlX5de.js:231:15851)}"
+            ]
+          ]
+        },
+        {
+          "passo": "schieramenti",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            770.7
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "offline",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            11.8
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "altezze",
+          "esito": "rosso",
+          "tentativi": 3,
+          "secondi": [
+            1586.2,
+            1575.9,
+            1565.4
+          ],
+          "problemi": [
+            "360x640 e01 porta_servizio: il rapporto radio sta sotto 2 segni ▲/▼ (PO-152 A)",
+            "360x760 e01 porta_servizio: il rapporto radio sta sotto 2 segni ▲/▼ (PO-152 A)",
+            "375x667 e25 nulla_osta «tocca il settore» con steward@piazza_municipio in mano: il riquadro radio copre zona_rossa 107 px² (D-255)"
+          ]
+        }
+      ],
+      "esito": "rosso"
+    },
+    {
+      "catena": "governo",
+      "data": "2026-11-02T18:23:07.607Z",
+      "commit": "6f059cea",
+      "modifiche_non_committate": false,
+      "passi": [
+        {
+          "passo": "documenti",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "backlog",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "segreti",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "versione",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "store",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "modello",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0.2
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "bracci-rossi",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "governo.html",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0.1
+          ],
+          "problemi": []
+        }
+      ],
+      "esito": "verde"
     }
   ]
 }
