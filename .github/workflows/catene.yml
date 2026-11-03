@@ -111,9 +111,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk valmora-debug.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk vandelfalls.apk
           gh release view apk-debug >/dev/null 2>&1 || gh release create apk-debug --prerelease --title "APK di prova (debug)" --notes "APK di debug, ricostruito a ogni pubblicazione su main. Non è la versione per il Play Store."
-          gh release upload apk-debug valmora-debug.apk --clobber
+          gh release upload apk-debug vandelfalls.apk --clobber  # PO-157: nome nuovo (era valmora-debug.apk)
           gh release edit apk-debug --notes "APK di debug costruito da main ${GITHUB_SHA::7}. Non è la versione per il Play Store."
   # D-212/D-214 (PO-144): AAB di rilascio. Job separato: non tocca gli altri 9 e gira sempre. Nessun segreto e nessuna
   # firma: l'AAB esce NON firmato e serve solo a controllare che la build riesca (il PO firma in locale con Android Studio).
