@@ -32,6 +32,10 @@ let ridisponi: (m: HTMLElement) => void = () => {};
 // lo stesso: niente rifacimento (il ResizeObserver risponde anche al cambio d'altezza fatto da qui; ogni giro in più
 // rallentava i disegni e in CI a 375 i segni della risposta, 1,8 s di tempo vero, sparivano prima del controllo PO-085).
 const ultima = new WeakMap<HTMLElement, string>();
+// D-259: nella stessa risposta con la mossa la mappa abbassata non si rialza. Prima oscillava: spariti i segni il riquadro ci
+// stava tutto, la copia del costo spariva, la mappa tornava piena, il riquadro non ci stava più e la copia tornava (e08
+// imp_grandine/fermi_in_curva a 360×640: 0 → 78 → 0 px di scorrimento in 2,5 s). Chiave: il messaggio della risposta.
+const tenuta = new WeakMap<Element, { alta: number; fuori: boolean }>();
 
 function adatta(m: HTMLElement) {
   const main = m.closest('main');
@@ -61,6 +65,8 @@ function adatta(m: HTMLElement) {
     return e;
   };
   let ecc = eccedenza();
+  const risposta = deroga ? main.querySelector('[data-messaggio="risposta"]') : null, tenute = risposta ? tenuta.get(risposta) : undefined;
+  if (ecc <= 0 && tenute) { m.style.setProperty('--mappa-alta', `${tenute.alta}px`); m.setAttribute('data-adatta', ''); return fine(false, tenute.fuori); }
   if (ecc <= 0) return fine(false);
   const radice = getComputedStyle(document.documentElement);
   const min = parseFloat(radice.getPropertyValue(LETTURA.has(schermata) && !deroga && !spento('C191L01') ? '--mappa-altezza-min-lettura' : '--mappa-altezza-min')) || 0;
@@ -81,9 +87,12 @@ function adatta(m: HTMLElement) {
     if (!sotto('.settore-punto') && (!sotto('.settore-nome') || (ridisponi(m), !sotto('.settore-nome')))) break;
     alta = Math.min(nat, alta + passo);
   }
+  if (tenute && tenute.alta < alta) { alta = tenute.alta; m.style.setProperty('--mappa-alta', `${Math.round(alta)}px`); m.setAttribute('data-adatta', ''); }
   if (alta >= nat) { m.removeAttribute('data-adatta'); m.style.removeProperty('--mappa-alta'); }
   if (fuori && alta < nat) ridisponi(m); // nomi al loro posto sulla mappa abbassata, prima di guardare «Home»
-  fine(SENZA_MAPPA.has(schermata) && !spento('C191R01') && eccedenza() > 0, fuori && alta < nat && (sotto('.settore-punto') || sotto('.settore-nome')));
+  const casaFuori = fuori && alta < nat && (sotto('.settore-punto') || sotto('.settore-nome'));
+  if (risposta && alta < nat) tenuta.set(risposta, { alta: Math.round(alta), fuori: casaFuori || !!tenute?.fuori });
+  fine(SENZA_MAPPA.has(schermata) && !spento('C191R01') && eccedenza() > 0, casaFuori || !!tenute?.fuori);
 }
 
 /** Si rifà quando la pagina cambia (passi, testi, caratteri) e quando cambia la finestra. */
