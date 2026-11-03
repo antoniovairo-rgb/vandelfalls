@@ -56,7 +56,7 @@
   "e28.op.pista_fonderie.r": "Il comando segna «fonderie». Al porto la luce nel container si spegne presto.",
   "e28.op.due_piste": "Tieni aperte tutte e due",
   "e28.op.due_piste.c": "Nessuna sorpresa, ma ti costa una squadra.",
-  "e28.op.due_piste.r": "Due piste, due squadre stanche. Il comando sospira.",
+  "e28.op.due_piste.r": "Due piste aperte, una squadra in meno in riserva. Il comando sospira.",
   "e28.ch.mossgarth_rumore": "«Arches: i nostri sono tutti sul piazzale, senza biglietto. Ci accendete il maxischermo?»",
   "e28.op.apri_settore": "Accendi il maxischermo",
   "e28.op.apri_settore.c": "Il piazzale si riempie e sale.",
