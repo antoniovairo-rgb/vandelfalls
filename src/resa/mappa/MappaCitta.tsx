@@ -9,6 +9,7 @@ import { TastoHome } from '../schermate/Fumetto.tsx';
 import type { PuntoCitta } from './StratoCitta.tsx';
 import { webglDisponibile } from './webgl.ts';
 import { disponiNomeCitta } from './etichette.ts';
+import { parcoCitta } from './parco.ts';
 import { spento } from '../../interruttori.ts';
 
 const StratoCitta = lazy(() => import('./StratoCitta.tsx').then((x) => ({ default: x.StratoCitta })));
@@ -18,6 +19,9 @@ const conWebgl = typeof document !== 'undefined' && webglDisponibile();
 export const bozza = (m: Missione) => !!m.bozza && !spento('C14B01');
 
 export interface VoceCitta { m: Missione; stato: StatoEpisodio; stelle: number | null }
+
+/** Rosso C265B01: i luoghi della 0.61.0 (episodio 1-12 di ogni stagione). */
+const LUOGHI_PRIMA = [[15, 20], [40, 15], [65, 20], [86, 30], [20, 45], [45, 40], [70, 45], [86, 60], [15, 70], [40, 70], [65, 75], [86, 86]].map(([x, y]) => ({ x: x!, y: y! }));
 
 const posiziona = (x: number, y: number) => (el: HTMLElement | null) => {
   el?.style.setProperty('--x', String(x));
@@ -59,7 +63,9 @@ export function MappaCitta(p: { voci: VoceCitta[]; scelto: string | null; scegli
   const [pronta, setPronta] = useState(!conWebgl);
   const margine = useMemo(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--settore')) / 2 || 22, []);
   // Senza «luogo» nei dati gli episodi si mettono in fila, così non spariscono.
-  const voci = useMemo(() => p.voci.map((v, i) => ({ ...v, pos: v.m.luogo ?? { x: ((i + 1) * 100) / (p.voci.length + 1), y: 50 } })), [p.voci]);
+  // D-265 (PO-158): i luoghi nei dati sono una griglia 4 × 3 per stagione (bolle staccate a ogni misura della mappa). Rosso
+  // C265B01: i luoghi di prima (stesso schema per le tre stagioni), con le bolle che si toccavano.
+  const voci = useMemo(() => p.voci.map((v, i) => ({ ...v, pos: spento('C265B01') ? LUOGHI_PRIMA[(v.m.episodio - 1) % 12]! : v.m.luogo ?? { x: ((i + 1) * 100) / (p.voci.length + 1), y: 50 } })), [p.voci]);
   const punti: PuntoCitta[] = useMemo(() => voci.map((v) => ({ id: v.m.id, x: v.pos.x, y: v.pos.y, acceso: v.stato !== 'futuro' && v.stato !== 'superato' })), [voci]);
   // C17-12: il nome dell'episodio scelto al posto che non copre altri dischi, a ogni disegno, quando la mappa cambia
   // misura e quando arrivano i caratteri. Rosso C42N01: sempre sotto il disco, come prima.
@@ -100,7 +106,7 @@ export function MappaCitta(p: { voci: VoceCitta[]; scelto: string | null; scegli
     return () => ro.disconnect();
   });
   return (
-    <div className="mappa citta" ref={contenitore} data-mappa={conWebgl ? 'webgl' : 'html'} data-pronta={pronta ? 'si' : 'no'} aria-label="Mappa di Vandel Falls">
+    <div className="mappa citta" ref={contenitore} data-mappa={conWebgl ? 'webgl' : 'html'} data-pronta={pronta ? 'si' : 'no'} data-parco={conWebgl ? parcoCitta().join(' ') : undefined} aria-label="Mappa di Vandel Falls">
       {p.home && <TastoHome vai={p.home} />}
       {conWebgl && <Suspense fallback={null}><StratoCitta contenitore={contenitore} punti={punti} margine={margine} pronto={() => setPronta(true)} /></Suspense>}
       {voci.map((v) => (

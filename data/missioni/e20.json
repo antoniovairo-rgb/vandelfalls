@@ -5,8 +5,8 @@
   "titolo": "testi:e20.titolo",
   "disponibile_se": {},
   "luogo": {
-    "x": 86,
-    "y": 60
+    "x": 94,
+    "y": 50
   },
   "introduzione": [
     "testi:e20.intro1",

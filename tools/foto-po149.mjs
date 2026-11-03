@@ -54,9 +54,9 @@ export async function controllaPo149(browser, url, larghezza, rossi = [], cartel
     for (const b of m.pulsanti) if (b.margine < m.minMargine) male.push(`${vp} città ${stato}: «${b.azione}» con l'ombra è a ${b.margine} px dal riquadro interno della scheda (serve ≥ ${m.minMargine}, PO-149)`);
     for (const x of m.tagli) male.push(`${vp} città ${stato}: ${x} (D-243)`);
     if (stato !== 'tripla' && m.striscia) { // la striscia c'è da 700 px in su (D-210); C52-02: lo spazio sopra le teste in ogni stato
-      // D-243: i valori della 0.52.0 (sopra le teste ≥ 100 a 915; mappa ≥ 431 a 915 e ≥ 276 a 760), oltre alla regola da token
-      const sopraMin = h >= 915 ? Math.max(m.minSopra, 100) : m.minSopra, mappaMin = Math.max(m.mappaAttesa, h >= 915 ? 431 : h >= 760 ? 276 : 0);
-      if (m.sopra === null || m.sopra < sopraMin) male.push(`${vp} città ${stato}: sopra i personaggi ${m.sopra} px (serve ≥ ${sopraMin}, PO-149, D-243)`);
+      // D-243: i valori della 0.52.0 (mappa ≥ 431 a 915 e ≥ 276 a 760), oltre alla regola da token. D-265 (PO-158): lo spazio
+      // sopra le teste non deve più crescere (≥ 100 a 915 era cielo vuoto): lo misura tools/foto-po158.mjs (16-32 px, petto visibile)
+      const mappaMin = Math.max(m.mappaAttesa, h >= 915 ? 431 : h >= 760 ? 276 : 0);
       if (m.mappa < mappaMin - 1) male.push(`${vp} città ${stato}: mappa alta ${m.mappa} px (serve ≥ ${mappaMin}, PO-149, D-243)`);
     }
     await p.close();

@@ -63,7 +63,12 @@ main:not(.rosso-c242m01)[data-schermata="citta"] .scena .scheda.compatta > :is(h
 main:not(.rosso-c242m01)[data-schermata="citta"] .scheda.compatta .riga { flex-wrap: nowrap; }
 main:not(.rosso-c242m01)[data-schermata="citta"] .scheda.compatta .riga .stelle { margin-left: auto; }
 main:not(.rosso-c242m01)[data-schermata="citta"] .scheda.compatta .sfida-club { min-width: 0; }
-main:not(.rosso-c242m01)[data-schermata="citta"] .scheda.compatta :is(.sfida-club > span:last-child, .testo-pulsante) { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+main:not(.rosso-c242m01)[data-schermata="citta"] .scheda.compatta .testo-pulsante { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* D-265 (PO-158): il nome della squadra va intero, al massimo su due righe; due righe (2 × 14,4 px) stanno nell'altezza dello
+   stemma (32 px), quindi la scheda non cresce. La parola più lunga (70 px) sta nello spazio più stretto (86 px a 360).
+   Rosso C265N01: su una riga con l'ellissi, come prima («SKYFIELD ATH…»). */
+main:not(.rosso-c242m01):not(.rosso-c265n01)[data-schermata="citta"] .scheda.compatta .sfida-club > span:last-child { min-width: 0; white-space: normal; overflow-wrap: normal; text-align: left; }
+main:not(.rosso-c242m01).rosso-c265n01[data-schermata="citta"] .scheda.compatta .sfida-club > span:last-child { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 main:not(.rosso-c242m01)[data-schermata="citta"] .scena .scheda.compatta .scheda-azioni { display: flex; gap: calc(var(--spazio-1) + var(--ombra-1-scarto)); margin: var(--spazio-1) calc(var(--spazio-1) + var(--ombra-1-scarto)) calc(var(--spazio-1) + var(--ombra-1-scarto)) var(--spazio-1); }
 main:not(.rosso-c242m01)[data-schermata="citta"] .scena .scheda.compatta .scheda-azioni .pulsante { flex: 1 1 0; min-width: 0; width: auto; margin: 0; }
 main:not(.rosso-c242m01)[data-schermata="citta"] .scena .scheda.compatta .scheda-azioni:has(> :nth-child(2)) .pulsante { padding-inline: var(--spazio-2); gap: var(--spazio-1); }

@@ -9,6 +9,7 @@ import { spento } from '../../interruttori.ts';
 import { cartelloni, notte, parcheggi, quartiere } from './notte.ts';
 import { disegnaDettagli, leggiDettaglio } from './dettagli.ts';
 import { neutroCorteo } from './folla.ts';
+import { parcoCitta } from './parco.ts';
 
 export interface Pt { x: number; y: number }
 export interface Stadio { cx: number; cy: number; rx: number; ry: number; vuoto?: boolean }
@@ -331,8 +332,10 @@ export function disegnaCitta(f: CanvasRenderingContext2D, W: number, H: number) 
   const caso = creaCaso(11); const r = () => caso.numero();
   const fiume = (x: number) => H * 0.22 + Math.sin((x / W) * Math.PI * 1.6) * H * 0.08 + (x / W) * H * 0.1;
   f.fillStyle = token('--mappa-asfalto'); f.fillRect(0, 0, W, H);
-  isolati(f, W, H, r, (x, y) => Math.abs(y - fiume(x)) < 34 || (x > W * 0.55 && y > H * 0.62 && y < H * 0.82));
-  f.fillStyle = token('--citta-parco'); f.fillRect(W * 0.57, H * 0.64, W * 0.36, H * 0.16);
+  // D-265 (PO-158, «12 sul prato»): il parco nella fascia libera fra le file di episodi (parco.ts); rosso C265B01: dove stava
+  const [px, p0, pw, ph] = parcoCitta();
+  isolati(f, W, H, r, (x, y) => Math.abs(y - fiume(x)) < 34 || (x > W * (px - 0.02) && y > H * (p0 - 0.02) && y < H * (p0 + ph + 0.02)));
+  f.fillStyle = token('--citta-parco'); f.fillRect(W * px, H * p0, W * pw, H * ph);
   f.strokeStyle = token('--citta-fiume'); f.lineWidth = Math.max(14, W / 18); f.lineCap = 'round';
   f.beginPath(); for (let x = -10; x <= W + 10; x += 6) (x === -10 ? f.moveTo(x, fiume(x)) : f.lineTo(x, fiume(x))); f.stroke();
   for (const q of [0.3, 0.7]) { f.fillStyle = token('--mappa-marciapiede'); f.fillRect(W * q - 5, fiume(W * q) - 26, 10, 52); }

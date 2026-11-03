@@ -175,7 +175,7 @@ export function chiusureCostruite(dati, dich) {
   return out;
 }
 
-export const PARTI = ['e01', 'citta36', 'chiamate', 'rapporti', 'riepilogo', 'verbali', 'po149', 'po152a', 'c52nomi', 'po152b', 'risposte', 'chiusure'];
+export const PARTI = ['e01', 'citta36', 'chiamate', 'rapporti', 'riepilogo', 'verbali', 'po149', 'po152a', 'c52nomi', 'po152b', 'risposte', 'chiusure', 'po158'];
 // C53-02 (D-252): la risposta di ogni opzione di ogni carta d'imprevisto e di ogni variante, a queste finestre (soglie di SOGLIE)
 export const RISPOSTE_VP = ['360x640', '375x667', '412x760'];
 export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi = [], cartella = '', parti = PARTI, limiteRisposte = Infinity, chiusureMax = Infinity }) {
@@ -301,6 +301,8 @@ export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi
           await q.close(); })); }
       if (h === 760 && parti.includes('po149')) { const { controllaPo149 } = await import('./foto-po149.mjs'); // PO-149 (D-237): 640/667/760/915 a questa larghezza
         const g = await controllaPo149(b, url, w, rossi, cartella); errori.push(...g.male); }
+      if (h === 760 && parti.includes('po158')) { const { controllaPo158 } = await import('./foto-po158.mjs'); // PO-158 (D-265): 640/760/830/915
+        const g = await controllaPo158(b, url, w, rossi, cartella); errori.push(...g.male); }
       if (h === 760 && parti.includes('po152a')) { const { controllaPo152a } = await import('./foto-po152-a.mjs'); // PO-152 A (D-241): 640 e 760
         const g = await controllaPo152a(b, url, w, rossi, cartella, dati, dich); errori.push(...g.male); }
       if (h === 760 && parti.includes('po152b')) { const { controllaPo152b } = await import('./foto-po152-b.mjs'); // D-241 idea B: 640/667/760
