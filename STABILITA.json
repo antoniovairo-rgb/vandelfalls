@@ -141379,6 +141379,174 @@
         }
       ],
       "esito": "verde"
+    },
+    {
+      "catena": "grafica",
+      "data": "2026-11-03T03:35:33.017Z",
+      "commit": "c7da29ad",
+      "modifiche_non_committate": false,
+      "passi": [
+        {
+          "passo": "token",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "build",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            2.8
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "email",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0.8
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "foto",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            2270.1
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "schieramenti",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            1040.9
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "offline",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            14.3
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "altezze",
+          "esito": "rosso",
+          "tentativi": 3,
+          "secondi": [
+            3839.3,
+            3973.1,
+            4394.6
+          ],
+          "problemi": [
+            "360x640 risposta: mappa 200 px dopo 328 px nella chiamata (D-197)",
+            "360x640 risposta: mappa 207 px dopo 328 px nella chiamata (D-197)",
+            "360x640 risposta: mappa 211 px dopo 328 px nella chiamata (D-197)",
+            "360x640 risposta e02 imp_acquazzone/settore_coperto: scorre di 75 px (soglia 68, C53-02)",
+            "360x640 risposta e02 imp_soppresso/sala_attesa: scorre di 75 px (soglia 68, C53-02)",
+            "360x640 risposta e02 imp_divano/carica_divano: scorre di 75 px (soglia 68, C53-02)",
+            "360x640 risposta e06 imp_monopattini/camioncino: scorre di 75 px (soglia 68, C53-02)",
+            "360x640 risposta e06 poche_navette_v/a_piedi: scorre di 79 px (soglia 68, C53-02)",
+            "360x640 risposta e06 imp_lavaggio/lance_viale: scorre di 75 px (soglia 68, C53-02)",
+            "360x640 risposta e14 imp_ombrelli/due_corsie: scorre di 78 px (soglia 68, C53-02)",
+            "360x640 risposta e14 imp_gomma/attorno_pullman: scorre di 74 px (soglia 68, C53-02)",
+            "… e altre 25 risposte oltre soglia (C53-02)"
+          ]
+        }
+      ],
+      "esito": "rosso"
+    },
+    {
+      "catena": "governo",
+      "data": "2026-11-03T07:54:29.409Z",
+      "commit": "c7da29ad",
+      "modifiche_non_committate": false,
+      "passi": [
+        {
+          "passo": "documenti",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "backlog",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "segreti",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "versione",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "store",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "modello",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0.3
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "bracci-rossi",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "governo.html",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        }
+      ],
+      "esito": "verde"
     }
   ]
 }
