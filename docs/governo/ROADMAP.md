@@ -49,6 +49,7 @@ Stati dei lotti: PROPOSTO / IN CORSO / CHIUSO.
   | 8c | C53-01: l'imprevisto della carta nuova non arriva più per ultimo nell'ondata (10,5% → 0); finestre validate sulle chiamate senza condizioni; rosso | S-26 | 0.56.0 | fatto |
 | 8b | **Nuovo nome «Varcalda – Cortina di fumo» (PO-153, D-244).** Testi, store, privacy, identificativo dell'app, chiavi del salvataggio con migrazione, repository e Pages; guardiano «nessun Valmora visibile» e rosso | S-26 + PO (rinomina del repository) | 0.55.0 + 0.56.0 | fatto (repository rinominato dal PO il 28/10, sito su …/varcalda/) |
 | 8d | Caratteri (D-254 rivista da D-257: Inter è già incluso): peso 500 mancante, woff doppi, simboli fuori dal sottoinsieme latin, guardiano senza Inter di sistema | S-26 | 0.60.0 | fatto |
+| 8e | Città (PO-158, D-265): meno cielo e personaggi più grandi, bolle della mappa senza sovrapposizioni, nomi delle squadre interi | S-26 | – | in corsa |
 | 9 | Prova del tester: link al PO per il collega; collaudo con «Partita da giocatore» e la domanda «leggi le opzioni? la mappa la usi?» | principale + collaudatrice | – | da scrivere |
 
 - Criterio d'uscita:
