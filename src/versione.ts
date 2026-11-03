@@ -325,4 +325,7 @@
 //   simboli → ≤ ≥ ⋮ ▲ ▼ ★ ☆ ⚑ da file inclusi (prima dal sistema), via i woff doppi (caratteri 195.004 → 109.584 B, dist −69.929 B);
 //   gli a capo diversi in CI venivano dall'hinting del Chromium headless: fontconfig fisso + --font-render-hinting=none nelle catene.
 //   guardiano: tools/caratteri.mjs (passo «caratteri»), rossi C254F01 e C257H01.
-export const GAME_VERSION = '0.60.0';
+// 0.61.0 – numeri dei morsi coerenti (C56-01, collaudo C-056): 4 rapporti dicevano «una squadra» per un effetto riserva −2
+//   (e02, e26, e31, e32), e28 diceva «due squadre stanche» per −1; corretti i testi, non i valori (bilanciamento invariato).
+//   guardiano: tests/numeri-morsi.test.ts (127 frasi di squadre e 85 di steward lette, pavimento di lettura), rossi verificati.
+export const GAME_VERSION = '0.61.0';
