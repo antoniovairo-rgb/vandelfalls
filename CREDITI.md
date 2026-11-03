@@ -15,7 +15,10 @@ package.json compaia in entrambi.
 | `@capacitor/core`, `@capacitor/android` | 8.5.3 | app Android | MIT | © 2017-present Drifty Co. | https://github.com/ionic-team/capacitor |
 | `@fontsource/space-grotesk` | 5.3.0 | carattere dei titoli (file nel gioco, nessun CDN) | SIL Open Font License 1.1 | © 2020 The Space Grotesk Project Authors | https://github.com/floriankarsten/space-grotesk |
 | `@fontsource/inter` | 5.3.0 | carattere dei testi (file nel gioco, nessun CDN) | SIL Open Font License 1.1 | © 2016 The Inter Project Authors | https://github.com/rsms/inter |
+| `inter-ui` (solo per generare i file, non è una dipendenza) | 4.1.1 | simboli → ≤ ≥ ▲ ▼ ★ ☆ in Inter, più ⋮ e ⚑ disegnati da noi (`tools/caratteri-simboli.py`, D-257) | SIL Open Font License 1.1 | © 2016-2018 The Inter Project Authors | https://github.com/rsms/inter |
 | `ajv` | 8.20.0 | controllo dei dati di gioco | MIT | © 2015-2021 Evgeny Poberezkin | https://github.com/ajv-validator/ajv |
+
+Testo delle licenze dei caratteri, distribuito col gioco: `public/licenze/inter-OFL.txt`, `public/licenze/space-grotesk-OFL.txt`.
 
 ## Asset grafici
 

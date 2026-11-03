@@ -45,10 +45,14 @@ const PASSI = {
 const CATENE = {
   governo: ['documenti', 'backlog', 'segreti', 'versione', 'store', 'modello', 'bracci-rossi', 'governo.html'],
   logica: ['tipi', 'confini', 'schema', 'test', 'bot', 'storia', 'salvataggi-reali', 'bracci-rossi-logica'],
-  grafica: ['token', 'build', 'email', 'foto', 'schieramenti', 'offline', 'altezze', 'bracci-rossi-grafica'],
+  grafica: ['token', 'build', 'email', 'foto', 'schieramenti', 'offline', 'caratteri', 'altezze', 'bracci-rossi-grafica'],
 };
 CATENE.completa = [...CATENE.governo, ...CATENE.logica, ...CATENE.grafica];
 
+// D-257: ogni Chromium delle catene vede gli stessi caratteri di sistema e li disegna senza hinting (fontconfig fisso
+// e --font-render-hinting=none, tools/caratteri.mjs): larghezze uguali in locale e in CI (lì si arrotondavano al pixel).
+// Solo per le catene con passi della grafica: il lavoro «governo» della CI non installa node_modules (playwright-core).
+if ((CATENE[process.argv[2]] ?? []).some((p) => CATENE.grafica.includes(p))) (await import('./caratteri.mjs')).resaFissa();
 const nome = process.argv[2];
 if (!CATENE[nome]) {
   console.error(`Catena sconosciuta «${nome}». Disponibili: ${Object.keys(CATENE).join(', ')}`);

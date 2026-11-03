@@ -60,7 +60,7 @@ jobs:
       matrix:
         include:
           - { larghezza: 360, parte: foto, passi: 'token,build,email,foto' }
-          - { larghezza: 360, parte: schieramenti, passi: 'build,schieramenti,offline,altezze' }
+          - { larghezza: 360, parte: schieramenti, passi: 'build,schieramenti,offline,caratteri,altezze' }
           - { larghezza: 360, parte: bracci, passi: 'build,bracci-rossi-grafica' }
           - { larghezza: 375 }
           - { larghezza: 412 }
