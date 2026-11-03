@@ -141246,6 +141246,139 @@
         }
       ],
       "esito": "verde"
+    },
+    {
+      "catena": "grafica",
+      "data": "2026-11-03T00:18:36.306Z",
+      "commit": "147d3bbf",
+      "modifiche_non_committate": false,
+      "passi": [
+        {
+          "passo": "token",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            1.8
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "build",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            14
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "email",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0.7
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "foto",
+          "esito": "rosso",
+          "tentativi": 3,
+          "secondi": [
+            2372.1,
+            2427.2,
+            2378.6
+          ],
+          "problemi": [
+            "360px: risposta «chiudi»: segni sulla mappa su «», gli effetti che cambiano lo stato toccano «strada_cinderwick» (PO-085, C20-07)",
+            "360px: risposta «parcheggi_pubblici»: segni sulla mappa su «», gli effetti che cambiano lo stato toccano «parcheggi» (PO-085, C20-07)",
+            "360px: risposta «scorta_senza_modulo»: segni sulla mappa su «», gli effetti che cambiano lo stato toccano «piazza_municipio» (PO-085, C20-07)",
+            "360px: risposta «fotografa»: segni sulla mappa su «», gli effetti che cambiano lo stato toccano «curva_cinderwick» (PO-085, C20-07)"
+          ]
+        }
+      ],
+      "esito": "rosso"
+    },
+    {
+      "catena": "governo",
+      "data": "2026-11-03T02:18:31.149Z",
+      "commit": "147d3bbf",
+      "modifiche_non_committate": false,
+      "passi": [
+        {
+          "passo": "documenti",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0.2
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "backlog",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "segreti",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "versione",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "store",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0.3
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "modello",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            14.3
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "bracci-rossi",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "governo.html",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0.1
+          ],
+          "problemi": []
+        }
+      ],
+      "esito": "verde"
     }
   ]
 }
