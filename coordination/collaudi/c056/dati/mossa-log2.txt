@@ -1,0 +1,5 @@
+{"ep":"e04","vp":"360x640","tast":false,"pause":12,"possibili":9,"mosse":6,"pesano":0,"difetti":0,"errori":0}
+{"ep":"e01","vp":"375x667","tast":false,"pause":17,"possibili":14,"mosse":10,"pesano":0,"difetti":0,"errori":0}
+{"ep":"e07","vp":"375x667","tast":false,"pause":16,"possibili":12,"mosse":7,"pesano":0,"difetti":0,"errori":0}
+{"ep":"e22","vp":"375x667","tast":false,"pause":16,"possibili":12,"mosse":8,"pesano":0,"difetti":0,"errori":0}
+{"ep":"e30","vp":"412x760","tast":false,"pause":10,"possibili":8,"mosse":6,"pesano":0,"difetti":1,"errori":0}

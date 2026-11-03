@@ -1,0 +1,166 @@
+{
+ "episodi": [
+  {
+   "ep": "e01",
+   "modo": "giusta",
+   "tentativo": 1,
+   "pause": 17,
+   "mosseFatte": 0,
+   "mosseSuggerite": 0,
+   "morsi": 1,
+   "risposte": 17,
+   "scene": 41,
+   "ecc": 56,
+   "testi": [
+    "Pressione +1, Piazzale dello stadio. La troupe senza intervista riprende l'uscita dal piazzale: gente ferma davanti alle telecamere."
+   ],
+   "verbale": "01VerbaleContenutoKiln UnitedcontroSkyfield AthleticDerby concluso senza danni gravi né titoli in prima pagina. Il vice paga la scommessa con una smorfia: «Doppio o niente sulla prossima.»Nuovo miglior risultato per questo episodio.CondividiCosa ti ha aiutatoTrattieni gli ospiti dieci minutiOndata 3 · −2 pressione su Strada da Skyfield, alza la tensione su Curva SkyfieldChiedi i rinforziOndata 1 · +2 Squadre di riser",
+   "secondiReali": 53,
+   "esito": "Contenuto",
+   "stelle": 3,
+   "registrato": true
+  },
+  {
+   "ep": "e02",
+   "modo": "giusta",
+   "tentativo": 1,
+   "pause": 17,
+   "mosseFatte": 0,
+   "mosseSuggerite": 0,
+   "morsi": 4,
+   "risposte": 17,
+   "scene": 43,
+   "ecc": 59,
+   "testi": [
+    "Tensione +3, Viale della stazione. Il responsabile del Railhead, offeso, l'ha detto ai suoi: sul viale della stazione l'aria si scalda.",
+    "Squadre −2. Il vagone col finestrino rotto va portato in deposito: una squadra è impegnata fino a fine serata.",
+    "Pressione +3, Curva ospiti. «Railhead non dimentica»: ora si capisce cosa. La curva ospiti lo canta, e si muove.",
+    "Fiducia −2. Senza saluto, in tv il responsabile del Railhead parla di «accoglienza fredda». Il comando chiama."
+   ],
+   "verbale": "02VerbaleContenutoSkyfield AthleticcontroRailhead CountyOttocento ospiti arrivati, quasi tutti ripartiti in giornata. Il Railhead manda un comunicato di ringraziamento. Malvasi lo appende accanto alla cartina dei treni.Nuovo miglior risultato per questo episodio.CondividiCosa ti ha aiutatoScorta subito il primo gruppo allo stadioOndata 1 · −2 pressione su Viale della stazione, −1 Squadre di riservaManda il mediatore ",
+   "secondiReali": 63,
+   "esito": "Contenuto",
+   "stelle": 3,
+   "registrato": true
+  },
+  {
+   "ep": "e03",
+   "modo": "sbagliata",
+   "tentativo": 1,
+   "pause": 16,
+   "mosseFatte": 0,
+   "mosseSuggerite": 0,
+   "morsi": 1,
+   "risposte": 16,
+   "scene": 41,
+   "ecc": 40,
+   "testi": [
+    "Squadre −1. L'arbitro vuole i laser trovati: una squadra resta in curva ospiti a cercarli, fino a fine serata."
+   ],
+   "fotoRapporto": 1,
+   "verbale": "03VerbaleDegenerato fuori campoSkyfield AthleticcontroGarden AlbionIl quartiere è rimasto sveglio fino all'alba, e non per la festa. Il comune convoca una riunione sulla «convivenza fra stadio e città». Davanti ai cartelloni qualcuno sorride.Episodio fallito: riparti dall'ondata 4, dove si è deciso, o da capo.CondividiRiparti dall'ondata 4RicominciaCosa ti ha aiutatoChiedi due squadre per la notteOndata 3 · +2 Squadr",
+   "secondiReali": 54,
+   "esito": "Degenerato fuori campo",
+   "stelle": null,
+   "registrato": false
+  },
+  {
+   "ep": "e03",
+   "modo": "giusta",
+   "tentativo": 2,
+   "pause": 4,
+   "mosseFatte": 0,
+   "mosseSuggerite": 0,
+   "morsi": 0,
+   "risposte": 4,
+   "scene": 11,
+   "ecc": 34,
+   "testi": [],
+   "verbale": "03VerbaleContenuto a faticaSkyfield AthleticcontroGarden AlbionQualche bottiglia, molti clacson, nessun ferito. Il comitato chiede un incontro. Malvasi chiede che l'incontro sia di giorno.Nuovo miglior risultato per questo episodio.CondividiCosa ti ha aiutatoChiedi due squadre per la notteOndata 3 · +2 Squadre di riserva, −2 fiduciaCosa ti ha penalizzatoNessuna scelta ti è costata.Dove sei rimasto scopertoOndata 2 · ",
+   "secondiReali": 11,
+   "esito": "Contenuto a fatica",
+   "stelle": 1,
+   "registrato": true
+  },
+  {
+   "ep": "e04",
+   "modo": "giusta",
+   "tentativo": 1,
+   "pause": 12,
+   "mosseFatte": 0,
+   "mosseSuggerite": 0,
+   "morsi": 1,
+   "risposte": 12,
+   "scene": 31,
+   "ecc": 54,
+   "testi": [
+    "Pressione +3, Piazzale dello stadio. I biglietti falsi lasciati passare: duecento senza posto escono prima e si fermano al piazzale."
+   ],
+   "verbale": "04VerbaleContenutoLa partita è finita e il mercato è tornato quello di sempre: qualche cassetta fuori posto, nessun ferito. La presidente dei commercianti manda un cavolo a Malvasi, che lo appende alla cartina dei treni.Nuovo miglior risultato per questo episodio.CondividiCosa ti ha aiutatoFai partire prima i pullman ospitiOndata 3 · −2 pressione su Strada da Kiln, alza la tensione su Le fonderieFallo girare per la s",
+   "secondiReali": 29,
+   "esito": "Contenuto",
+   "stelle": 3,
+   "registrato": true
+  },
+  {
+   "ep": "e05",
+   "modo": "sbagliata",
+   "tentativo": 1,
+   "pause": 13,
+   "mosseFatte": 0,
+   "mosseSuggerite": 0,
+   "morsi": 1,
+   "risposte": 13,
+   "scene": 35,
+   "ecc": 50,
+   "testi": [
+    "Fiducia −2. Il coro del Domepark ha fatto il giro della rete, senza una risposta. Il club Skyfield protesta."
+   ],
+   "fotoRapporto": 1,
+   "verbale": "05VerbaleDegenerato fuori campoSkyfield AthleticcontroDomepark VillaSenza steward lo stadio è diventato terra di nessuno: una notte di discussioni. Il sindacato dice che servono più steward. Ha ragione, e non consola.Episodio fallito: riparti dall'ondata 3, dove si è deciso, o da capo.CondividiRiparti dall'ondata 3RicominciaCosa ti ha aiutatoFai uscire tutti verso la strada da SkyfieldOndata 4 · −2 pressione su Torne",
+   "secondiReali": 43,
+   "esito": "Degenerato fuori campo",
+   "stelle": null,
+   "registrato": false
+  },
+  {
+   "ep": "e05",
+   "modo": "giusta",
+   "tentativo": 2,
+   "pause": 7,
+   "mosseFatte": 0,
+   "mosseSuggerite": 0,
+   "morsi": 0,
+   "risposte": 7,
+   "scene": 19,
+   "ecc": 50,
+   "testi": [],
+   "verbale": "05VerbaleContenuto a faticaSkyfield AthleticcontroDomepark VillaCode lunghe, curve senza controllo, qualche spintone all'uscita, nessun ferito. Sindacato e comando si accusano a vicenda. Tu sei nel mezzo, come al solito.Nuovo miglior risultato per questo episodio.CondividiCosa ti ha aiutatoFallo fare inversione sul postoOndata 4 · −1 pressione su Strada da Skyfield, alza la tensione su Strada da SkyfieldCosa ti ha pe",
+   "secondiReali": 19,
+   "esito": "Contenuto a fatica",
+   "stelle": 1,
+   "registrato": true
+  },
+  {
+   "ep": "e06",
+   "modo": "giusta",
+   "tentativo": 1,
+   "pause": 15,
+   "mosseFatte": 0,
+   "mosseSuggerite": 0,
+   "morsi": 1,
+   "risposte": 15,
+   "scene": 39,
+   "ecc": 73,
+   "testi": [
+    "Tensione +1, Piazza del concerto. Varrone & Figli non ha gradito: gli addetti al palco rallentano tutto, e la piazza si spazientisce."
+   ],
+   "verbale": "06VerbaleContenutoKiln UnitedcontroGarden AlbionVentimila persone, due eventi, un viale, nessun danno. Il comune ringrazia gli organizzatori del concerto e, in fondo alla lettera, anche te. Malvasi ritaglia il fondo.Nuovo miglior risultato per questo episodio.CondividiCosa ti ha aiutatoChiedi navette straordinarie al comuneOndata 4 · −2 pressione su Piazzale dello stadio, −1 fiduciaCosa ti ha penalizzatoNessuna scelt",
+   "secondiReali": 41,
+   "esito": "Contenuto",
+   "stelle": 3,
+   "registrato": true
+  }
+ ],
+ "errori": []
+}

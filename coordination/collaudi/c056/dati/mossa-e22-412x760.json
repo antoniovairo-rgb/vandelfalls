@@ -1,0 +1,45 @@
+{
+ "ep": "e22",
+ "vp": "412x760",
+ "tast": false,
+ "pause": 16,
+ "possibili": 12,
+ "mosse": 9,
+ "difetti": [],
+ "note": [
+  "ricarica a mossa fatta: identica"
+ ],
+ "sceneChiamata": 16,
+ "chiamataConMossa": 0,
+ "ultimaConMossa": 0,
+ "ultime": 4,
+ "mossePesano": 0,
+ "nomi": [
+  "porta qui: Curva Kiln",
+  "porta qui: Curva Skyfield",
+  "porta qui: Piazzale dello stadio",
+  "porta qui: Strada da Kiln",
+  "sposta Steward da Curva Kiln",
+  "sposta Mediatore da Curva Kiln",
+  "sposta Squadre da Piazzale dello stadio",
+  "sposta Squadre da Strada da Kiln",
+  "sposta Steward da Strada da Kiln",
+  "sposta Squadre da Piazza del municipio",
+  "sposta Steward da Piazza del municipio",
+  "porta qui: Piazza del municipio"
+ ],
+ "tabStop": null,
+ "ricPrima": {
+  "scena": "chiamata",
+  "ind": null,
+  "attivi": 0,
+  "stessoSalvataggio": true
+ },
+ "ricDopo": {
+  "scena": "chiamata",
+  "ind": null,
+  "attivi": 0
+ },
+ "errori": [],
+ "fine": "verbale"
+}

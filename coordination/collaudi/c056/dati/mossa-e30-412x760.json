@@ -1,0 +1,51 @@
+{
+ "ep": "e30",
+ "vp": "412x760",
+ "tast": false,
+ "pause": 16,
+ "possibili": 12,
+ "mosse": 11,
+ "difetti": [
+  "e30 412x760: pausa 3:10 il bersaglio «piazzale» [184,204,44,44] è coperto al centro da mediatore@piazza_municipio (5 punti: mediatore@piazza_municipio,ok,mediatore@piazza_municipio,ok,ok)",
+  "e30 412x760: dopo la mossa mediatore@piazza_municipio→piazzale il salvataggio non coincide col motore",
+  "e30 412x760: dopo la mossa indicatore «puoi», 7 unità ancora toccabili",
+  "e30 412x760: seconda mossa nella stessa pausa riuscita"
+ ],
+ "note": [
+  "ricarica a mossa fatta: identica"
+ ],
+ "sceneChiamata": 16,
+ "chiamataConMossa": 0,
+ "ultimaConMossa": 0,
+ "ultime": 4,
+ "mossePesano": 0,
+ "nomi": [
+  "porta qui: Piazzale dello stadio",
+  "porta qui: Strada da Kiln",
+  "porta qui: Vie del quartiere",
+  "porta qui: Piazza del municipio",
+  "sposta Squadre da Piazzale dello stadio",
+  "sposta Steward da Piazzale dello stadio",
+  "sposta Mediatore da Piazzale dello stadio",
+  "sposta Squadre da Viale della stazione",
+  "sposta Squadre da Vie del quartiere",
+  "sposta Steward da Vie del quartiere",
+  "porta qui: Viale della stazione",
+  "sposta Squadre da Piazza del municipio"
+ ],
+ "tabStop": null,
+ "ricPrima": {
+  "scena": "chiamata",
+  "ind": null,
+  "attivi": 0,
+  "stessoSalvataggio": true
+ },
+ "ricDopo": {
+  "scena": "chiamata",
+  "ind": null,
+  "attivi": 0
+ },
+ "coperti": 1,
+ "errori": [],
+ "fine": "verbale"
+}

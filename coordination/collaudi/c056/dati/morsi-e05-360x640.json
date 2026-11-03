@@ -1,0 +1,61 @@
+{
+ "ep": "e05",
+ "vp": "360x640",
+ "chiusure": 4,
+ "morsiAttesi": 2,
+ "morsiVisti": 2,
+ "difetti": [],
+ "esempi": [
+  {
+   "ond": 2,
+   "scelta": "sindacato/impegno_firmato",
+   "costo": "Tensione +2, Tornelli.",
+   "testo": "Tensione +2, Tornelli. Il comando non riconosce l'impegno firmato: ai tornelli il picchetto lo sa, e si scalda."
+  },
+  {
+   "ond": 3,
+   "scelta": "megafono/lascia_megafono",
+   "costo": "Pressione +2, Tornelli.",
+   "testo": "Pressione +2, Tornelli. Il picchetto col megafono ha fatto proseliti: ai tornelli la coda si ferma ad ascoltare."
+  }
+ ],
+ "eccMax": 0,
+ "comodeScelte": 0,
+ "episodio": {
+  "migliore": {
+   "esito": "contenuto",
+   "fallita": false,
+   "stelle": 2
+  },
+  "tentativi": 1,
+  "variabili_prima": {
+   "tensione_max": 3,
+   "credito": 4,
+   "informatore_pagato": true,
+   "presidente_incontrato": false,
+   "furgone_visto": true,
+   "rapporto_dessi": "neutro",
+   "testimone": "nessuno",
+   "busta": "nessuna",
+   "pista_cattura": "nessuna",
+   "fascicolo": "nessuno",
+   "sospetti_talpa": 0,
+   "carte": "nessuna"
+  },
+  "variabili_dopo": {
+   "tensione_max": 3,
+   "credito": 5,
+   "informatore_pagato": true,
+   "presidente_incontrato": false,
+   "furgone_visto": true,
+   "rapporto_dessi": "neutro",
+   "testimone": "nessuno",
+   "busta": "nessuna",
+   "pista_cattura": "nessuna",
+   "fascicolo": "nessuno",
+   "sospetti_talpa": 0,
+   "carte": "nessuna"
+  }
+ },
+ "errori": []
+}

@@ -1,0 +1,61 @@
+{
+ "ep": "e09",
+ "vp": "360x640",
+ "chiusure": 4,
+ "morsiAttesi": 2,
+ "morsiVisti": 2,
+ "difetti": [],
+ "esempi": [
+  {
+   "ond": 2,
+   "scelta": "furgone_coinvolto/uno_dei_dodici",
+   "costo": "Tensione +1, Tangenziale.",
+   "testo": "Tensione +1, Tangenziale. «Uno dei dodici»: in coda lo dicono ad alta voce, e chi aspetta in tangenziale si innervosisce."
+  },
+  {
+   "ond": 4,
+   "scelta": "due_furgoni/ignora_foto",
+   "costo": "Pressione +1, Piazzale dello stadio.",
+   "testo": "Pressione +1, Piazzale dello stadio. La foto del furgone ammaccato gira fra i tifosi: sul piazzale si formano capannelli."
+  }
+ ],
+ "eccMax": 0,
+ "comodeScelte": 2,
+ "episodio": {
+  "migliore": {
+   "esito": "contenuto",
+   "fallita": false,
+   "stelle": 2
+  },
+  "tentativi": 1,
+  "variabili_prima": {
+   "tensione_max": 1,
+   "credito": 2,
+   "informatore_pagato": true,
+   "presidente_incontrato": false,
+   "furgone_visto": true,
+   "rapporto_dessi": "rispetto",
+   "testimone": "nessuno",
+   "busta": "nessuna",
+   "pista_cattura": "nessuna",
+   "fascicolo": "nessuno",
+   "sospetti_talpa": 0,
+   "carte": "nessuna"
+  },
+  "variabili_dopo": {
+   "tensione_max": 2,
+   "credito": 5,
+   "informatore_pagato": true,
+   "presidente_incontrato": false,
+   "furgone_visto": true,
+   "rapporto_dessi": "rispetto",
+   "testimone": "nessuno",
+   "busta": "nessuna",
+   "pista_cattura": "nessuna",
+   "fascicolo": "nessuno",
+   "sospetti_talpa": 0,
+   "carte": "nessuna"
+  }
+ },
+ "errori": []
+}

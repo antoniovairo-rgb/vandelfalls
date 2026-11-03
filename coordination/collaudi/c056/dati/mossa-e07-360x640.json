@@ -1,0 +1,47 @@
+{
+ "ep": "e07",
+ "vp": "360x640",
+ "tast": false,
+ "pause": 16,
+ "possibili": 12,
+ "mosse": 7,
+ "difetti": [],
+ "note": [
+  "ricarica a mossa fatta: identica"
+ ],
+ "sceneChiamata": 16,
+ "chiamataConMossa": 0,
+ "ultimaConMossa": 0,
+ "ultime": 4,
+ "mossePesano": 0,
+ "nomi": [
+  "porta qui: Piazzale dello stadio",
+  "porta qui: Parcheggi",
+  "porta qui: Curva ospiti",
+  "porta qui: Strada da Skyfield",
+  "sposta Squadre da Viale della stazione",
+  "sposta Steward da Viale della stazione",
+  "sposta Mediatore da Viale della stazione",
+  "sposta Steward da Piazzale dello stadio",
+  "sposta Squadre da Parcheggi",
+  "sposta Steward da Parcheggi",
+  "porta qui: Viale della stazione",
+  "sposta Squadre da Strada da Skyfield"
+ ],
+ "tabStop": null,
+ "ricPrima": {
+  "scena": "chiamata",
+  "ind": null,
+  "attivi": 0,
+  "stessoSalvataggio": true
+ },
+ "ricDopo": {
+  "scena": "chiamata",
+  "ind": null,
+  "attivi": 0
+ },
+ "errori": [
+  "TypeError: Cannot read properties of null (reading 'addChild')\n    at http://127.0.0.1:43345/assets/StratoCitta-Bb6CVRzJ.js:1:1037\n    at Er (http://127.0.0.1:43345/assets/sfondo-Du4TPTOt.js:238:60202)\n    at ri (http://127.0.0.1:43345/assets/sfondo-Du4TPTOt.js:238:72020)\n    at ni (http://127.0.0.1:43345/assets/sfondo-Du4TPTOt.js:238:71904)\n    at ri (http://127.0.0.1:43345/assets/sfondo-Du4TPTOt.js:238:72698)\n    at ni (http://127.0.0.1:43345/assets/sfondo-Du4TPTOt.js:238:71904)\n    at ri (http://127.0.0.1:43345/assets/sfondo-Du4TPTOt.js:238:72698)\n    at ni (http://127.0.0.1:43345/assets/sfondo-Du4TPTOt.js:238:71904)\n    at ri (http://127.0.0.1:43345/assets/sfondo-Du4TPTOt.js:238:72698)\n    at ni (http://127.0.0.1:43345/assets/sfondo-Du4TPTOt.js:238:71904) {componentStack: \n    at v (http://127.0.0.1:43345/assets/StratoCit….0.0.1:43345/assets/sfondo-Du4TPTOt.js:231:15851)}"
+ ],
+ "fine": "verbale"
+}

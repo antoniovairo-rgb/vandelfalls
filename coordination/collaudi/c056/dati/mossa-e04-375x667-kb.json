@@ -1,0 +1,39 @@
+{
+ "ep": "e04",
+ "vp": "375x667",
+ "tast": true,
+ "pause": 12,
+ "possibili": 9,
+ "mosse": 6,
+ "difetti": [],
+ "note": [
+  "ricarica a mossa fatta: identica"
+ ],
+ "sceneChiamata": 12,
+ "chiamataConMossa": 0,
+ "ultimaConMossa": 0,
+ "ultime": 3,
+ "mossePesano": 0,
+ "nomi": [
+  "porta qui: Strada da Kiln",
+  "porta qui: Le fonderie",
+  "porta qui: Parcheggi",
+  "porta qui: Piazzale dello stadio",
+  "sposta Squadre da Mercato rionale",
+  "sposta Steward da Mercato rionale",
+  "sposta Mediatore da Mercato rionale",
+  "sposta Squadre da Strada da Kiln",
+  "sposta Steward da Strada da Kiln",
+  "sposta Steward da Parcheggi",
+  "porta qui: Mercato rionale",
+  "sposta Steward da Le fonderie"
+ ],
+ "tabStop": null,
+ "ricDopo": {
+  "scena": "chiamata",
+  "ind": null,
+  "attivi": 0
+ },
+ "errori": [],
+ "fine": "verbale"
+}

@@ -1,0 +1,39 @@
+{
+ "ep": "e14",
+ "vp": "375x667",
+ "tast": true,
+ "pause": 17,
+ "possibili": 13,
+ "mosse": 8,
+ "difetti": [],
+ "note": [
+  "ricarica a mossa fatta: identica"
+ ],
+ "sceneChiamata": 17,
+ "chiamataConMossa": 0,
+ "ultimaConMossa": 0,
+ "ultime": 4,
+ "mossePesano": 0,
+ "nomi": [
+  "porta qui: Biglietteria",
+  "porta qui: Curva Skyfield",
+  "porta qui: Curva ospiti",
+  "porta qui: Piazzale dello stadio",
+  "sposta Squadre da Biglietteria",
+  "sposta Steward da Biglietteria",
+  "sposta Mediatore da Biglietteria",
+  "sposta Squadre da Tornelli",
+  "sposta Steward da Tornelli",
+  "porta qui: Tornelli",
+  "sposta Squadre da Piazzale dello stadio",
+  "sposta Squadre da Curva Skyfield"
+ ],
+ "tabStop": null,
+ "ricDopo": {
+  "scena": "chiamata",
+  "ind": null,
+  "attivi": 0
+ },
+ "errori": [],
+ "fine": "verbale"
+}

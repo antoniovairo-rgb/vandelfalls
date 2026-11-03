@@ -1,0 +1,45 @@
+{
+ "ep": "e02",
+ "vp": "375x667",
+ "tast": false,
+ "pause": 19,
+ "possibili": 15,
+ "mosse": 13,
+ "difetti": [],
+ "note": [
+  "ricarica a mossa fatta: identica"
+ ],
+ "sceneChiamata": 19,
+ "chiamataConMossa": 0,
+ "ultimaConMossa": 0,
+ "ultime": 4,
+ "mossePesano": 0,
+ "nomi": [
+  "porta qui: Viale della stazione",
+  "porta qui: Tornelli",
+  "porta qui: Curva ospiti",
+  "porta qui: Curva Skyfield",
+  "sposta Squadre da Stazione",
+  "sposta Steward da Stazione",
+  "sposta Mediatore da Stazione",
+  "sposta Squadre da Viale della stazione",
+  "porta qui: Stazione",
+  "sposta Squadre da Curva Skyfield",
+  "sposta Squadre da Tornelli",
+  "sposta Steward da Tornelli"
+ ],
+ "tabStop": null,
+ "ricPrima": {
+  "scena": "chiamata",
+  "ind": null,
+  "attivi": 0,
+  "stessoSalvataggio": true
+ },
+ "ricDopo": {
+  "scena": "chiamata",
+  "ind": null,
+  "attivi": 0
+ },
+ "errori": [],
+ "fine": "verbale"
+}

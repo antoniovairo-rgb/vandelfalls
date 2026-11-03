@@ -1,0 +1,45 @@
+{
+ "ep": "e30",
+ "vp": "375x667",
+ "tast": false,
+ "pause": 16,
+ "possibili": 12,
+ "mosse": 7,
+ "difetti": [],
+ "note": [
+  "ricarica a mossa fatta: identica"
+ ],
+ "sceneChiamata": 16,
+ "chiamataConMossa": 0,
+ "ultimaConMossa": 0,
+ "ultime": 4,
+ "mossePesano": 0,
+ "nomi": [
+  "porta qui: Piazzale dello stadio",
+  "porta qui: Strada da Kiln",
+  "porta qui: Vie del quartiere",
+  "porta qui: Piazza del municipio",
+  "sposta Squadre da Piazzale dello stadio",
+  "sposta Steward da Piazzale dello stadio",
+  "sposta Mediatore da Piazzale dello stadio",
+  "sposta Squadre da Viale della stazione",
+  "sposta Squadre da Vie del quartiere",
+  "sposta Steward da Vie del quartiere",
+  "porta qui: Viale della stazione",
+  "sposta Squadre da Strada da Kiln"
+ ],
+ "tabStop": null,
+ "ricPrima": {
+  "scena": "chiamata",
+  "ind": null,
+  "attivi": 0,
+  "stessoSalvataggio": true
+ },
+ "ricDopo": {
+  "scena": "chiamata",
+  "ind": null,
+  "attivi": 0
+ },
+ "errori": [],
+ "fine": "verbale"
+}

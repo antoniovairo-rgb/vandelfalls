@@ -1,0 +1,62 @@
+{
+ "vecchi": [
+  {
+   "ep": "e01",
+   "da": "0.58.0",
+   "save_version": 3,
+   "ondata": 1,
+   "scelte": 5,
+   "mosse": "(assente)",
+   "seme": 390310819,
+   "riprendeScena": "chiamata",
+   "chiamataUI": "chiamata-striscione",
+   "chiamataAttesaDalMotore": "striscione",
+   "dopo": {
+    "save_version": 3,
+    "disposizioneUguale": true,
+    "scelteUguali": true,
+    "seme": true
+   },
+   "finito": "verbale",
+   "pauseMossa": 9,
+   "mosseFatte": 9,
+   "erroriConsole": [],
+   "finale": {
+    "save_version": 4,
+    "game_version": "0.58.0",
+    "episodio": {
+     "esito": "contenuto",
+     "fallita": false,
+     "stelle": 2
+    }
+   }
+  },
+  {
+   "ep": "e03",
+   "da": "0.59.0",
+   "save_version": 3,
+   "ondata": 2,
+   "scelte": 7,
+   "mosse": "(assente)",
+   "seme": 3122671484,
+   "riprendeScena": "chiamata",
+   "chiamataUI": "chiamata-torcia_casa",
+   "chiamataAttesaDalMotore": "torcia_casa",
+   "dopo": {
+    "save_version": 3,
+    "disposizioneUguale": true,
+    "scelteUguali": true,
+    "seme": true
+   },
+   "finito": "verbale",
+   "pauseMossa": 7,
+   "mosseFatte": 7,
+   "erroriConsole": [],
+   "finale": {
+    "save_version": 4,
+    "game_version": "0.59.0",
+    "episodio": null
+   }
+  }
+ ]
+}

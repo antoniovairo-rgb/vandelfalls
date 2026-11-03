@@ -1,0 +1,45 @@
+{
+ "ep": "e07",
+ "vp": "412x760",
+ "tast": false,
+ "pause": 16,
+ "possibili": 12,
+ "mosse": 8,
+ "difetti": [],
+ "note": [
+  "ricarica a mossa fatta: identica"
+ ],
+ "sceneChiamata": 16,
+ "chiamataConMossa": 0,
+ "ultimaConMossa": 0,
+ "ultime": 4,
+ "mossePesano": 0,
+ "nomi": [
+  "porta qui: Piazzale dello stadio",
+  "porta qui: Parcheggi",
+  "porta qui: Curva ospiti",
+  "porta qui: Strada da Skyfield",
+  "sposta Squadre da Viale della stazione",
+  "sposta Steward da Viale della stazione",
+  "sposta Mediatore da Viale della stazione",
+  "sposta Steward da Piazzale dello stadio",
+  "sposta Squadre da Parcheggi",
+  "sposta Steward da Parcheggi",
+  "sposta Mediatore da Parcheggi",
+  "porta qui: Viale della stazione"
+ ],
+ "tabStop": null,
+ "ricPrima": {
+  "scena": "chiamata",
+  "ind": null,
+  "attivi": 0,
+  "stessoSalvataggio": true
+ },
+ "ricDopo": {
+  "scena": "chiamata",
+  "ind": null,
+  "attivi": 0
+ },
+ "errori": [],
+ "fine": "verbale"
+}

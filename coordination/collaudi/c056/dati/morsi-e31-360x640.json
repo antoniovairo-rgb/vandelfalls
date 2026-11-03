@@ -1,0 +1,67 @@
+{
+ "ep": "e31",
+ "vp": "360x640",
+ "chiusure": 4,
+ "morsiAttesi": 3,
+ "morsiVisti": 3,
+ "difetti": [],
+ "esempi": [
+  {
+   "ond": 2,
+   "scelta": "comando_vuole/copia_prima",
+   "costo": "Tensione +1, Tribuna autorità.",
+   "testo": "Tensione +1, Tribuna autorità. Il comando aspetta ancora la copia dell'indice e telefona in tribuna, davanti a tutti."
+  },
+  {
+   "ond": 4,
+   "scelta": "cronista_cartella/dai_cronista",
+   "costo": "Fiducia −2.",
+   "testo": "Fiducia −2. La notizia del fascicolo è in rete prima del fischio. Il comando la legge lì, e chiama."
+  },
+  {
+   "ond": 4,
+   "scelta": "segreteria_chiede/rifiuta_segreteria",
+   "costo": "Pressione +3, Tribuna autorità.",
+   "testo": "Pressione +3, Tribuna autorità. Segreteria a mani vuote: chi voleva il fascicolo manda gente in tribuna a chiederlo di persona."
+  }
+ ],
+ "eccMax": 0,
+ "comodeScelte": 2,
+ "episodio": {
+  "migliore": {
+   "esito": "contenuto",
+   "fallita": false,
+   "stelle": 2
+  },
+  "tentativi": 1,
+  "variabili_prima": {
+   "tensione_max": 2,
+   "credito": 3,
+   "informatore_pagato": true,
+   "presidente_incontrato": false,
+   "furgone_visto": true,
+   "rapporto_dessi": "rispetto",
+   "testimone": "esposto",
+   "busta": "consegnata",
+   "pista_cattura": "nessuna",
+   "fascicolo": "nessuno",
+   "sospetti_talpa": 3,
+   "carte": "nessuna"
+  },
+  "variabili_dopo": {
+   "tensione_max": 2,
+   "credito": 5,
+   "informatore_pagato": true,
+   "presidente_incontrato": false,
+   "furgone_visto": true,
+   "rapporto_dessi": "rispetto",
+   "testimone": "esposto",
+   "busta": "consegnata",
+   "pista_cattura": "nessuna",
+   "fascicolo": "procura",
+   "sospetti_talpa": 3,
+   "carte": "nessuna"
+  }
+ },
+ "errori": []
+}

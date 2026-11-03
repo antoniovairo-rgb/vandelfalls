@@ -1,0 +1,155 @@
+[
+ {
+  "ond": 1,
+  "n": 1,
+  "ultima": "palco",
+  "e0": 30,
+  "senzaRadio": 30,
+  "testo": "Concedi una squadra al palcoIntanto… Una squadra davanti alle transenne del palco. Il cantante le de",
+  "radio": "Radio: La piazza si calma, ma ti costa una squadra fino a fine serata. Ti costa 1 squadra dalla prossima ondata"
+ },
+ {
+  "ond": 1,
+  "n": 2,
+  "ultima": "sponsor",
+  "e0": 73,
+  "senzaRadio": 73,
+  "testo": "Chiama l'impresa: chiedi di anticipareIntanto… Risponde Tullio Varrone in persona, gentilissimo, e a",
+  "radio": "Radio: La piazza si alleggerisce; Varrone non gradisce."
+ },
+ {
+  "ond": 1,
+  "n": 3,
+  "ultima": "imp_allarme",
+  "e0": 30,
+  "senzaRadio": 30,
+  "testo": "Fai spegnere la provaIntanto… La prova si ferma. La sirena tace, e chi era venuto per sentire il sou",
+  "radio": "Radio: Piazza più calma; chi era venuto per la prova fischia."
+ },
+ {
+  "ond": 1,
+  "n": 4,
+  "ultima": "corteo_cinderwick",
+  "e0": 30,
+  "senzaRadio": 30,
+  "testo": "Manda il mediatore dal corteoIntanto… Il mediatore li convince a cantare un coro solo per isolato. N",
+  "radio": "Radio: Il viale si calma, ma il mediatore resta con il corteo fino a sera. Ti costa 1 mediatore dalla prossima ondata"
+ },
+ {
+  "ond": 1,
+  "n": 5,
+  "ultima": "ospiti_concerto",
+  "e0": 30,
+  "senzaRadio": 30,
+  "testo": "Un salto e poi allo stadioIntanto… Duecento sciarpe blu e rosse sotto il palco. Il cantante non sa a",
+  "radio": "Radio: La piazza si affolla."
+ },
+ {
+  "ond": 2,
+  "n": 6,
+  "ultima": "volume",
+  "e0": 30,
+  "senzaRadio": 30,
+  "testo": "Lascia la gara di volumeIntanto… Lo stadio vince ai punti. La curva Kiln festeggia la vittoria sbagl",
+  "radio": "Radio: Nessun costo subito; la curva Kiln si scalda."
+ },
+ {
+  "ond": 2,
+  "n": 7,
+  "ultima": "fumo_viola",
+  "e0": 9,
+  "senzaRadio": 9,
+  "testo": "Lascia correreIntanto… In piazza applaudono il fumo. Il Garden si sente un gruppo rock.",
+  "radio": "Radio: Gli organizzatori ti danno fiducia; la curva ospiti si infiamma."
+ },
+ {
+  "ond": 2,
+  "n": 8,
+  "ultima": "imp_palloncini",
+  "e0": 32,
+  "senzaRadio": 32,
+  "testo": "Lascia fare al ventoIntanto… Il vento li porta tutti in curva Kiln. La curva li fa scoppiare a tempo",
+  "radio": "Radio: Nessuno impegnato; si gioca fra i palloncini."
+ },
+ {
+  "ond": 2,
+  "n": 9,
+  "ultima": "saluto_cantante",
+  "e0": 50,
+  "senzaRadio": 50,
+  "testo": "Chiedi al cantante di salutare anche gli ospitiIntanto… «E un saluto anche al Garden!» Dalle fonderi",
+  "radio": "Radio: La curva ospiti si calma, ma la curva Kiln si offende."
+ },
+ {
+  "ond": 2,
+  "n": 10,
+  "ultima": "pass_falsi",
+  "e0": 30,
+  "senzaRadio": 30,
+  "testo": "Fai fermare i venditoriIntanto… Due venditori fermati, venti pass sequestrati. Il terzo scappa verso",
+  "radio": "Radio: La piazza si calma un po', ma uno steward ci resta per tutta la sera. Ti costa 1 steward dalla prossima ondata"
+ },
+ {
+  "ond": 3,
+  "n": 11,
+  "ultima": "bis",
+  "e0": 9,
+  "senzaRadio": 9,
+  "testo": "Bis lungo, che finisca dopo la partitaIntanto… Bis lungo. La piazza canta, lo stadio canta, il viale",
+  "radio": "Radio: Gli organizzatori ti danno fiducia; la piazza resta piena."
+ },
+ {
+  "ond": 3,
+  "n": 12,
+  "ultima": "imp_corrente",
+  "e0": 32,
+  "senzaRadio": 32,
+  "testo": "Fai tenere libero il fronte del palcoIntanto… La squadra si mette davanti al palco. Il pubblico cant",
+  "radio": "Radio: Piazza in ordine; chi spinge per avvicinarsi resta fermo sul viale."
+ },
+ {
+  "ond": 3,
+  "n": 13,
+  "ultima": "rigore6",
+  "e0": 32,
+  "senzaRadio": 32,
+  "testo": "Avvisa la curva Kiln dallo speakerIntanto… L'avviso rimbomba sotto la balaustra. La curva cambia ber",
+  "radio": "Radio: La curva si calma, ma l'avviso ti costa fiducia."
+ },
+ {
+  "ond": 4,
+  "n": 14,
+  "ultima": "risultato_bislungo",
+  "e0": 7,
+  "senzaRadio": 7,
+  "testo": "Fai uscire prima lo stadioIntanto… Lo stadio esce. La piazza aspetta, e canta per ingannare l'attesa",
+  "radio": "Radio: Il viale si alleggerisce, ma la piazza aspetta e si scalda."
+ },
+ {
+  "ond": 4,
+  "n": 15,
+  "ultima": "poche_navette",
+  "e0": 28,
+  "senzaRadio": 28,
+  "testo": "Chiedi navette straordinarie al comuneIntanto… Tre navette in più. In comune qualcuno firma, sbuffan",
+  "radio": "Radio: Il piazzale si svuota, ma il comune ti toglie fiducia."
+ },
+ {
+  "ond": 4,
+  "n": 16,
+  "ultima": "imp_lavaggio",
+  "e0": 52,
+  "senzaRadio": 52,
+  "testo": "Fai girare le lance degli addetti verso il vialeIntanto… Gli addetti girano le lance. La piazza esce",
+  "radio": "Radio: Piazza più scorrevole; gli schizzi passano sul viale, e lì si protesta."
+ },
+ {
+  "ond": 4,
+  "n": 17,
+  "ultima": "furgone_palco",
+  "e0": 32,
+  "senzaRadio": 32,
+  "testo": "Annota tutto nel rapportoIntanto… Malvasi annota l'ora e il posto: dietro un palco pagato dall'impre",
+  "radio": "Radio: Il comando ti dà fiducia; il viale resta un po' scoperto."
+ }
+]

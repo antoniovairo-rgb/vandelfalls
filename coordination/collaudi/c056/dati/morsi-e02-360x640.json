@@ -1,0 +1,73 @@
+{
+ "ep": "e02",
+ "vp": "360x640",
+ "chiusure": 4,
+ "morsiAttesi": 4,
+ "morsiVisti": 4,
+ "difetti": [],
+ "esempi": [
+  {
+   "ond": 2,
+   "scelta": "responsabile_v/non_fidarti",
+   "costo": "Tensione +3, Viale della stazione.",
+   "testo": "Tensione +3, Viale della stazione. Il responsabile del Railhead, offeso, l'ha detto ai suoi: sul viale della stazione l'aria si scalda."
+  },
+  {
+   "ond": 3,
+   "scelta": "secondo_treno_v/normale",
+   "costo": "Squadre −2.",
+   "testo": "Squadre −2. Il vagone col finestrino rotto va portato in deposito: una squadra è impegnata fino a fine serata."
+  },
+  {
+   "ond": 4,
+   "scelta": "striscione_ospiti_v/ignora_str",
+   "costo": "Pressione +3, Curva ospiti.",
+   "testo": "Pressione +3, Curva ospiti. «Railhead non dimentica»: ora si capisce cosa. La curva ospiti lo canta, e si muove."
+  },
+  {
+   "ond": 4,
+   "scelta": "responsabile_saluta/rifiuta_saluto",
+   "costo": "Fiducia −2.",
+   "testo": "Fiducia −2. Senza saluto, in tv il responsabile del Railhead parla di «accoglienza fredda». Il comando chiama."
+  }
+ ],
+ "eccMax": 0,
+ "comodeScelte": 3,
+ "episodio": {
+  "migliore": {
+   "esito": "contenuto",
+   "fallita": false,
+   "stelle": 3
+  },
+  "tentativi": 1,
+  "variabili_prima": {
+   "tensione_max": 1,
+   "credito": 6,
+   "informatore_pagato": true,
+   "presidente_incontrato": false,
+   "furgone_visto": false,
+   "rapporto_dessi": "neutro",
+   "testimone": "nessuno",
+   "busta": "nessuna",
+   "pista_cattura": "nessuna",
+   "fascicolo": "nessuno",
+   "sospetti_talpa": 0,
+   "carte": "nessuna"
+  },
+  "variabili_dopo": {
+   "tensione_max": 3,
+   "credito": 8,
+   "informatore_pagato": true,
+   "presidente_incontrato": false,
+   "furgone_visto": true,
+   "rapporto_dessi": "neutro",
+   "testimone": "nessuno",
+   "busta": "nessuna",
+   "pista_cattura": "nessuna",
+   "fascicolo": "nessuno",
+   "sospetti_talpa": 0,
+   "carte": "nessuna"
+  }
+ },
+ "errori": []
+}

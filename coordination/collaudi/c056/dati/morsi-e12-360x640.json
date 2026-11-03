@@ -1,0 +1,61 @@
+{
+ "ep": "e12",
+ "vp": "360x640",
+ "chiusure": 4,
+ "morsiAttesi": 2,
+ "morsiVisti": 2,
+ "difetti": [],
+ "esempi": [
+  {
+   "ond": 3,
+   "scelta": "salvezza/cordone12",
+   "costo": "Squadre −1.",
+   "testo": "Squadre −1. Il Southwind prende il cordone come un affronto: una squadra resta in curva ospiti fino alla fine."
+  },
+  {
+   "ond": 4,
+   "scelta": "rinforzi/chiudi_cancelli",
+   "costo": "Pressione +1, Piazzale dello stadio.",
+   "testo": "Pressione +1, Piazzale dello stadio. Chi è rimasto fuori dai cancelli preme sulle grate: al piazzale si spinge per rientrare."
+  }
+ ],
+ "eccMax": 0,
+ "comodeScelte": 0,
+ "episodio": {
+  "migliore": {
+   "esito": "contenuto",
+   "fallita": false,
+   "stelle": 2
+  },
+  "tentativi": 1,
+  "variabili_prima": {
+   "tensione_max": 3,
+   "credito": 6,
+   "informatore_pagato": true,
+   "presidente_incontrato": false,
+   "furgone_visto": true,
+   "rapporto_dessi": "rispetto",
+   "testimone": "nessuno",
+   "busta": "nessuna",
+   "pista_cattura": "nessuna",
+   "fascicolo": "nessuno",
+   "sospetti_talpa": 0,
+   "carte": "nessuna"
+  },
+  "variabili_dopo": {
+   "tensione_max": 3,
+   "credito": 5,
+   "informatore_pagato": true,
+   "presidente_incontrato": false,
+   "furgone_visto": true,
+   "rapporto_dessi": "rispetto",
+   "testimone": "nessuno",
+   "busta": "nessuna",
+   "pista_cattura": "nessuna",
+   "fascicolo": "nessuno",
+   "sospetti_talpa": 0,
+   "carte": "nessuna"
+  }
+ },
+ "errori": []
+}

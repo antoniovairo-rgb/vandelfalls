@@ -1,0 +1,173 @@
+[
+ {
+  "ond": 1,
+  "n": 1,
+  "ultima": "ritardo",
+  "e0": 34,
+  "senzaRadio": 34,
+  "testo": "Scorta subito il primo gruppo allo stadioIntanto… Una squadra accompagna il primo gruppo. Resterà co",
+  "radio": "Radio: Il viale si calma, ma ti costa una squadra. Ti costa 1 squadra dalla prossima ondataPuoi spostare una squadra: tocca un'unità sulla m"
+ },
+ {
+  "ond": 1,
+  "n": 2,
+  "ultima": "responsabile_v",
+  "e0": 34,
+  "senzaRadio": 34,
+  "testo": "Ringrazia e tieni il viale come l'hai dispostoIntanto… «Ne terremo conto», dice il responsabile. Dal",
+  "radio": "Radio: Il club si offende; sul campo non cambia nulla.Puoi spostare una squadra: tocca un'unità sulla mappa, poi il settore."
+ },
+ {
+  "ond": 1,
+  "n": 3,
+  "ultima": "imp_banda",
+  "e0": 34,
+  "senzaRadio": 34,
+  "testo": "Fai suonare la banda davanti alla stazioneIntanto… La banda suona in stazione; chi scende ci canta i",
+  "radio": "Radio: Viale sgombro; in stazione la banda suona per chi scende, e lì ci si scalda.Puoi spostare una squadra: tocca un'unità sulla mappa, po"
+ },
+ {
+  "ond": 1,
+  "n": 4,
+  "ultima": "selfie",
+  "e0": 34,
+  "senzaRadio": 34,
+  "testo": "Fai deviare il percorso lontano da SkyfieldIntanto… Il giro turistico diventa un giro dell'isolato. ",
+  "radio": "Radio: Skyfield si calma, il viale si allunga.Puoi spostare una squadra: tocca un'unità sulla mappa, poi il settore."
+ },
+ {
+  "ond": 1,
+  "n": 5,
+  "ultima": "biglietti_voce",
+  "e0": 57,
+  "senzaRadio": 57,
+  "testo": "Fai sapere ai venditori che li stai guardandoIntanto… Una voce alla fermata, qualche domanda. Gli af",
+  "radio": "Radio: Toglie lavoro ai tornelli."
+ },
+ {
+  "ond": 2,
+  "n": 6,
+  "ultima": "secondo_treno_v",
+  "e0": 0,
+  "senzaRadio": 0,
+  "testo": "Lascialo arrivare come previstoIntanto… Si aprono le porte, e la stazione si riempie di cori e di br",
+  "radio": "Radio: Nessun costo subito; la stazione si riempie.Puoi spostare una squadra: tocca un'unità sulla mappa, poi il settore."
+ },
+ {
+  "ond": 2,
+  "n": 7,
+  "ultima": "imp_piccione",
+  "e0": 34,
+  "senzaRadio": 34,
+  "testo": "Fai timbrare i tagliandi a mano, fuori dal gabbiottoIntanto… Un addetto timbra a mano su un tavolino",
+  "radio": "Radio: La coda ai tornelli si muove un poco; chi aspetta il timbro brontola.Puoi spostare una squadra: tocca un'unità sulla mappa, poi il se"
+ },
+ {
+  "ond": 2,
+  "n": 8,
+  "ultima": "tornelli_falsi",
+  "e0": 0,
+  "senzaRadio": 0,
+  "testo": "Chiudi un occhioIntanto… Tornelli sbloccati. In coda, chi ha il biglietto vero brontola.",
+  "radio": "Radio: I tornelli scorrono, ma la coda si scalda.Puoi spostare una squadra: tocca un'unità sulla mappa, poi il settore."
+ },
+ {
+  "ond": 2,
+  "n": 9,
+  "ultima": "corteo_viale",
+  "e0": 59,
+  "senzaRadio": 59,
+  "testo": "Manda il mediatore a trattare il percorsoIntanto… Il mediatore e il responsabile del Railhead disegn",
+  "radio": "Radio: Percorso concordato; il mediatore resta lì. Ti costa 1 mediatore dalla prossima ondataPuoi spostare una squadra: tocca un'unità sulla"
+ },
+ {
+  "ond": 2,
+  "n": 10,
+  "ultima": "comitato_quartiere",
+  "e0": 36,
+  "senzaRadio": 36,
+  "testo": "Presidio in curva Skyfield per calmare gli animiIntanto… Il quartiere si calma. In curva ospiti nota",
+  "radio": "Radio: Il quartiere si calma, la curva ospiti si irrita."
+ },
+ {
+  "ond": 3,
+  "n": 11,
+  "ultima": "striscione_ospiti_v",
+  "e0": 14,
+  "senzaRadio": 14,
+  "testo": "Lascialo dov'èIntanto… Resta appeso fino alla fine. Malvasi lo copia sul taccuino, per capirlo un gi",
+  "radio": "Radio: Nessun costo, nessun aiuto.Puoi spostare una squadra: tocca un'unità sulla mappa, poi il settore."
+ },
+ {
+  "ond": 3,
+  "n": 12,
+  "ultima": "imp_tornello",
+  "e0": 14,
+  "senzaRadio": 14,
+  "testo": "Lascia girare il tornello come vuoleIntanto… A fine giornata il tornello segna seicento ospiti su tr",
+  "radio": "Radio: Nessuno impegnato; il conteggio dei paganti lo sistemerà qualcuno domani.Puoi spostare una squadra: tocca un'unità sulla mappa, poi i"
+ },
+ {
+  "ond": 3,
+  "n": 13,
+  "ultima": "caldo_casa",
+  "e0": 10,
+  "senzaRadio": 10,
+  "testo": "Non intervenire: il mediatore è ancora col corteoIntanto… I cori continuano. Per ora restano cori.",
+  "radio": "Radio: Nessun costo, nessun aiuto: l'hai mandato col corteo del Railhead.Puoi spostare una squadra: tocca un'unità sulla mappa, poi il setto"
+ },
+ {
+  "ond": 3,
+  "n": 14,
+  "ultima": "biglietti_rete",
+  "e0": 38,
+  "senzaRadio": 38,
+  "testo": "Annota tutto nel rapportoIntanto… Malvasi scrive «furgone grigio» e sottolinea due volte. Il ragazzo",
+  "radio": "Radio: Un dettaglio in più nel rapporto."
+ },
+ {
+  "ond": 4,
+  "n": 15,
+  "ultima": "risultato",
+  "e0": 14,
+  "senzaRadio": 14,
+  "testo": "Fai uscire prima gli ospiti, scortatiIntanto… Gli ospiti escono per primi. La curva di casa li guard",
+  "radio": "Radio: Viale più sicuro, costa una squadra; Skyfield si offende. Le unità restano impegnate fino a fine serataPuoi spostare una squadra: toc"
+ },
+ {
+  "ond": 4,
+  "n": 16,
+  "ultima": "ultimo_treno",
+  "e0": 34,
+  "senzaRadio": 34,
+  "testo": "Chiedi alle ferrovie di trattenere il trenoIntanto… Il treno aspetta dieci minuti. Gli ultimi arriva",
+  "radio": "Radio: Stazione più calma; chi corre al treno si accalca nel viale.Puoi spostare una squadra: tocca un'unità sulla mappa, poi il settore."
+ },
+ {
+  "ond": 4,
+  "n": 17,
+  "ultima": "imp_divano",
+  "e0": 34,
+  "senzaRadio": 34,
+  "testo": "Fai caricare il divano sul furgone dai traslocatoriIntanto… Quattro traslocatori caricano il divano ",
+  "radio": "Radio: Marciapiede libero; la folla del viale si riversa ai tornelli dello stadio, che si scaldano.Puoi spostare una squadra: tocca un'unità"
+ },
+ {
+  "ond": 4,
+  "n": 18,
+  "ultima": "responsabile_saluta",
+  "e0": 14,
+  "senzaRadio": 14,
+  "testo": "Declina con gentilezzaIntanto… «Peccato», dice il responsabile. «La prossima volta, magari.»",
+  "radio": "Radio: Gli ospiti ci restano male; sul campo non cambia nulla.Puoi spostare una squadra: tocca un'unità sulla mappa, poi il settore."
+ },
+ {
+  "ond": 4,
+  "n": 19,
+  "ultima": "vetrine",
+  "e0": 0,
+  "senzaRadio": 0,
+  "testo": "Chiudi il viale fino alla partenzaIntanto… Viale chiuso. La stazione diventa l'unico posto dove anda",
+  "radio": "Radio: Viale chiuso; la stazione si affolla."
+ }
+]

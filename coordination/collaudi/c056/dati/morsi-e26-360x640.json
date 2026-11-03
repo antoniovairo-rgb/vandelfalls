@@ -1,0 +1,67 @@
+{
+ "ep": "e26",
+ "vp": "360x640",
+ "chiusure": 4,
+ "morsiAttesi": 3,
+ "morsiVisti": 3,
+ "difetti": [],
+ "esempi": [
+  {
+   "ond": 3,
+   "scelta": "fumogeni_finale/steward_fumogeni",
+   "costo": "Squadre −2.",
+   "testo": "Squadre −2. Gli steward fischiati chiedono aiuto: una squadra resta in curva ospiti fino a fine serata."
+  },
+  {
+   "ond": 4,
+   "scelta": "piazzale_maxischermo/spegni_schermo",
+   "costo": "Fiducia −1.",
+   "testo": "Fiducia −1. Maxischermo spento: in rete «la finale negata ai tifosi». Il comune chiede spiegazioni."
+  },
+  {
+   "ond": 4,
+   "scelta": "foto_coppa/niente_foto",
+   "costo": "Tensione +1, Tribuna autorità.",
+   "testo": "Tensione +1, Tribuna autorità. Niente foto con la coppa: in tribuna le autorità se ne vanno offese, e lo fanno sapere."
+  }
+ ],
+ "eccMax": 0,
+ "comodeScelte": 1,
+ "episodio": {
+  "migliore": {
+   "esito": "contenuto",
+   "fallita": false,
+   "stelle": 3
+  },
+  "tentativi": 1,
+  "variabili_prima": {
+   "tensione_max": 3,
+   "credito": 5,
+   "informatore_pagato": true,
+   "presidente_incontrato": false,
+   "furgone_visto": true,
+   "rapporto_dessi": "rispetto",
+   "testimone": "esposto",
+   "busta": "consegnata",
+   "pista_cattura": "nessuna",
+   "fascicolo": "nessuno",
+   "sospetti_talpa": 3,
+   "carte": "nessuna"
+  },
+  "variabili_dopo": {
+   "tensione_max": 2,
+   "credito": 8,
+   "informatore_pagato": true,
+   "presidente_incontrato": false,
+   "furgone_visto": true,
+   "rapporto_dessi": "rispetto",
+   "testimone": "esposto",
+   "busta": "consegnata",
+   "pista_cattura": "nessuna",
+   "fascicolo": "nessuno",
+   "sospetti_talpa": 3,
+   "carte": "nessuna"
+  }
+ },
+ "errori": []
+}

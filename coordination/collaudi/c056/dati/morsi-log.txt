@@ -1,0 +1,6 @@
+{"ep":"e26","vp":"360x640","chiusure":4,"attesi":3,"visti":3,"comode":1,"eccMax":0,"difetti":0}
+{"ep":"e09","vp":"360x640","chiusure":4,"attesi":2,"visti":2,"comode":2,"eccMax":0,"difetti":0}
+{"ep":"e02","vp":"360x640","chiusure":4,"attesi":4,"visti":4,"comode":3,"eccMax":0,"difetti":0}
+{"ep":"e05","vp":"360x640","chiusure":4,"attesi":2,"visti":2,"comode":0,"eccMax":0,"difetti":0}
+{"ep":"e31","vp":"360x640","chiusure":4,"attesi":3,"visti":3,"comode":2,"eccMax":0,"difetti":0}
+{"ep":"e12","vp":"360x640","chiusure":4,"attesi":2,"visti":2,"comode":0,"eccMax":0,"difetti":0}

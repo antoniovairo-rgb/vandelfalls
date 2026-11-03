@@ -1,0 +1,10 @@
+import * as L from './lib.mjs';
+import { writeFileSync } from 'node:fs';
+const [ep, W, H] = process.argv.slice(2); const m = L.miss(ep), idx = L.ms.indexOf(m); const out = [];
+const a = await L.avvia([+W, +H]); const p = await a.nuova(L.salvataggioPrima(idx)); await p.getByRole('button', { name: 'Riprendi' }).click(); await p.click('[data-azione="avvia-episodio"]');
+const g = L.equilibrata(L.creaCaso(1), L.dich);
+await L.gioca(p, m, g, { risposta: async (pp, { s }) => { const r = await pp.evaluate(() => { const ecc = () => document.scrollingElement.scrollHeight - innerHeight; const e0 = ecc(); const rm = document.querySelector('[data-radio-mappa]'); let e1 = e0; if (rm) { rm.style.display = 'none'; e1 = ecc(); rm.style.display = ''; } return { e0, senzaRadio: e1, testo: document.querySelector('[data-messaggio="risposta"]')?.textContent.trim().slice(0, 100), cid: document.querySelector('[data-messaggio="scelta"]')?.textContent.trim().slice(0, 50), radio: rm?.textContent.trim().slice(0, 140) }; });
+  out.push({ ond: s.ondata, n: s.scelte.length, ultima: s.scelte.at(-1)?.chiamata, ...r }); } });
+writeFileSync(`${process.env.OUT}/ecc-${ep}-${W}x${H}.json`, JSON.stringify(out, null, 1));
+const sup = out.filter((x) => x.e0 > (+W === 360 ? 68 : +W === 375 ? 56 : 0)); console.log(ep, W + 'x' + H, 'max', Math.max(...out.map((x) => x.e0)), 'sopra soglia', sup.length, 'di', out.length, 'max senza radio', Math.max(...out.map((x) => x.senzaRadio)));
+await a.chiudi();
