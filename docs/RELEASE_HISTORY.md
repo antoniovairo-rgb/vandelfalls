@@ -79,3 +79,83 @@ Spostati qui da src/versione.ts il 2026-10-26 (D-233), testo invariato, perché 
   causa: collaudo C-016. misura: completa 3/3 sulla build del rilascio; offline O5 verde e rosso.
   guardiano: tools/offline.mjs O5 (C28W01), guida passo 3 (C28G01), controllaRipartiTesto (C28R01), C10S03.
 ```
+
+
+## Commenti di GAME_VERSION da 0.11.0 a 0.20.0 (spostati da src/versione.ts, D-263)
+
+```
+// 0.11.0 – rilascio delle 08:00 (D-109): fiducia che premia il risultato dell'ondata (PO-094, D-113), perché di ogni
+//   settore scoperto nel rapporto (PO-087), lampeggia solo il settore della chiamata (PO-088, PO-093), corteo e squadre
+//   in movimento con vignetta nella chiamata (PO-089, parte A), mappa ridisegnata al ritorno dal background (S-26,
+//   PO-081), stadio accanto al piazzale (S-25, PO-080), stagione chiusa spiegata (PO-091), C15-04…09.
+//   causa: collaudo del PO del 12/10 e C-015. misura: completa 3/3 sulla build del rilascio; peggiore sopra equilibrata
+//   26→0/36; 1161 scoperti, 0 senza causa. guardiano: tests/fiducia-risultato.test.ts (PO094), tests/causa-scoperto.test.ts
+//   (PO087), C31M01, C32D01, C31W01/W02, C29P01/P02, C33C01, C34N01…C34S01, C34P01.
+//
+// 0.12.0 – rilascio anticipato su richiesta del PO (deroga all'orario di D-109): scelte che cambiano il seguito (PO-086,
+//   campo «dopo»: e04 mercato, e06 bis, e09, e10, e03, mediatore e02/e07), chiamate «non c'è nessuno» solo se il settore
+//   è davvero sguarnito (PO-095), fiducia che scende solo per settori scoperti (C17-05), Riparti più leggero (C17-06) e
+//   che resiste al ricarico (C17-04), città a 360/375 (C17-12), bozza dello schieramento salvata (C17-16), in sala pulsa
+//   solo il settore del passo (C17-17), sala con margine per la CI (D-115).
+//   causa: collaudo C-017 e foto del PO del 13/10. misura: completa 3/3 e CI verde sulla build del rilascio; contraddizioni
+//   0 su 461 scelte forzate. guardiano: tests/dopo-scelte.test.ts (PO086, C17R03), tests/senza-presidio.test.ts (PO095),
+//   tests/fiducia-risultato.test.ts (C17R05), tests/ripartenza-po083.test.ts (C17R06), C35R01, C35C01, C35B01, C35S01.
+//
+// 0.13.0 – rilascio anticipato su richiesta del PO (deroga all'orario di D-109): vignette nello stile C «pop retinato»
+//   in sala, verbale e chiamate (PO-092, D-114), aiuto del «?» leggibile per intero (PO-096), numero di versione in basso
+//   a destra su ogni schermata (PO-097), «Rispondi» porta sempre alla prima opzione (C17-15), riepilogo dello schieramento
+//   non coperto dai pulsanti (C17-22).
+//   causa: PO-092, PO-096, PO-097, collaudo C-017. misura: completa 3/3 e CI verde sulla build del rilascio.
+//   guardiano: C26V01, C36V01, C38A01, C38V01 e i controlli di C17-15/C17-22 nella catena grafica.
+//
+// 0.14.0 – rilascio anticipato su richiesta del PO (deroga all'orario di D-109): fonti (≤ 80 caratteri) e chiamate in stile
+//   radio (≤ 100) della stagione 1 (PO-084, PO-085), testi coerenti con le scelte fatte (collaudo C-018: C18-01/02/03/04,
+//   C17-09/10/19), tetto ai rientri di unità (C17-14), contrasto di testi e riquadri sul giallo (PO-098), via il
+//   suggerimento «Rende di più» (PO-099, D-116), versione sempre visibile in basso a destra (C18-10).
+//   causa: PO-084/085/098/099, collaudo C-018. misura: completa 3/3 e CI verde sulla build del rilascio.
+//   guardiano: tests/brevita.test.ts, tests/riserva-tetto.test.ts (C17R14), tests/dopo-scelte.test.ts esteso, C40C01,
+//   C40C02, C41R01; controllo pre-push tools/prima-del-push.mjs (PO-100, D-117).
+//
+// 0.15.0 – rilascio delle 23:00: icona «i» accanto al titolo dell'ondata con una riga che spiega il momento (PO-101,
+//   142 righe), contrasto di ogni testo su ogni fondo e verde più scuro (C19-04), segno della conseguenza sul settore
+//   dopo una risposta e icone dell'effetto sotto le opzioni (PO-085), correzioni grafiche C-018 (C18-05/07/08/09, C17-05,
+//   C17-12, C17-22), coerenza C-019 (C19-01/02/03/05), controllo pre-push con «bot» quando cambiano dati o logica.
+//   causa: PO-101, PO-085, collaudi C-018 e C-019. misura: completa 3/3 e CI verde sulla build del rilascio.
+//   guardiano: tests/ondata-info.test.ts, C43I01, C40C01, C39E01, C39I01, C42*, tests/dopo-scelte.test.ts esteso.
+//
+// 0.16.0 – rilascio delle 08:00: colori dei cortei coerenti con la strada e con chi c'è (PO-102: club su 11 settori,
+//   altrimenti neutri), vignetta di ogni chiamata con la sagoma dell'evento e scontro solo fuori scena (D-112 punto 5),
+//   correzioni del collaudo C-020 (C20-01/02/03/04/05/06/07/08).
+//   causa: PO-102, D-112 punto 5, collaudo C-020. misura: completa 3/3 e CI verde sulla build del rilascio.
+//   guardiano: C44S03 e i controlli della catena grafica sulle vignette, tests/ondata-info.test.ts, bot D-108.
+//
+// 0.17.0 – rilascio delle 13:30: ritiro di una sola unità invece di tutte (PO-054), persone a pallini piatti nelle vignette
+//   (PO-103), nomi in città più piccoli a 360/375 e posto del nome stabile (D-119, C20-03, controllo instabile della CI),
+//   cortei neutri grigi e non più arancio (C21-01), club dei tifosi anche sul singolo evento e sulle strade dove i testi
+//   dicono chi c'è (C21-02, C21-03).
+//   causa: PO-054, PO-103, D-119, collaudo C-021. misura: completa 3/3 e CI verde sulla build del rilascio.
+//   guardiano: C46R01, C47N01/N02, C48P01, C48N01, C49C01, C49E01, tests/corteo-club.test.ts, controllaColoriCortei.
+//
+// 0.18.0 – rilascio anticipato su richiesta del PO (PO-107, deroga all'orario di D-109): vignetta del luogo 42×42 al posto
+//   dell'avatar nel briefing (PO-078, D-118, D-122), spicchio d'orologio dell'urgenza come bollino (PO-085, D-120), cerimonie,
+//   minacce e liti disegnate come gente e «scontro» solo per le risse (C21-05/06), spalti di e15 fra le due squadre (C21-04),
+//   eventi condizionati solo quando la condizione è vera (C21-09), club Cinderwick sui cortei della curva in e30 ed e17 (C23-03),
+//   corteo della chiamata col club dell'evento (C23-01), nome dell'episodio in città fuori dalle proprie stelline (C23-02).
+//   causa: PO-078, PO-085, collaudi C-021 e C-023, PO-107. misura: completa 3/3 e CI verde sulla build del rilascio.
+//   guardiano: C51A01, C51O01, C50G01, C50C01, C50S01, C53D01, C53N01, controllaColoriCortei.
+//
+// 0.19.0 – rilascio delle 23:00: nomi delle squadre più semplici ispirati a Roma Sud (PO-108, D-124: Kiln United, Skyfield
+//   Athletic, Square Rovers, Arches Town, Studio Town, Garden Albion, Stoneway Wanderers; id invariati), icona HTML leggibile di
+//   chi chiama accanto alla vignetta (C22-01, PO-106), pallini delle vignette più grandi e con contorno (C22-02);
+//   109 articoli corretti dopo il cambio dei nomi («dello Skyfield», «dell'Arches», «degli Stoneway», «lo Studio»).
+//   causa: PO-108, PO-106, collaudo C-022. misura: completa 3/3 e CI verde sulla build del rilascio.
+//   guardiano: C54C01 e controllaChiIcona, C55P01, test e bot sui testi rinominati.
+//
+// 0.20.0 – rilascio delle 08:00: 13 club di Valmora e 3 di fuori città raccontati negli episodi (PO-109, D-125: 9 club nuovi,
+//   23 episodi ritoccati, BIBBIA con «Quartieri e club»), 12 stemmi nuovi; nome dell'episodio in città nascosto a 360/375 (D-123);
+//   persone sulla mappa, icone a 16-20 px, contorno degli stemmi, splash Android col logo (C22-03…10, PO-106); avatar nel briefing,
+//   urgenza solo con un evento sul settore, vignette nascoste a 375×667 (D-126); primo tocco sulla mappa con la «i» aperta (C25-02),
+//   lettura protetta di app.screen (C24-03), nome di e36 stabile (C24-06), ultimo nome vecchio nei testi (C25-01).
+//   causa: PO-109, PO-106, D-123, D-126, collaudi C-024 e C-025. misura: completa 3/3 e CI verde sulla build del rilascio.
+//   guardiano: tests/nomi-club.test.ts (C63N01), tools/foto-stemmi.mjs (C62S01), C61N01, C56P01, C58I01, C64U01, C66V01, C69I01.
+```
