@@ -35,7 +35,9 @@ const ultima = new WeakMap<HTMLElement, string>();
 
 function adatta(m: HTMLElement) {
   const main = m.closest('main');
-  const deroga = main?.dataset.schermata === 'risposta' && !!m.querySelector(CON_MOSSA) && !spento('C259A01');
+  // solo con la risposta già sulla pagina: durante il cambio di scena la pagina è più alta e la mappa si abbassava e si rialzava
+  // (e13 viale_pieno a 360×800: 217 → 302 → 328 px, tre rifacimenti di Pixi da 280-500 ms) e i segni di PO-085 scadevano prima
+  const deroga = main?.dataset.schermata === 'risposta' && !!m.querySelector(CON_MOSSA) && !!main.querySelector('[data-messaggio="risposta"]') && !spento('C259A01');
   const chiave = `${main?.dataset.schermata}|${deroga}|${innerHeight}|${Math.round((main?.getBoundingClientRect().height ?? 0) - m.getBoundingClientRect().height)}`;
   if (ultima.get(m) === chiave) return;
   ultima.set(m, chiave);
