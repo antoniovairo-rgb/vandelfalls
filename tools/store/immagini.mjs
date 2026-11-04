@@ -4,7 +4,7 @@
 // - grafica.jpg 1024×500, JPEG (niente alfa), fatta dentro la build vera: token, caratteri e logo del gioco;
 // - schermata-1..4.jpg 1080×1920 (9:16): home, città, una chiamata, il verbale di e01, dal gioco vero a 360×640 × 3.
 //   Gli stati arrivano dal motore (giocatore attento di tools/foto.mjs) come salvataggi; poi «Riprendi».
-// Rossi (VALMORA_ROSSI=…, solo per provare il guardiano): S23I01 icona a 1024 px, S23F01 grafica in PNG con alfa,
+// Rossi (VALMORA_ROSSI=…, solo per provare il guardiano): C268S01 bollo della versione nelle schermate (C54-02), S23I01 icona a 1024 px, S23F01 grafica in PNG con alfa,
 // S23S01 schermate a densità 1 (360×640).
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -80,6 +80,12 @@ try {
     // il verbale entra con una transizione: si scatta a animazioni finite (prima: 2 schermate diverse su 5 giri)
     await q.waitForFunction(() => document.getAnimations().every((a) => a.playState !== 'running'), null, { timeout: 10000 }); await q.waitForTimeout(400);
     if (errori.length) throw new Error(`schermata ${n}: ${errori.join('; ')}`);
+    // C54-02 (D-268): il bollo della versione invecchiava le foto a ogni rilascio (lo store aveva «v0.56.0» con la 0.57.0):
+    // nelle schermate dello store non c'è. Guardiano: se dopo averlo nascosto si vede ancora, lo strumento si ferma.
+    // Rosso C268S01: non si nasconde (e il guardiano lo deve vedere).
+    if (!rossi.has('C268S01')) await q.addStyleTag({ content: '[data-versione-angolo] { visibility: hidden !important; }' });
+    if (await q.evaluate(() => [...document.querySelectorAll('[data-versione-angolo]')].some((e) => e.checkVisibility({ visibilityProperty: true }))))
+      throw new Error(`schermata ${n}: si vede il bollo della versione (C54-02: le foto dello store non lo portano)`);
     writeFileSync(join(cartella, `schermata-${n}.jpg`), await q.screenshot({ type: 'jpeg', quality: 90 }));
     fatti.push(`schermata-${n} (${scena})`); await q.close();
   };
