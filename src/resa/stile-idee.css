@@ -29,7 +29,10 @@ main:not(.rosso-c241n01) .mappa.citta .settore-nome { min-width: min-content; }
 .messaggio[data-messaggio="radio-dopo"] { margin-top: var(--spazio-3); padding-block: var(--spazio-2); }
 
 /* Idea B: nella risposta l'unità toccata resta evidenziata finché non tocchi il settore; l'indicazione sta nel riquadro radio */
-.tocco-pastiglia.in-mano .pastiglia { outline: var(--bordo) solid var(--magenta); outline-offset: var(--spazio-px); }
+/* C56-03 (D-262): la classe era «in-mano», che c'è già per il riquadro dello schieramento (stile-schermate.css: padding,
+   margine, spaziatura): l'unità in mano si allargava da 44 a 61 px, le unità andavano a capo e uscivano dalla mappa (e02
+   ritardo). Rosso C262M01: di nuovo «in-mano». */
+.tocco-pastiglia:is(.mossa-in-mano, .in-mano) .pastiglia { outline: var(--bordo) solid var(--magenta); outline-offset: var(--spazio-px); }
 .radio-mappa .mossa-indicazione { margin: 0; font-weight: 700; }
 .radio-mappa .rapporto-costo + .mossa-indicazione { margin-top: var(--spazio-1); }
 /* D-255 punto 2: con la mossa il riquadro radio non copre unità e settori da toccare (radio-mappa.tsx, collocaRadio) */
@@ -48,7 +51,7 @@ main:has(.mappa[data-casa-fuori]) .casa-riserva { display: flex; }
 /* D-261 punto 4: con la mossa l'evidenziazione basta da sola (anche col riquadro al solo lettore): unità e settori toccabili
    hanno un bordo tratteggiato magenta, l'unità in mano pieno. Rosso C261E01: niente bordo, come prima. */
 main:not(.rosso-c261e01) .mappa.mossa .tocco-pastiglia:not(:disabled) .pastiglia { outline: var(--bordo) dashed var(--magenta); outline-offset: var(--spazio-px); }
-main:not(.rosso-c261e01) .mappa.mossa .tocco-pastiglia.in-mano .pastiglia { outline-style: solid; }
+main:not(.rosso-c261e01) .mappa.mossa .tocco-pastiglia:is(.mossa-in-mano, .in-mano) .pastiglia { outline-style: solid; }
 main:not(.rosso-c261e01) .mappa.mossa .settore-punto:not(:disabled) { outline: var(--bordo) dashed var(--magenta); outline-offset: var(--spazio-1); }
 /* C56-03 (D-262): con la mossa il centro di un bersaglio cadeva sotto un altro elemento (e30 a 412×760: il centro di «Piazzale»
    dava il badge dell'unità in mano). Durante la mossa: ciò che non si tocca lascia passare il tocco (punti e unità
