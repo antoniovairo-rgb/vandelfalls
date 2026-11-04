@@ -62,6 +62,11 @@ export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: bo
   // costo, D-258), mai solo al lettore di schermo: nessuno stato lascia il giocatore senza istruzione. Nella misura di adatta.ts
   // (C57-01) la copia porta il testo più lungo fra gli stati possibili («riserva»), così la mappa non cambia altezza.
   // Rossi: C269P01 niente previsione nella copia; C269I01 niente istruzione (solo la previsione, come in 614c5103).
+  // D-269 (CI 1249): a 360×640 con la mappa al suo minimo (240 px, D-262) le due righe di «mossa.puoi» nella copia portavano la
+  // risposta oltre soglia (e02 tornelli_falsi 75 px, soglia 68; peggiore 81): nella copia la versione breve, di una riga (riquadro e
+  // lettore di schermo restano col testo intero). Rosso C269B01: il testo intero anche nella copia.
+  const breve = (s: string) => (s === 'puoi' && !spento('C269B01') && !spento('C268M01') ? t('mossa.puoi_breve') : null);
+  const testoSotto = breve(stato) ?? testo;
   let sotto: ReactNode = null;
   const conPrev = !spento('C269P01') && !spento('C262E01'), conIstr = !spento('C269I01');
   if ((conPrev || conIstr) && (possibile || riga)) {
@@ -69,11 +74,11 @@ export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: bo
     const verbo = t('mossa.si_scalda').length >= t('mossa.si_calma').length ? t('mossa.si_scalda') : t('mossa.si_calma');
     const prevLunga = !conPrev ? '' : spostabili(m, ic).flatMap((x) => settoriAmmessi(m, x.risorsa).filter((k) => k !== x.settore)
       .map((a) => `${t('mossa.previsione')} ${t(`settore.${x.settore}`)} ${verbo}, ${t(`settore.${a}`)} ${verbo}.`)).reduce((a, b) => (b.length > a.length ? b : a), t('mossa.non_cambia'));
-    const ora = unisci(conIstr ? testo : '', conPrev && riga ? riga : '');
-    const riserva = !possibile ? ora : [conIstr ? t('mossa.puoi') : '', conIstr ? t('mossa.dove') : '', unisci(conIstr ? t('mossa.fatta') : '', prevLunga)].reduce((a, b) => (b.length > a.length ? b : a), ora);
+    const ora = unisci(conIstr ? testoSotto : '', conPrev && riga ? riga : '');
+    const riserva = !possibile ? ora : [conIstr ? breve('puoi') ?? t('mossa.puoi') : '', conIstr ? t('mossa.dove') : '', unisci(conIstr ? t('mossa.fatta') : '', prevLunga)].reduce((a, b) => (b.length > a.length ? b : a), ora);
     sotto = (
       <p className="istruzione-sotto" data-istruzione-sotto={ora ? 'vera' : 'vuota'} aria-hidden="true">
-        <span className="vera">{conIstr && testo}{conIstr && conPrev && riga ? ' ' : ''}{conPrev && riga && <span data-previsione-sotto>{riga}</span>}</span>
+        <span className="vera" data-mossa-sotto={stato}>{conIstr && testoSotto}{conIstr && conPrev && riga ? ' ' : ''}{conPrev && riga && <span data-previsione-sotto>{riga}</span>}</span>
         <span className="riserva">{riserva}</span>
       </p>
     );

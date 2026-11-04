@@ -1272,3 +1272,42 @@ FATTO MISURATO (po152b, f9092cf3, dist del ramo, una prova per braccio):
 | rosso C269M01, 360 | | | | | | rosso, 78 (gradini) |
 
 Test: 489/489.
+
+### D-269 dopo la CI rossa 1249 (consegna 0.66.0)
+
+**Causa del rosso 1249** (FATTO MISURATO con una sonda temporanea su e02 tornelli_falsi/settore_separato a 360×640). La risposta scorreva di 75 px (soglia 68). La mappa era a 240 px, cioè al pavimento di D-262, con il riquadro «basso stretto muto». La copia sotto la mappa andava su 2 righe (31 px). Copia nascosta: 36 px di scorrimento. Copia di una riga: 59 px. La soglia non è stata toccata.
+
+**Correzioni**
+- **Testo breve approvato dal PO.** `mossa.puoi_breve` = «Puoi spostare un'unità: toccala, poi il settore.» (`data/testi/it/comune.json`). È usato solo nella copia sotto la mappa e nella sua riserva (`src/resa/mossa-ui.tsx`, `breve`). Il riquadro non muto tiene il testo lungo. Rosso C269B01: torna il testo lungo nella copia.
+- **(c) a 412×915.** `segniVisti` si aggancia al riquadro che porta la mossa (`.radio-mappa [data-mossa]`, `src/resa/mappa/segni-visti.ts`). Prima a 412×915 il riquadro cambiava ancora senza input. Esempio: e10 imp_cantiere, il riquadro andava a «posto» 262 e le unità da 151 a 63. Rosso C269C01 invariato.
+- **Guardiano po152b.**
+  - Nuovo giro di fermo a 412×915 (`FERMO_VP`, `controllaFermo`): prima chiamata con la mossa di ogni episodio, 2,5 s senza input, nello stato «puoi». Confronta classe del riquadro, `--radio-y` e posizione delle unità.
+  - Il controllo dell'istruzione verifica anche che la copia corrisponda allo stato della mossa (`data-mossa-sotto`).
+- **Braccio rosso C269B01.** In `tools/passi-grafica.mjs`, sulla parte «risposte» di sonda-altezze a 360×640, prime 120 risposte, cerca C53-02. Misura: e02 77/75/75/79 px, circa 5 min.
+- **`tools/catena.mjs`.** Anche quando il passo finisce rosso si stampano e si registrano in STABILITA i tentativi precedenti. Nella 1249 le cause dei tentativi 1 e 2 non erano visibili.
+- **CI 1256 (6febd9b9), job «360 bracci» rosso 3/3.** Eccezione `page.waitForSelector: Timeout 15000ms`, in attesa di `.mappa [data-mossa="puoi"]`. Causa: nel giro previsione di po152b l'attesa del «puoi spostare» non era protetta. Col rosso C241M02 la mossa non si disegna (`mossa-ui.tsx:29`): il passo cadeva per eccezione invece di segnalare il problema. Correzione (728ae4eb): l'assenza diventa il problema «il «puoi spostare» non compare (C57-02)». Il guardiano non è stato indebolito. IPOTESI non verificata: la stessa eccezione fu la causa dei tentativi 1 e 2 della 1249. Non posso confermarlo, i log di quei tentativi non la mostrano.
+
+**Misura della correzione 728ae4eb** (solo giro previsione, 360×640, sonda temporanea, una prova per caso):
+
+| codice | rossi | esito | tempo |
+|---|---|---|---|
+| 6febd9b9 | C241M02 | eccezione TimeoutError (come in CI) | 19 s |
+| 728ae4eb | C241M02 | 2 problemi segnalati, nessuna eccezione | 19 s |
+| 728ae4eb | nessuno | verde | 117 s |
+
+**sonda-altezze completa in locale** (6febd9b9, dist del ramo):
+
+| larghezza | esito | tempo | scorrimento massimo risposta | note |
+|---|---|---|---|---|
+| 375 | verde | 4422 s | 17 px (soglia 56) | |
+| 360, da sola | verde | 3081 s | 58 px (soglia 68) | previsione sotto la mappa 5 su 24 |
+| 360, in parallelo | rosso | | | «e30 imp_mercatino/si_incontrino non si apre» |
+
+Il giro in parallelo girava con un'altra sonda e i test del pre-push. Non lo conto come verde. Rifatto da solo, quel caso si apre e scorre 0 px. Lo dichiaro come attesa di 8 s superata sotto carico.
+
+**I 2 px senza input a 375** (FATTO MISURATO). In e21 corteo_dal_cortile lo scorrimento passa da 17 a 15 px quando `.fiducia` passa da 20 a 18 px, a circa 3,5 s. In e09 accade lo stesso a circa 4,2 s. È il segno della fiducia variabile già documentato nel commento di `tools/sonda-altezze.mjs` (e03 da 28 a 26).
+
+**Tempi di CI.**
+- Parte altezze: 3252 s nella 1239 (D-268), poi 3297, 3340 e 3346 s nella 1249.
+- Job bracci: 3655 s nella 1239. Nella 1249 3449, 3874 e 917 s; il terzo tentativo è caduto su page.goto (60 s).
+- Nessun controllo tolto, come concordato col PO. Con la correzione 728ae4eb il job bracci non dovrebbe più ripetere i tentativi per eccezione (IPOTESI, la verifica è la CI su 728ae4eb).
