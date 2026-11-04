@@ -13,7 +13,7 @@ Le sei verifiche richieste (FATTO MISURATO salvo dove marcato IPOTESI):
 | 2 | Costo visibile; mappa si abbassa e resta ferma | Costo visibile in 648/648 risposte (3 larghezze × 2 testi × 108). **Mappa NON ferma**: scende a gradini e di nuovo al tocco sull'unità → **C57-01 (media)** |
 | 3 | «Home» nella testata | In 648/648 stati una sola «Home» visibile. In testata solo in 3/108 stati a 360×640 (100%): e27/imp_cancello_inceppato, e35/curiosi_notte, e35/imp_gru. OK |
 | 4 | Previsione coerente con ciò che accade | 0 opposte su 403.536 confronti; coincide nel 91,62% (attenta 88,70%, equilibrata 89,90%, casuale 93,15%, peggiore 96,63%). Resta una quota di segni che non si realizza → C57-05; riga tagliata → C57-02 |
-| 5 | Ricarica | OK: 115/115 pause con la mossa tornano dalla ricarica; «Avanti»+ricarica → chiamata (115/115); risposta senza mossa + ricarica → chiamata (8/8); mossa fatta + ricarica → chiamata successiva (219/219). Salvataggi veri vecchi (tests/salvataggi-reali, v2 0.4.0, v2 0.52.0, v3 0.57.0) ripresi dalla chiamata (360×640 e 412×915), nessun errore di pagina |
+| 5 | Ricarica | OK: 115/115 pause con la mossa tornano dalla ricarica; «Avanti»+ricarica → chiamata (115/115); risposta senza mossa + ricarica → chiamata (8/8); mossa fatta + ricarica → chiamata successiva (438/438, 219 per testo). Salvataggi veri vecchi (tests/salvataggi-reali, v2 0.4.0, v2 0.52.0, v3 0.57.0) ripresi dalla chiamata (360×640 e 412×915), nessun errore di pagina |
 | 6 | Bersagli della mossa al tocco | OK: tocco vero sul centro di ogni unità (prima) e dell'ultimo settore ammesso, 219 stati per testo × 2 testi: 0 che non rispondono, 0 lati < 44 px, centro coperto 0 su 101 casi sospetti riesaminati. A 130% 0/219 non rispondono |
 
 ## Rilievi
