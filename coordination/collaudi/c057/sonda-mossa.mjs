@@ -15,7 +15,9 @@ if (FOTO) mkdirSync(FOTO, { recursive: true });
 const tutte = chiamateCostruite(dati, dich);
 // campione "qua e là": per episodio, PER_EP chiamate equidistanti (per e01 anche imprevisti/varianti compresi)
 const per = new Map(); for (const c of tutte) (per.get(c.ep) ?? per.set(c.ep, []).get(c.ep)).push(c);
+const CASI = process.env.CASI ? new Set(process.env.CASI.split(',')) : null;
 const campione = [...per].filter(([e]) => !EPS || EPS.includes(e)).flatMap(([, xs]) => Array.from({ length: Math.min(PER_EP, xs.length) }, (_, i) => xs[Math.floor((i + 0.5) * xs.length / Math.min(PER_EP, xs.length))]));
+const filtra = (xs) => CASI ? tutte.filter((c) => CASI.has(`${c.ep}/${c.id}`)) : xs;
 const opzDi = (c) => dati[`missioni/${c.ep}.json`].ondate.flatMap((o) => o.chiamate ?? []).find((x) => x.id === c.id);
 const srv = await servi('dist'), url = `http://127.0.0.1:${srv.address().port}/`;
 const b = await chromium.launch({ executablePath: existsSyncChrome() });
@@ -29,8 +31,8 @@ const hit = (p) => p.evaluate(() => {
   for (const e of els) { const r = e.getBoundingClientRect(), id = e.dataset.presenza ?? e.closest('[data-settore]')?.dataset.settore, tipo = e.dataset.presenza ? 'unità' : 'settore';
     if (r.bottom < 0 || r.top > innerHeight) { male.push(`${tipo} ${id}: fuori vista`); continue; }
     const pts = [[.5, .5], [.25, .5], [.75, .5], [.5, .25], [.5, .75]].map(([a, c]) => [r.left + r.width * a, r.top + r.height * c]);
-    const ko = pts.filter(([x, y]) => { const q = document.elementFromPoint(x, y); return !q || !(q === e || e.contains(q) || q.contains(e) && q.closest('button') === e); });
-    if (ko.length) { const [x, y] = ko[0], q = document.elementFromPoint(x, y); male.push(`${tipo} ${id}: ${ko.length}/5 punti coperti da ${q?.closest('[data-presenza]')?.dataset.presenza ?? q?.closest('[data-scheda-settore]') ? 'scheda' : (q?.className?.toString?.().slice(0, 40) ?? '?')}`); }
+    const ko = pts.filter(([x, y], i) => { const q = document.elementFromPoint(x, y); return !q || !(q === e || e.contains(q) || q.contains(e) && q.closest('button') === e); });
+    if (ko.length) { const centro = pts.some((q, i) => ko.includes(q) && i === 0); const [x, y] = ko[0], q = document.elementFromPoint(x, y); male.push(`${centro ? 'CENTRO ' : ''}${tipo} ${id}: ${ko.length}/5 punti coperti da ${q?.closest('[data-presenza]')?.dataset.presenza ?? q?.closest('[data-scheda-settore]') ? 'scheda' : (q?.className?.toString?.().slice(0, 40) ?? '?')}`); }
     if (Math.min(r.width, r.height) < px('--tocco-min') - 0.5) male.push(`${tipo} ${id}: lato ${Math.round(Math.min(r.width, r.height))} < ${px('--tocco-min')}`); }
   return { n: els.length, male };
 });
@@ -54,7 +56,7 @@ async function apri(vp, k, c, rossi) {
   if (k !== 1) await p.addStyleTag({ content: CSS130(k) });
   return { p, ok };
 }
-for (const vp of VPS) for (const k of TESTI) for (const c of campione) {
+for (const vp of VPS) for (const k of TESTI) for (const c of filtra(campione)) {
   const o = opzDi(c), dove = { vp, testo: k, ep: c.ep, id: c.id }, { p, ok } = await apri(vp, k, c);
   if (!ok) { out({ ...dove, tipo: 'nonApre' }); await p.close(); continue; }
   await p.waitForTimeout(250);

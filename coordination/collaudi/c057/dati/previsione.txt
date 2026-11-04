@@ -1,0 +1,11 @@
+TOTALE {"pari>pari":267679,"su>su":57808,"su>pari":18972,"pari>su":3943,"giu>giu":44241,"pari>giu":4755,"giu>pari":6138} 369728/403536 = 91.62%
+attenta {"pari>pari":77730,"su>su":15264,"su>pari":8928,"pari>su":1128,"giu>giu":3186,"pari>giu":972,"giu>pari":1224} 96180/108432 = 88.70%
+casuale {"su>su":24064,"pari>pari":76741,"pari>giu":1497,"giu>giu":19425,"pari>su":1447,"giu>pari":2790,"su>pari":3108} 120230/129072 = 93.15%
+peggiore {"pari>pari":40692,"pari>giu":1008,"giu>giu":17610,"giu>pari":1026} 58302/60336 = 96.63%
+equilibrata {"pari>pari":72516,"su>su":18480,"su>pari":6936,"pari>su":1368,"giu>giu":4020,"pari>giu":1278,"giu>pari":1098} 95016/105696 = 89.90%
+mosse con effetto reale su ALTRI settori oltre da/a: 70 / 201768
+OPPOSTI 0
+
+real	0m19.513s
+user	0m20.352s
+sys	0m0.541s
