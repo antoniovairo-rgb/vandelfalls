@@ -9,8 +9,8 @@ export const due = (n: number) => String(n).padStart(2, '0');
 export const LETTERE = 'ABCDEFGH';
 
 /** Pulsante «Home» (S-21, C14-05): nella testata del verbale e nell'angolo delle mappe; la partita resta salvata. */
-export function TastoHome(p: { vai: () => void; angolo?: string }) {
-  return <button type="button" className={`tasto-home${p.angolo ? ` ${p.angolo}` : ''}`} data-azione="home" aria-label="Torna alla home (la partita resta salvata)" onClick={p.vai}><Icona di={House} /></button>;
+export function TastoHome(p: { vai: () => void; angolo?: string; riserva?: boolean }) {
+  return <button type="button" className={`tasto-home${p.angolo ? ` ${p.angolo}` : ''}`} data-azione={p.riserva ? 'home-riserva' : 'home'} aria-label="Torna alla home (la partita resta salvata)" onClick={p.vai}><Icona di={House} /></button>;
 }
 
 /** «home» (S-21, C14-05): pulsante per tornare alla home, la partita resta salvata. */
@@ -36,12 +36,15 @@ function InfoOndata(p: { testo: string }) {
   );
 }
 
-export function Testata(p: { numero: string; etichetta: string; titolo: ReactNode; home?: () => void; info?: string | null }) {
+export function Testata(p: { numero: string; etichetta: string; titolo: ReactNode; home?: () => void; info?: string | null; casaRiserva?: () => void }) {
   return (
     <header className="testata">
       <div className="testata-n" aria-hidden="true">{p.numero}</div>
       <div className="testata-t"><small>{p.etichetta}</small><h1>{p.titolo}</h1>{p.info && <InfoOndata key={p.info} testo={p.info} />}</div>
       {p.home && <TastoHome vai={p.home} />}
+      {/* D-261: nella risposta con la mossa «Home» di riserva, nascosta finché la mappa abbassata non la manda qui
+          (.mappa[data-casa-fuori], adatta.ts): solo CSS, niente stato (con lo stato le «Home» visibili erano 0 o 2) */}
+      {!p.home && p.casaRiserva && <span className="casa-riserva"><TastoHome vai={p.casaRiserva} riserva /></span>}
     </header>
   );
 }

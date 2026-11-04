@@ -2,7 +2,8 @@
 // «Ti costa…», icone degli effetti); dopo «Conferma» il costo arriva come rapporto radio nella risposta; in chiamata i settori
 // si toccano e aprono una scheda di stato che non cambia la partita, non fa scorrere la pagina, si chiude con un tocco o con
 // Esc (il fuoco torna al settore) e ha bersagli ≥ --tocco-min. Chiamate costruite col motore (sonda-altezze), aperte da
-// salvataggio. Rossi: VALMORA_ROSSI=C241A01 (costo sotto le opzioni, niente rapporto radio), C241M01 (mappa disattivata).
+// salvataggio. Rossi: VALMORA_ROSSI=C241A01 (costo sotto le opzioni, niente rapporto radio), C241M01 (mappa disattivata),
+// C255S01 (C55-01: la scheda sempre in basso copre i settori bassi).
 import { join } from 'node:path';
 import { chiamateCostruite, SOGLIE } from './sonda-altezze.mjs';
 
@@ -67,22 +68,33 @@ export async function controllaPo152a(browser, url, larghezza, rossi = [], carte
       if (await p.locator('[data-scheda-settore]').count()) male.push(`${dove}: la scheda di ${s} non si chiude ${s === c.settore ? 'col tocco' : 'con Esc'} (PO-152 A)`);
       if (s !== c.settore && !(await punto.evaluate((e) => document.activeElement === e))) male.push(`${dove}: chiusa con Esc, il fuoco non torna al settore ${s} (PO-152 A)`);
     }
+    // C55-01 (D-255): per ogni settore, aperta la sua scheda, il centro del settore toccato resta in vista (rosso C255S01)
+    for (const k of await p.evaluate(() => [...document.querySelectorAll('.mappa [data-settore]')].map((e) => e.dataset.settore))) {
+      const punto = p.locator(`[data-settore="${k}"] .settore-punto`);
+      if (await punto.isDisabled()) continue;
+      await punto.click(); await p.waitForTimeout(120);
+      const coperto = await p.evaluate((id) => { const sc = document.querySelector('[data-scheda-settore]'), b = document.querySelector(`[data-settore="${id}"] .settore-punto`); if (!sc || !b) return null;
+        const r = sc.getBoundingClientRect(), q = b.getBoundingClientRect(), x = q.left + q.width / 2, y = q.top + q.height / 2; return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; }, k);
+      if (coperto) male.push(`${dove}: la scheda copre il settore toccato «${k}» (C55-01)`);
+      await p.keyboard.press('Escape'); await p.waitForTimeout(80);
+    }
     if ((await stato(p)) !== prima) male.push(`${dove}: aprire e chiudere le schede ha cambiato il salvataggio (PO-152 A)`);
     // 3) dopo «Conferma» il costo arriva come rapporto radio, in parole (D-078: niente numeri nell'accenno)
     await p.click(`[data-opzione="${c.opzione}"]`); await p.click('[data-conferma]').catch(() => {});
     if (!(await p.waitForSelector('[data-messaggio="risposta"]', { timeout: 8000 }).then(() => true).catch(() => false))) { male.push(`${dove}: dopo «Conferma» la risposta non arriva (PO-152 A)`); await p.close(); continue; }
     await p.waitForTimeout(300);
-    const radio = await p.evaluate((o) => { const e = document.querySelector(`[data-rapporto-costo="${o}"]`); if (!e || !e.getClientRects().length) return null;
+    // D-258: il rapporto visibile, nel riquadro sopra la mappa o (senza posto) nella risposta sotto; quello sotto non ha i controlli del riquadro
+    const radio = await p.evaluate((o) => { const e = [...document.querySelectorAll(`[data-rapporto-costo="${o}"]`)].find((x) => x.getClientRects().length && x.checkVisibility()); if (!e) return null;
       const r = (x) => x.getBoundingClientRect(), b = e.closest('[data-radio-mappa]') ?? e, rb = r(b), rm = b.closest('.mappa') ? r(b.closest('.mappa')) : null;
       const tocca = (q) => q.left < rb.right && q.right > rb.left && q.top < rb.bottom && q.bottom > rb.top;
       return { costo: e.querySelector('[data-costo]')?.textContent.trim() ?? '', quando: e.querySelector('[data-quando]')?.textContent.trim() ?? '', tagliato: b.scrollHeight > b.clientHeight + 1,
-        dentro: !!rm && rb.left >= rm.left - 0.5 && rb.right <= rm.right + 0.5 && rb.top >= rm.top - 0.5 && rb.bottom <= rm.bottom + 0.5, segni: [...document.querySelectorAll('[data-segno]')].filter((x) => tocca(r(x))).length }; }, c.opzione);
+        sotto: e.hasAttribute('data-sotto'), dentro: !!rm && rb.left >= rm.left - 0.5 && rb.right <= rm.right + 0.5 && rb.top >= rm.top - 0.5 && rb.bottom <= rm.bottom + 0.5, segni: [...document.querySelectorAll('[data-segno]')].filter((x) => tocca(r(x))).length }; }, c.opzione);
     if (!radio || !radio.costo) male.push(`${dove}: dopo «Conferma» nessun rapporto radio col costo di «${c.opzione}» (PO-152 A)`);
     else {
       if (/\d/.test(radio.costo)) male.push(`${dove}: il costo per radio contiene numeri («${radio.costo}», D-078)`);
       if (!radio.quando) male.push(`${dove}: «${c.opzione}» impegna unità ma il rapporto radio non dice quante (PO-152 A)`);
-      if (!radio.dentro || radio.tagliato) male.push(`${dove}: il rapporto radio ${radio.dentro ? 'è tagliato' : 'esce dalla mappa'} (PO-152 A)`);
-      if (radio.segni) male.push(`${dove}: il rapporto radio sta sotto ${radio.segni} segni ▲/▼ (PO-152 A)`);
+      if (radio.sotto) { /* nella risposta: niente controlli del riquadro */ } else if (!radio.dentro || radio.tagliato) male.push(`${dove}: il rapporto radio ${radio.dentro ? 'è tagliato' : 'esce dalla mappa'} (PO-152 A)`);
+      if (!radio.sotto && radio.segni) male.push(`${dove}: il rapporto radio sta sotto ${radio.segni} segni ▲/▼ (PO-152 A)`);
     }
     // il rapporto radio non allunga la risposta: scorrimento entro la soglia di sonda-altezze, o non più di senza rapporto
     const er = await ecc(p), senza = await p.evaluate(() => { const e = document.querySelector('[data-rapporto-costo]'); if (e) e.style.display = 'none'; const x = document.scrollingElement.scrollHeight - innerHeight; if (e) e.style.display = ''; return x; });

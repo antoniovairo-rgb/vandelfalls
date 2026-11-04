@@ -2,6 +2,9 @@
 
 /* Idea A: scheda di stato del settore, sopra la mappa in basso: non aggiunge altezza alla pagina. Toccarla la chiude. */
 .scheda-settore { position: absolute; left: var(--spazio-2); right: var(--spazio-2); bottom: var(--spazio-2); z-index: 6; max-height: calc(100% - 2 * var(--spazio-2)); overflow: auto; padding: var(--spazio-2) var(--tocco-min) var(--spazio-2) var(--spazio-2); background: var(--bianco); color: var(--nero); border: var(--bordo) solid var(--nero); box-shadow: var(--ombra-1); font-size: var(--testo-piccolo); line-height: var(--linea-stretta); cursor: pointer; }
+.scheda-settore.alto { top: var(--spazio-2); bottom: auto; } /* C55-01 (D-255): dalla parte opposta al settore toccato */
+.scheda-settore.libero-sx { left: calc(var(--tocco-min) + 2 * var(--spazio-2)); }
+.scheda-settore.libero-dx { right: calc(var(--tocco-min) + 2 * var(--spazio-2)); }
 .scheda-settore-nome { margin: 0 0 var(--spazio-1); font-family: var(--font-titoli); text-transform: uppercase; letter-spacing: var(--spaziatura-maiuscolo); }
 .scheda-settore-righe { margin: 0; padding: 0; list-style: none; }
 .scheda-settore-chiudi { position: absolute; top: 0; right: 0; display: grid; place-items: center; width: var(--tocco-min); height: var(--tocco-min); padding: 0; border: 0; background: transparent; color: var(--nero); cursor: pointer; }
@@ -26,6 +29,27 @@ main:not(.rosso-c241n01) .mappa.citta .settore-nome { min-width: min-content; }
 .messaggio[data-messaggio="radio-dopo"] { margin-top: var(--spazio-3); padding-block: var(--spazio-2); }
 
 /* Idea B: nella risposta l'unità toccata resta evidenziata finché non tocchi il settore; l'indicazione sta nel riquadro radio */
-.tocco-pastiglia.in-mano .pastiglia { outline: var(--bordo) solid var(--magenta); outline-offset: var(--spazio-px); }
+/* C56-03 (D-262): la classe era «in-mano», che c'è già per il riquadro dello schieramento (stile-schermate.css: padding,
+   margine, spaziatura): l'unità in mano si allargava da 44 a 61 px, le unità andavano a capo e uscivano dalla mappa (e02
+   ritardo). Rosso C262M01: di nuovo «in-mano». */
+.tocco-pastiglia:is(.mossa-in-mano, .in-mano) .pastiglia { outline: var(--bordo) solid var(--magenta); outline-offset: var(--spazio-px); }
 .radio-mappa .mossa-indicazione { margin: 0; font-weight: 700; }
 .radio-mappa .rapporto-costo + .mossa-indicazione { margin-top: var(--spazio-1); }
+/* D-255 punto 2: con la mossa il riquadro radio non copre unità e settori da toccare (radio-mappa.tsx, collocaRadio) */
+.radio-mappa.posto { top: calc(var(--radio-y) * var(--spazio-px)); bottom: auto; }
+.radio-mappa.meta-sx { right: calc(50% + var(--spazio-1)); }
+.radio-mappa.meta-dx { left: calc(50% + var(--spazio-1)); }
+/* D-258: dove il riquadro non ha posto per il rapporto, il rapporto si legge nella risposta sotto la mappa (copia «sotto») */
+.radio-mappa:is(.compatto, .stretto, .muto) .rapporto-costo, .rapporto-sotto { display: none; }
+main:has(.mappa .radio-mappa:is(.compatto, .stretto, .muto)) .rapporto-sotto { display: block; }
+.radio-mappa.muto { position: absolute; width: var(--spazio-px); height: var(--spazio-px); overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.radio-mappa:is(.compatto, .stretto) .rapporto-costo + .mossa-indicazione { margin-top: 0; }
+/* D-261: «Home» nella testata quando la risposta con la mossa abbassa la mappa e la casa coprirebbe un settore (adatta.ts) */
+.mappa[data-casa-fuori] > .tasto-home { visibility: hidden; }
+.casa-riserva { display: none; }
+main:has(.mappa[data-casa-fuori]) .casa-riserva { display: flex; }
+/* D-261 punto 4: con la mossa l'evidenziazione basta da sola (anche col riquadro al solo lettore): unità e settori toccabili
+   hanno un bordo tratteggiato magenta, l'unità in mano pieno. Rosso C261E01: niente bordo, come prima. */
+main:not(.rosso-c261e01) .mappa.mossa .tocco-pastiglia:not(:disabled) .pastiglia { outline: var(--bordo) dashed var(--magenta); outline-offset: var(--spazio-px); }
+main:not(.rosso-c261e01) .mappa.mossa .tocco-pastiglia:is(.mossa-in-mano, .in-mano) .pastiglia { outline-style: solid; }
+main:not(.rosso-c261e01) .mappa.mossa .settore-punto:not(:disabled) { outline: var(--bordo) dashed var(--magenta); outline-offset: var(--spazio-1); }

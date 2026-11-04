@@ -156,6 +156,7 @@ export function Risposta(p: { m: Missione; ic: InCorso; o: Opzione; avanti: () =
       <Messaggio classe="vice risposta-unica" dati="risposta">
         <p className="testo-radio scelta-riga" data-scelta>{t(p.o.testo)}</p>
         {p.o.risposta && <p className="intanto"><strong><Icona di={Coffee} />Intanto…</strong> {t(p.o.risposta)}</p>}
+        <RapportoCosto m={p.m} ic={p.ic} o={p.o} sotto />
       </Messaggio>
       <button className="pulsante" data-azione="continua" onClick={p.avanti}>Avanti<Icona di={ChevronRight} /></button>
     </>
@@ -179,11 +180,13 @@ export const costoMorso = (e: EffettoMissione): string => ('tensione' in e ? `Te
 /** PO-152 (D-241): dopo «Conferma» il costo della risposta arriva per radio (D-078 rivisto: sempre nei dati, mostrato dopo),
  *  sulla mappa insieme ai segni ▲/▼ (Mappa, prop radio: sopra la mappa, la risposta non si allunga; a 360×640 restavano
  *  6 px prima della soglia di sonda-altezze). Rosso C241A01: niente, il costo era già sotto l'opzione. */
-export function RapportoCosto(p: { m: Missione; ic: InCorso; o: Opzione }) {
-  if (spento('C241A01') || !p.o.costo) return null;
+// D-258 (opzione B del PO): «sotto» è la copia nella risposta, sotto la mappa; si vede solo quando il riquadro della mossa
+// non ha posto per il rapporto (stretto, compatto, muto: radio-mappa.tsx), così il costo si vede sempre. Rosso C258S01: niente copia.
+export function RapportoCosto(p: { m: Missione; ic: InCorso; o: Opzione; sotto?: boolean }) {
+  if (spento('C241A01') || !p.o.costo || (p.sotto && spento('C258S01'))) return null;
   const quando = quandoCosta(p.o, p.ic.ondata >= p.m.ondate.length);
   return (
-    <p className="rapporto-costo" data-rapporto-costo={p.o.id}>
+    <p className={`rapporto-costo${p.sotto ? ' rapporto-sotto' : ''}`} data-rapporto-costo={p.o.id} data-sotto={p.sotto ? '' : undefined}>
       <strong><Icona di={Radio} />{t('radio.costo')}</strong> <span data-costo={p.o.id}>{t(p.o.costo)}</span>
       {quando && <> <span data-quando={p.o.id}>{quando}</span></>}
     </p>

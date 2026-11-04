@@ -18,7 +18,8 @@ export function rigaFolla(s: { id: string; tipo: string }, folla: Folla): string
   return t(c ? `scheda.corteo.${c.verso}` : 'scheda.corteo.nessuno');
 }
 
-export function SchedaSettore(p: { s: StatoSettore; folla: string | null; chiudi: () => void }) {
+/** «banda»: dove si apre (C55-01, D-255: dalla parte opposta al settore toccato, che resta in vista); «libero»: il lato di «Home» */
+export function SchedaSettore(p: { s: StatoSettore; folla: string | null; chiudi: () => void; banda: 'alto' | 'basso'; libero?: 'sx' | 'dx' }) {
   const chiudi = useRef<HTMLButtonElement>(null);
   const { chiudi: vai } = p;
   useEffect(() => { chiudi.current?.focus({ preventScroll: true }); }, [p.s.id]);
@@ -29,7 +30,7 @@ export function SchedaSettore(p: { s: StatoSettore; folla: string | null; chiudi
   }, [vai]);
   const titolo = `scheda-settore-${p.s.id}`;
   return (
-    <div className="scheda-settore" role="dialog" aria-labelledby={titolo} data-scheda-settore={p.s.id} onClick={vai}>
+    <div className={`scheda-settore ${p.banda}${p.libero ? ` libero-${p.libero}` : ''}`} role="dialog" aria-labelledby={titolo} data-scheda-settore={p.s.id} onClick={vai}>
       <p className="scheda-settore-nome" id={titolo}>{t(`settore.${p.s.id}`)}</p>
       <ul className="scheda-settore-righe">
         {p.s.situazione && <li data-riga="situazione"><strong>{t('scheda.situazione')}</strong> {p.s.situazione}</li>}
