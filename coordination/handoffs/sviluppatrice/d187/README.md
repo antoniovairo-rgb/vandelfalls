@@ -1179,3 +1179,68 @@ Il testo nuovo di e29 è più lungo di 9 caratteri; la stessa sonda delle rispos
 FATTO MISURATO: 568 tocchi immediati, pagina spostata 0 volte. Nessuna correzione.
 
 Non verificato: telefono reale.
+
+## D-269: C57-01 e C57-02 — S-11, 4/11
+
+Base: 02e2d458 (la 0.64.0 in arrivo). Ramo claude/valmora-c057. Rapporto della collaudatrice: ramo claude/collaudo-c057, `coordination/collaudi/c057/RAPPORTO.md`.
+
+### C57-01: la mappa della risposta con la mossa scendeva a gradini
+
+FATTO MISURATO, riproduzione con la sonda della collaudatrice (`sonda-stabilita.mjs`, 2 prove per caso, uguali):
+
+| caso | 360×640 | 375×667 |
+|---|---|---|
+| e35 curiosi_notte | 328→302→247→231 | 343→329, al tocco 274 |
+| e03 laser | 328→302, al tocco 247 | 343→274 |
+| e16 imp_buca | 328→266→200 | 343→293→215 |
+
+Causa, misurata fotogramma per fotogramma su e03 ed e35 a 360×640. Ogni volta che la mappa si abbassa, cresce qualcosa fuori dalla mappa:
+- il riquadro radio non ci sta più («stretto»), oppure l'unità in mano lo rende «compatto»: la copia del costo compare nella risposta (D-258), che passa da 139 a 194 px (+55);
+- con «muto», «Home» passa nella testata (D-261), che passa da 62 a 78 px (+16);
+- la pagina scorre di nuovo e `adatta` abbassa ancora la mappa.
+
+Correzione in `src/resa/mappa/adatta.ts`, rosso C269M01:
+- con la mossa, la misura conta la copia del costo come già visibile. Durante la misura c'è la classe `misura-copia` su `main` (stile-idee.css); viene tolta prima del disegno;
+- se «Home» è appena passata nella testata, si rimisura subito invece di aspettare il giro dopo del ResizeObserver.
+
+Il costo resta nel riquadro sopra la mappa quando c'è posto, quindi PO-152 A, D-258, D-259 e D-261 restano validi.
+
+FATTO MISURATO dopo la correzione (stessa sonda, 5 casi, 2 larghezze, 2 prove):
+- una sola discesa, e al tocco dell'unità nessun cambio;
+- le altezze finali sono quelle di prima: e03 a 360 sta a 247 px già prima del tocco (prima 302, e 247 dopo il tocco).
+
+### C57-02: la previsione dopo la mossa non si vedeva
+
+FATTO MISURATO, e16 imp_nebbia a 360×640, ultima unità e ultimo settore come nella foto della collaudatrice:
+- dopo la mossa il riquadro è «compatto muto» (14 px, `clip-path`): la previsione la legge solo il lettore di schermo, anche dopo che i segni sono spariti;
+- gli ostacoli sono «Home» e i due segni ▲/▼, e la riga di due righe non trova posto né a larghezza piena né a metà.
+
+Correzione (rosso C269P01):
+- `src/resa/mossa-ui.tsx` costruisce una copia della previsione; `Ondata.tsx` (Risposta) la mette nella risposta, sotto il costo;
+- si vede solo quando il riquadro è «muto» (stile-idee.css), in testo piccolo come il riquadro;
+- prima della mossa porta la riga più lunga fra le mosse possibili, e `adatta` la conta nella misura (C57-01), così la mappa non cambia altezza quando arriva la previsione.
+
+Misura con il testo in corpo normale: dopo la mossa la risposta scorreva di 85 px (soglia 68), perché la mappa era già al minimo (200 px). Col testo piccolo: 47 px.
+
+### Guardiano (`tools/foto-po152-b.mjs`, giro radio e giro nuovo «previsione»)
+
+- C57-01: l'altezza della mappa si registra a ogni fotogramma da quando c'è la risposta. Dopo «Conferma» cambia al più una volta; con ogni unità in mano e dopo la mossa resta uguale.
+- C57-02: in ogni stato la previsione, se c'è, si vede: nel riquadro non muto e non tagliato, oppure nella copia sotto con lo stesso testo.
+- Giro «previsione»: e16 imp_nebbia, ogni combinazione unità → settore (24); dopo la mossa la previsione si vede, la mappa non cambia altezza, e lo scorrimento resta entro soglia.
+- Bracci in `tools/passi-grafica.mjs`: C269M01 e C269P01, po152b a 360×760.
+
+FATTO MISURATO (po152b, dist del ramo):
+
+| | radio, stati | riquadro muto | «Home» in testata | mappa | scorrimento massimo | previsione sotto la mappa | esito |
+|---|---|---|---|---|---|---|---|
+| 360×640 | 276 | 144 | 22 | 200-240 | 58 (soglia 68) | 2 su 24 | verde |
+| 375×667 | 277 | 114 | 7 | 200-246 | 9 (soglia 56) | 2 su 24 | verde |
+| 412×760 | 277 | 0 | 0 | 285-355 | 0 | 0 su 24 | verde |
+| rosso C269M01, 360 | 277 | 105 | 7 | | | | rosso, 40 problemi (gradini, e cambio d'altezza con l'unità in mano) |
+| rosso C269P01, 360 | 277 | 106 | 7 | | | | rosso, 2 problemi: le due combinazioni di e16 della collaudatrice |
+
+Test: 489/489.
+
+Effetto da sapere: a 360×640 la mappa più bassa già prima del tocco cambia due conteggi. Il riquadro al solo lettore va da 105 a 144 stati, e «Home» nella testata da 7 a 22. Prima ci arrivavano solo dopo il tocco dell'unità. Il costo resta visibile in tutti gli stati (0 non visibili).
+
+Non verificato: telefono reale; testo al 130 % (resta a S-26).
