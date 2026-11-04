@@ -5,6 +5,7 @@ import { spento } from '../interruttori.ts';
 import { completaPartita, riparaInCorso } from '../logica/aggiornamento.ts';
 import { migra, type Salvataggio } from '../salvataggi/salvataggio.ts';
 import { dichiarate, missioni } from './dati.ts';
+import { GAME_VERSION } from '../versione.ts';
 
 const CHIAVE = 'vandelfalls-salvataggio';
 const RISERVA = 'vandelfalls-salvataggio-riserva';
@@ -98,7 +99,9 @@ export function carica(): Salvataggio | null {
 
 export function salva(s: Salvataggio): void {
   try {
-    const testo = JSON.stringify(s);
+    // C56-08 (D-268): «game_version» dice la versione che ha scritto il file; prima restava quella di chi l'aveva creato
+    // (un salvataggio della 0.58.0 finito sulla 0.59.0 diceva ancora 0.58.0). Rosso C268G01: come prima.
+    const testo = JSON.stringify(spento('C268G01') ? s : { ...s, game_version: GAME_VERSION });
     localStorage.setItem(CHIAVE, testo);
     localStorage.setItem(RISERVA, testo); // s viene dal gioco: è buono per costruzione
   } catch (e) { console.warn(`salvataggio non riuscito: ${(e as Error).message}`); }

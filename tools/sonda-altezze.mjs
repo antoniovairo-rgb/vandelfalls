@@ -82,10 +82,10 @@ export function verbaliCostruiti(dati, dich) {
 // Rosso C206I01. Mai alzarle per far passare una modifica.
 export const CHIAMATE_NORMALI_MAX = 664, IMPREVISTI_MAX = 339, IMPREVISTI_MEDIANA = 285;
 const semeCon = (m, o, id) => { for (let i = 1; ; i++) { const s = semeDa(`altezze:${m.id}:${i}`); if (chiamateDellaPartita(m, o, s).some((x) => x.id === id)) return s; } };
-/** C53-02: un salvataggio per ogni opzione valida di ogni carta d'imprevisto e di ogni variante, con la chiamata aperta. */
-export function risposteCostruite(dati, dich) {
+/** C53-02: un salvataggio per ogni opzione valida di ogni chiamata, con la chiamata aperta. C56-07 (D-268): anche le chiamate ordinarie (prima solo carte e varianti; e02 biglietti_voce/sequestra scorreva 57 px a 375×667, soglia 56). Rosso C268R01: solo carte e varianti. */
+export function risposteCostruite(dati, dich, rossi = []) {
   const ms = new Map(Object.entries(dati).filter(([k]) => k.startsWith('missioni/')).map(([, x]) => [x.id, x]));
-  return chiamateCostruite(dati, dich).filter((c) => c.imprevisto || c.variante).flatMap((c) => {
+  return chiamateCostruite(dati, dich).filter((c) => c.imprevisto || c.variante || !rossi.includes('C268R01')).flatMap((c) => {
     const m = ms.get(c.ep), s = migra(JSON.parse(c.sal)).in_corso, ch = M.chiamateAperte(m, s).find((x) => x.id === c.id);
     return ch ? M.opzioniValide(ch, s, m).map((o) => ({ ...c, op: o.id })) : [];
   });
@@ -261,7 +261,7 @@ export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi
       if (RISPOSTE_VP.includes(vp) && parti.includes('risposte') && !process.env.RISPOSTE_VERE) { // C53-02, veloce: una risposta vera per
         // episodio e tipo (carta o variante), poi nella stessa scena (stessi CSS, caratteri e mappa) i testi di ogni opzione al
         // posto dei suoi, e si misura. Confrontata con la misura una per una (RISPOSTE_VERE=1) su 150 risposte: stesse altezze.
-        const tutte = risposteCostruite(dati, dich).slice(0, limiteRisposte), T = Object.assign({}, ...Object.entries(dati).filter(([k]) => k.startsWith('testi/it/')).map(([, v]) => v));
+        const tutte = risposteCostruite(dati, dich, rossi).slice(0, limiteRisposte), T = Object.assign({}, ...Object.entries(dati).filter(([k]) => k.startsWith('testi/it/')).map(([, v]) => v));
         const tx = (k) => (k ? T[k.replace(/^testi:/, '')] ?? null : null);
         const ms = new Map(Object.entries(dati).filter(([k]) => k.startsWith('missioni/')).map(([, x]) => [x.id, x]));
         const opz = (c) => ms.get(c.ep).ondate.flatMap((o) => o.chiamate ?? []).find((x) => x.id === c.id).opzioni.find((o) => o.id === c.op);
@@ -290,7 +290,7 @@ export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi
               risposte.push({ vp, ep: x.ep, id: x.id, op: x.op, ecc }); }
             if (process.env.AVANZAMENTO) console.log(`${vp} risposte: ${risposte.length}`); }
           await q.close(); })); }
-      if (RISPOSTE_VP.includes(vp) && parti.includes('risposte') && process.env.RISPOSTE_VERE) { const coda = risposteCostruite(dati, dich).slice(0, limiteRisposte); // C53-02, una per una (lenta)
+      if (RISPOSTE_VP.includes(vp) && parti.includes('risposte') && process.env.RISPOSTE_VERE) { const coda = risposteCostruite(dati, dich, rossi).slice(0, limiteRisposte); // C53-02, una per una (lenta)
         await Promise.all(Array.from({ length: 4 }, async () => { const q = await b.newPage({ viewport: { width: w, height: h }, hasTouch: true, reducedMotion: 'reduce' });
           if (rossi.length) await q.addInitScript((xs) => { for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi);
           await q.addInitScript(() => { globalThis.__VALMORA_SECONDO_MS = 1; }); await q.goto(url);

@@ -12,7 +12,8 @@ const rosso = (x) => Boolean(globalThis[`__NO_${x}`]) || (process.env.VALMORA_RO
 export function htmlPrivacy(dirDati = 'data') {
   const testi = JSON.parse(readFileSync(join(dirDati, 'testi/it/privacy.json'), 'utf8'));
   const stile = ['src/resa/token.css', 'src/resa/privacy-pagina.css'].map((f) => readFileSync(f, 'utf8')).join('\n');
-  return paginaPrivacy(testoPrivacy(testi), stile);
+  const icona = `data:image/png;base64,${readFileSync('public/icone/favicon-32.png').toString('base64')}`; // C54-03 (D-268)
+  return paginaPrivacy(testoPrivacy(testi), stile, icona);
 }
 
 /** Plugin di Vite: aggiunge la pagina ai file della build (prima di «precache», che la mette nella cache offline). */
