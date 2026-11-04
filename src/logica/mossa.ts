@@ -52,3 +52,11 @@ export function rispostaDaRiprendere(m: Missione, s: InCorso): Opzione | null {
   const o = u && m.ondate.flatMap((x) => x.chiamate ?? []).find((c) => c.id === u.chiamata)?.opzioni.find((x) => x.id === u.opzione);
   return o?.risposta ? o : null;
 }
+
+/** C56-02 (D-262): «Avanti» senza mossa chiude la pausa: il turno si segna in «mosse» come una mossa usata, così dopo una
+ *  ricarica la risposta già lasciata non torna (si riprende dalla chiamata dopo, come prima di C56-02; giro foto di
+ *  tools/foto.mjs: «dopo la prima risposta»). Il salvataggio resta nello stesso formato (SAVE_VERSION 4). */
+export function rinunciaMossa(m: Missione, s: InCorso): InCorso {
+  const t = turnoMossa(m, s);
+  return t === null || !mossaPossibile(m, s) ? s : { ...s, mosse: [...(s.mosse ?? []), t] };
+}

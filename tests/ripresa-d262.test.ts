@@ -7,7 +7,7 @@ import { leggiDati } from '../tools/dati-disco.mjs';
 import { attenta } from '../src/logica/bot.ts';
 import { creaCaso } from '../src/logica/caso.ts';
 import { chiamateAperte, rispondi, settoriAmmessi, type InCorso } from '../src/logica/missione.ts';
-import { rispostaDaRiprendere, sposta, spostabili } from '../src/logica/mossa.ts';
+import { rinunciaMossa, rispostaDaRiprendere, sposta, spostabili } from '../src/logica/mossa.ts';
 import { migra } from '../src/salvataggi/salvataggio.ts';
 import type { Dichiarazione, Missione } from '../src/logica/tipi.ts';
 
@@ -27,6 +27,13 @@ describe('C56-02: la pausa con la mossa torna dopo una ricarica', () => {
   it('dopo la mossa, ripreso, non torna (la mossa è già fatta)', () => {
     const ic = vero(), x = spostabili(e01, ic)[0]!, a = settoriAmmessi(e01, x.risorsa).find((k) => k !== x.settore)!;
     expect(rispostaDaRiprendere(e01, JSON.parse(JSON.stringify(sposta(e01, ic, { risorsa: x.risorsa, da: x.settore, a }))))).toBeNull();
+  });
+  it('«Avanti» senza mossa chiude la pausa: ripreso, non torna (prima tornava: giro foto «dopo la prima risposta»)', () => {
+    const ic = vero(), dopo = JSON.parse(JSON.stringify(rinunciaMossa(e01, ic)));
+    expect(dopo.mosse).toHaveLength((ic.mosse ?? []).length + 1);
+    expect(dopo.disposizione).toEqual(ic.disposizione);
+    expect(rispostaDaRiprendere(e01, dopo)).toBeNull();
+    expect(rinunciaMossa(e01, dopo)).toBe(dopo); // già chiusa: niente da segnare
   });
   it('dopo l\'ultima chiamata dell\'ondata non torna (lì la mossa non c\'è)', () => {
     let s = vero();

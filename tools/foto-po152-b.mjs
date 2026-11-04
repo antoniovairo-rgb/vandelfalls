@@ -89,6 +89,9 @@ export async function controllaPo152b(browser, url, larghezza, rossi = [], carte
       if (giro === 'avanti') { // la mossa è facoltativa: «Avanti» senza toccare niente porta alla chiamata dopo
         await p.click('[data-azione="continua"]');
         if (!(await p.waitForSelector('[data-messaggio^="chiamata-"]', { timeout: 15000 }).then(() => true).catch(() => false))) male.push(`${dove}: «Avanti» senza mossa non porta alla chiamata dopo (PO-152 B)`);
+        // C56-02: «Avanti» senza mossa chiude la pausa; ricaricata, si riprende dalla chiamata, non dalla risposta lasciata
+        else { await p.reload(); await p.getByRole('button', { name: 'Riprendi' }).click();
+          if (!(await p.waitForSelector('[data-messaggio^="chiamata-"]', { timeout: 15000 }).then(() => true).catch(() => false))) male.push(`${dove}: dopo «Avanti» e una ricarica torna la risposta lasciata (C56-02)`); }
       }
       await p.close(); continue;
     }
