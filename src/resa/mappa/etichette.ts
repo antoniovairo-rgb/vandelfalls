@@ -204,9 +204,13 @@ export function disponiNomeCitta(contenitore: HTMLElement) {
     .flatMap((x) => [...x.querySelectorAll('.settore-punto, .settore-unita')]).map((e) => ({ ...ostacolo(rel(e.getBoundingClientRect()), STACCO), peso: e.classList.contains('settore-punto') && !spento('C44N01') ? 10 : 1 }));
   // C23-02: anche il disco e le stelline del SUO episodio (coprivano «La finale» al 100% a 360). Disco esatto, senza
   // distacco: i posti del nome gli stanno accanto per costruzione. Rosso C53N01: solo gli altri episodi, come prima.
+  // D-265 (PO-158): con la fila alta delle bolle al 4% il nome «sopra» si fermava sul margine dal bordo e, col disco
+  // ristretto di 1 px, entrava di 0,1 px nel cerchio (e25, e26, e28 a 412×915; il controllo C20-03 tollera 0,5 px):
+  // il disco si restringe di 0,5 px, come il controllo. Rosso C265D01: di 1 px, come prima.
+  const dentroDisco = spento('C265D01') ? 1 : 0.5;
   if (!spento('C53N01')) for (const e of [...s.querySelectorAll('.settore-punto, .settore-unita')]) {
-    const r = rel(e.getBoundingClientRect()), disco = e.classList.contains('settore-punto');
-    altri.push({ ...ostacolo(disco ? { left: r.left + 1, top: r.top + 1, right: r.right - 1, bottom: r.bottom - 1 } : r, disco ? 0 : STACCO), peso: disco ? 10 : 1 });
+    const r = rel(e.getBoundingClientRect()), disco = e.classList.contains('settore-punto'), d = dentroDisco;
+    altri.push({ ...ostacolo(disco ? { left: r.left + d, top: r.top + d, right: r.right - d, bottom: r.bottom - d } : r, disco ? 0 : STACCO), peso: disco ? 10 : 1 });
   }
   const sposta = (dx: number, dy: number) => { nome.style.setProperty('--nome-dx', `${dx}px`); nome.style.setProperty('--nome-dy', `${dy}px`); };
   const dentro = (a: number, b: number, min: number, max: number) => (a < min ? min - a : b > max ? max - b : 0);

@@ -143874,6 +143874,55 @@
         }
       ],
       "esito": "verde"
+    },
+    {
+      "catena": "grafica",
+      "data": "2026-11-04T00:08:03.447Z",
+      "commit": "aa129ada",
+      "modifiche_non_committate": false,
+      "passi": [
+        {
+          "passo": "token",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "build",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            2.8
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "email",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0.6
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "foto",
+          "esito": "rosso",
+          "tentativi": 3,
+          "secondi": [
+            1754.2,
+            1766.4,
+            1643.4
+          ],
+          "problemi": [
+            "360px: città 412×915, episodi conclusi: il nome dell'episodio scelto tocca dischi, stelline o bordo in 3 casi: e25 su e25, e26 su e26, e28 su e28 (C20-03, D-119)"
+          ]
+        }
+      ],
+      "esito": "rosso"
     }
   ]
 }
