@@ -18,6 +18,9 @@
 // rialza per «Home» e la risposta scorre); unità e settori toccabili col bordo dell'evidenziazione (rosso C261E01).
 // C57-01 (D-269): dal comparire della risposta la mappa cambia altezza al più una volta, e poi resta ferma in ogni stato (unità
 // in mano, mossa fatta). Rosso C269M01: scende a gradini e di nuovo al tocco dell'unità.
+// C57-02 (D-269): dopo la mossa la previsione si vede (nel riquadro, intero, o sotto la mappa), in ogni stato del giro radio e in
+// ogni combinazione unità → settore delle chiamate di CASI_PREVISIONE (e16 imp_nebbia: 4 su 24 col riquadro «muto» a 360×640).
+// Rosso C269P01: previsione al solo lettore di schermo.
 import { join } from 'node:path';
 import { chiamateCostruite, SOGLIE } from './sonda-altezze.mjs';
 import { effettoMossa } from '../src/logica/previsione.ts';
@@ -46,9 +49,12 @@ const coperti = (p) => p.evaluate(() => {
   const case_ = [...document.querySelectorAll('[data-azione^="home"]')].filter((e) => e.checkVisibility({ visibilityProperty: true })).length, fuori = !!document.querySelector('.mappa[data-casa-fuori]');
   const senzaBordo = [...document.querySelectorAll('.mappa.mossa [data-presenza]:not(:disabled) .pastiglia, .mappa.mossa .settore-punto:not(:disabled)')]
     .filter((e) => getComputedStyle(e).outlineStyle === 'none').map((e) => e.closest('[data-presenza]')?.dataset.presenza ?? e.closest('[data-settore]').dataset.settore);
-  if (q.classList.contains('muto')) return { xs: [], stretto: true, muto: true, costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, tagliato: false }; // al solo lettore: non copre niente
+  // C57-02: la previsione (se c'è) si vede: nel riquadro non muto e non tagliato, oppure nella copia sotto la mappa
+  const pr = document.querySelector('.mappa [data-previsione]'), prSotto = document.querySelector('[data-previsione-sotto="vera"]');
+  const previsione = !pr || (!q.classList.contains('muto') && q.scrollHeight <= q.clientHeight + 1 && pr.checkVisibility()) || (!!prSotto?.checkVisibility() && prSotto.textContent === pr.textContent);
+  if (q.classList.contains('muto')) return { xs: [], stretto: true, muto: true, costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, previsione, tagliato: false }; // al solo lettore: non copre niente
   const sop = (x) => Math.max(0, Math.min(r.right, x.right) - Math.max(r.left, x.left)) * Math.max(0, Math.min(r.bottom, x.bottom) - Math.max(r.top, x.top));
-  return { costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, tagliato: q.scrollHeight > q.clientHeight + 1, stretto: q.classList.contains('stretto'), xs: [...document.querySelectorAll('.mappa [data-presenza]:not(:disabled), .mappa [data-settore] .settore-punto:not(:disabled)')]
+  return { costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, previsione, tagliato: q.scrollHeight > q.clientHeight + 1, stretto: q.classList.contains('stretto'), xs: [...document.querySelectorAll('.mappa [data-presenza]:not(:disabled), .mappa [data-settore] .settore-punto:not(:disabled)')]
     .map((e) => [e.dataset.presenza ?? e.closest('[data-settore]').dataset.settore, sop(e.getBoundingClientRect())]).filter(([, a]) => a > 0.5).map(([k, a]) => `${k} ${Math.round(a)} px²`) };
 });
 const stato = (p) => p.evaluate(() => {
@@ -133,6 +139,7 @@ export async function controllaPo152b(browser, url, larghezza, rossi = [], carte
   }
   const hr = RADIO_VP[larghezza];
   if (hr) { const r = await controllaRadio(browser, url, larghezza, hr, rossi, dati, dich); male.push(...r.male); ris.push(r.ris); }
+  if (hr) { const r = await controllaPrevisione(browser, url, larghezza, hr, rossi, dati, dich); male.push(...r.male); ris.push(r.ris); }
   return { ris, male };
 }
 
@@ -167,6 +174,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
       if (x.fuori) conto.casaFuori++;
       if (x.case_ !== 1) male.push(`${vp} ${ep} ${c.id} ${dove}: ${x.case_} pulsanti «Home» visibili, ne serve uno (D-261)`);
       if (x.tagliato) male.push(`${vp} ${ep} ${c.id} ${dove}: il riquadro radio è tagliato (D-262)`);
+      if (!x.previsione) male.push(`${vp} ${ep} ${c.id} ${dove}: la previsione non si vede (C57-02)`);
       if (x.coperto.length) male.push(`${vp} ${ep} ${c.id} ${dove}: il centro non si tocca: ${x.coperto.join(', ')} (C56-03)`);
       if (x.senzaBordo.length) male.push(`${vp} ${ep} ${c.id} ${dove}: senza evidenziazione ${x.senzaBordo.join(', ')} (D-261)`);
       if (x.sotto) { conto.sotto++; conto.mappaMin = Math.min(conto.mappaMin, x.mappa); conto.mappaMax = Math.max(conto.mappaMax, x.mappa); }
@@ -196,5 +204,40 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
   }
   console.log(`radio della mossa ${vp}: ${conto.episodi} episodi, ${conto.stati} stati, rapporto al solo lettore in ${conto.stretti}, riquadro al solo lettore in ${conto.muti}; con costo ${conto.conCosto}, costo non visibile in ${conto.senzaCosto}; scorrimento massimo ${conto.scorreMax} px (soglia ${soglia}); costo sotto la mappa in ${conto.sotto}, mappa alta da ${conto.mappaMin} a ${conto.mappaMax} px; «Home» nella testata in ${conto.casaFuori}`);
   if (conto.episodi < 30) male.push(`${vp}: radio della mossa provata solo in ${conto.episodi} episodi (D-255)`);
+  return { ris: conto, male };
+}
+
+/** C57-02 (D-269): ogni combinazione unità → settore delle chiamate di CASI_PREVISIONE; dopo la mossa la previsione si vede, la
+ *  mappa non ha cambiato altezza dal «puoi spostare» (C57-01) e la risposta scorre entro soglia. */
+const CASI_PREVISIONE = [['e16', 'imp_nebbia']];
+async function controllaPrevisione(browser, url, larghezza, h, rossi, dati, dich) {
+  const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'previsione', mosse: 0, sotto: 0 }, soglia = SOGLIE[vp]?.risposta ?? 0;
+  for (const [ep, id] of CASI_PREVISIONE) {
+    const c = tutte.find((x) => x.ep === ep && x.id === id), ch = dati[`missioni/${ep}.json`].ondate.flatMap((o) => o.chiamate ?? []).find((x) => x.id === id);
+    if (!c || !ch) { male.push(`${vp} ${ep} ${id}: chiamata non trovata (C57-02)`); continue; }
+    const apri = async () => { const p = await browser.newPage({ viewport: { width: larghezza, height: h }, hasTouch: true, reducedMotion: 'reduce' });
+      await p.addInitScript((xs) => { globalThis.__VALMORA_SECONDO_MS = 1; for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi);
+      await p.goto(url); await p.evaluate(([k, v]) => localStorage.setItem(k, v), [CHIAVE, c.sal]); await p.reload(); await p.getByRole('button', { name: 'Riprendi' }).click();
+      await p.waitForSelector(`[data-messaggio="chiamata-${id}"]`, { timeout: 15000 }); await p.click(`[data-opzione="${ch.opzioni[0].id}"]`); await p.click('[data-conferma]').catch(() => {});
+      await p.waitForSelector('.mappa [data-mossa="puoi"]', { timeout: 15000, state: 'attached' }); await p.waitForTimeout(300);
+      let prima = ''; for (let i = 0; i < 30; i++) { const ora = await p.evaluate(() => `${document.scrollingElement.scrollHeight}|${document.querySelector('.mappa')?.getBoundingClientRect().height}|${document.querySelector('.radio-mappa')?.className}`); if (ora === prima) break; prima = ora; await p.waitForTimeout(100); }
+      return p; };
+    const altezza = (p) => p.evaluate(() => Math.round(document.querySelector('.mappa').getBoundingClientRect().height));
+    const p0 = await apri(), unita = await p0.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza)); await p0.close();
+    for (const u of unita) for (let j = 0, n = 1; j < n; j++) {
+      const p = await apri(), h0 = await altezza(p);
+      await p.locator(`.mappa [data-presenza="${u}"]`).click({ force: true }); await p.waitForTimeout(80);
+      const ss = await p.$$('.mappa .settore-punto:not(:disabled)'); n = ss.length;
+      if (!ss[j]) { await p.close(); break; }
+      const a = await ss[j].evaluate((e) => e.closest('[data-settore]').dataset.settore); await ss[j].click({ force: true }); await p.waitForTimeout(600);
+      const x = await coperti(p), h1 = await altezza(p), dove = `${vp} ${ep} ${id} ${u} → ${a}`; conto.mosse++; if (x.muto) conto.sotto++;
+      if (!x.previsione) male.push(`${dove}: la previsione non si vede (C57-02)`);
+      if (h1 !== h0) male.push(`${dove}: dopo la mossa la mappa passa da ${h0} a ${h1} px (C57-01)`);
+      if (x.ecc > soglia) male.push(`${dove}: la risposta scorre di ${x.ecc} px (soglia ${soglia})`);
+      await p.close();
+    }
+  }
+  console.log(`previsione dopo la mossa ${vp}: ${conto.mosse} mosse, previsione sotto la mappa in ${conto.sotto}`);
+  if (!conto.mosse) male.push(`${vp}: nessuna mossa provata (C57-02)`);
   return { ris: conto, male };
 }

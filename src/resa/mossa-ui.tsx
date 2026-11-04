@@ -2,7 +2,7 @@
 // spostare UNA unità: tocco sull'unità (badge), poi sul settore dove portarla (anche da tastiera: Invio sui due pulsanti; Esc
 // lascia l'unità). Facoltativa: «Avanti» senza mossa resta il default. L'indicazione sta nel riquadro radio sopra la mappa
 // (radio-mappa.tsx), quindi la pagina non si allunga. Rosso C241M02: la mappa non si tocca fra le chiamate.
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { spento } from '../interruttori.ts';
 import { settoriAmmessi, type InCorso } from '../logica/missione.ts';
 import { mossaPossibile, sposta, spostabili, turnoMossa } from '../logica/mossa.ts';
@@ -57,5 +57,16 @@ export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: bo
     : t('mossa.non_cambia');
   const indicazione = <p className="mossa-indicazione" data-mossa={stato}>{t(stato === 'puoi' && spento('C268M01') ? 'mossa.puoi_c56' : `mossa.${stato}`) /* C56-04: «un'unità», non «una squadra»; rosso C268M01: come prima */}{riga && <> <span data-previsione={cambi.map((e) => `${e.settore}:${e.verso}`).join(' ')}>{riga}</span></>}</p>;
   const segni: Segno[] = cambi.map((e) => ({ settore: e.settore, tipo: 'tensione', verso: e.verso as 'su' | 'giu' }));
-  return { mappa, indicazione, segni };
+  // C57-02 (D-269): se dopo la mossa il riquadro non trova posto («muto»), la previsione si legge nella risposta sotto la mappa
+  // (come il costo, D-258), mai solo al lettore di schermo. Prima della mossa la copia porta la riga più lunga fra le mosse
+  // possibili: adatta.ts la conta nella misura (C57-01), così la mappa non cambia altezza quando la previsione arriva.
+  // Rosso C269P01: niente copia, come prima.
+  let sotto: ReactNode = null;
+  if (!spento('C269P01') && !spento('C262E01') && (possibile || riga)) {
+    const verbo = t('mossa.si_scalda').length >= t('mossa.si_calma').length ? t('mossa.si_scalda') : t('mossa.si_calma');
+    const riserva = possibile ? spostabili(m, ic).flatMap((x) => settoriAmmessi(m, x.risorsa).filter((k) => k !== x.settore)
+      .map((a) => `${t('mossa.previsione')} ${t(`settore.${x.settore}`)} ${verbo}, ${t(`settore.${a}`)} ${verbo}.`)).reduce((a, b) => (b.length > a.length ? b : a), t('mossa.non_cambia')) : '';
+    sotto = <p className="previsione-sotto" data-previsione-sotto={riga ? 'vera' : 'riserva'} aria-hidden="true">{riga ?? riserva}</p>;
+  }
+  return { mappa, indicazione, segni, sotto };
 }
