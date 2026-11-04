@@ -23,7 +23,7 @@
 // Rosso C269P01: previsione al solo lettore di schermo.
 // D-269 a, b, c: in ogni stato l'istruzione della mossa si vede (nel riquadro o nella copia sotto la mappa; rosso C269I01);
 // a pagina ferma nessuna riga della copia (istruzione, previsione) sta sotto «Avanti» (elementFromPoint su ogni riga; rosso
-// C269A01); dopo l'assestamento il riquadro non cambia classe né posto per 2,5 s senza input (al «puoi spostare»).
+// C269A01); dopo l'assestamento il riquadro non cambia classe né posto per 2,5 s senza input (al «puoi spostare»; rosso C269C01).
 import { join } from 'node:path';
 import { chiamateCostruite, SOGLIE } from './sonda-altezze.mjs';
 import { effettoMossa } from '../src/logica/previsione.ts';

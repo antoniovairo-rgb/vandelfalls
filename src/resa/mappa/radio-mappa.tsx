@@ -25,16 +25,31 @@ export function RadioMappa(p: { settori: { id: string; pos: { y: number } }[]; s
 }
 
 const MODI = ['', 'meta-sx', 'meta-dx'] as const;
+// D-269 c: senza input il riquadro cambiava classe e posto dopo l'assestamento (po152b, 2,5 s ferma: 8-10 chiamate per larghezza,
+// da «muto» a «posto», o 7 px più su): spariti i segni ▲/▼ (1,8 s di gioco) gli ostacoli erano meno e si ricollocava. Ora, nello
+// stesso stato (indicazione, testo, misura della mappa), i segni già visti restano ostacoli e, se nulla è cambiato, il riquadro
+// resta com'è. Rosso C269C01: si ricolloca a ogni disegno, come prima.
+type Rett = { left: number; right: number; top: number; bottom: number };
+const visto = new WeakMap<HTMLElement, { stato: string; segni: Rett[]; firma: string }>();
 
 /** Colloca il riquadro radio fuori dai bersagli della mossa (unità e settori toccabili, «Home») e dai segni ▲/▼ (PO-152 A). Chiamata da Mappa a ogni
  *  disegno e quando la mappa cambia misura, dopo le etichette (le unità si spostano con i nomi). */
 export function collocaRadio(mappa: HTMLElement) {
   const r = mappa.querySelector<HTMLElement>(':scope > .radio-mappa');
   if (!r) return;
+  const fermo = r.dataset.evita === 'si' && !spento('C269C01');
+  const m0 = mappa.getBoundingClientRect(), rel = (b: Rett): Rett => ({ left: b.left - m0.left, right: b.right - m0.left, top: b.top - m0.top, bottom: b.bottom - m0.top });
+  const stato = `${r.textContent}|${Math.round(m0.width)}x${Math.round(m0.height)}`, prima = fermo ? visto.get(r) : undefined;
+  const segniOra = [...mappa.querySelectorAll('[data-segno]')].map((e) => rel(e.getBoundingClientRect()));
+  const segni = prima?.stato === stato ? [...prima.segni, ...segniOra] : segniOra;
+  const fissi = [...mappa.querySelectorAll('[data-presenza]:not(:disabled), .settore-punto:not(:disabled), .tasto-home')].map((e) => rel(e.getBoundingClientRect()));
+  const firma = [...fissi, ...segni].map((b) => [b.left, b.top, b.right, b.bottom].map(Math.round).join(',')).sort().filter((x, i, a) => a.indexOf(x) === i).join(' ');
+  if (fermo) { const ok = prima?.stato === stato && prima.firma === firma; visto.set(r, { stato, segni, firma }); if (ok) return; }
   r.classList.remove('posto', 'stretto', 'muto', ...MODI.filter(Boolean));
   if (r.dataset.evita !== 'si') return;
   const m = mappa.getBoundingClientRect(), base = r.getBoundingClientRect();
-  const bersagli = [...mappa.querySelectorAll('[data-presenza]:not(:disabled), .settore-punto:not(:disabled), .tasto-home, [data-segno]')].map((e) => e.getBoundingClientRect());
+  const ass = (b: Rett): Rett => ({ left: b.left + m.left, right: b.right + m.left, top: b.top + m.top, bottom: b.bottom + m.top });
+  const bersagli = fermo ? [...fissi, ...segni].map(ass) : [...mappa.querySelectorAll('[data-presenza]:not(:disabled), .settore-punto:not(:disabled), .tasto-home, [data-segno]')].map((e) => e.getBoundingClientRect());
   const v = (k: string) => parseFloat(getComputedStyle(mappa).getPropertyValue(k)) || 0, bordo = v('--spazio-2'), aria = v('--spazio-1');
   // un filo d'aria (--spazio-1) fra il riquadro e i bersagli: a filo i pixel frazionari si toccano
   const urto = (l: number, d: number, y: number, h: number) => bersagli.reduce((a, x) => a + Math.max(0, Math.min(d, x.right + aria) - Math.max(l, x.left - aria)) * Math.max(0, Math.min(y + h, x.bottom + aria) - Math.max(y, x.top - aria)), 0);
