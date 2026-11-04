@@ -53,9 +53,3 @@ main:has(.mappa[data-casa-fuori]) .casa-riserva { display: flex; }
 main:not(.rosso-c261e01) .mappa.mossa .tocco-pastiglia:not(:disabled) .pastiglia { outline: var(--bordo) dashed var(--magenta); outline-offset: var(--spazio-px); }
 main:not(.rosso-c261e01) .mappa.mossa .tocco-pastiglia:is(.mossa-in-mano, .in-mano) .pastiglia { outline-style: solid; }
 main:not(.rosso-c261e01) .mappa.mossa .settore-punto:not(:disabled) { outline: var(--bordo) dashed var(--magenta); outline-offset: var(--spazio-1); }
-/* C56-03 (D-262): con la mossa il centro di un bersaglio cadeva sotto un altro elemento (e30 a 412×760: il centro di «Piazzale»
-   dava il badge dell'unità in mano). Durante la mossa: ciò che non si tocca lascia passare il tocco (punti e unità
-   disattivati, lo spazio vuoto del gruppo di unità) e i settori dove portare l'unità stanno sopra le unità. Rosso C262T01. */
-main:not(.rosso-c262t01) .mappa.mossa :is(.settore-punto:disabled, .settore-unita, .settore-unita > :disabled) { pointer-events: none; }
-main:not(.rosso-c262t01) .mappa.mossa .settore-unita > :not(:disabled) { pointer-events: auto; }
-main:not(.rosso-c262t01) .mappa.mossa .settore-punto:not(:disabled) { z-index: 2; }
