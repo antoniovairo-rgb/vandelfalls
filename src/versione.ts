@@ -328,4 +328,14 @@
 // 0.61.0 – numeri dei morsi coerenti (C56-01, collaudo C-056): 4 rapporti dicevano «una squadra» per un effetto riserva −2
 //   (e02, e26, e31, e32), e28 diceva «due squadre stanche» per −1; corretti i testi, non i valori (bilanciamento invariato).
 //   guardiano: tests/numeri-morsi.test.ts (127 frasi di squadre e 85 di steward lette, pavimento di lettura), rossi verificati.
-export const GAME_VERSION = '0.61.0';
+// 0.63.0 – mossa leggibile e affidabile (D-255, D-258/D-259/D-261, D-262; collaudi C-055/C-056). Contiene la consegna prevista
+//   come 0.62.0, che non esce da sola (D-267).
+//   causa: la scheda del settore copriva il settore toccato (C55-01); il costo spariva nella risposta con la mossa; la mossa quasi
+//   mai cambiava le chiamate e il giocatore non ne vedeva l'effetto; dopo una ricarica la pausa della mossa si perdeva (C56-02);
+//   i bersagli della mossa non sempre rispondevano al tocco (C56-03).
+//   misura: previsione dell'effetto della mossa (previsione.ts) d'accordo con l'esito nell'88,7% (minimo 85,7%), 0 opposte; la pausa
+//   torna dopo la ricarica solo se era a schermo, «Avanti» la chiude, salvataggi vecchi a metà ondata riprendono dalla chiamata
+//   (SAVE_VERSION 4 invariata, provato su salvataggi veri 0.4.0 e 0.57.0); bersagli: centro di ogni bersaglio risponde al tocco.
+//   guardiano: tools/foto-po152-a.mjs (C255S01), foto-po152-b (C262M01, C262D01, giri «ricarica» e «avanti»), tests ripresa-d262 e
+//   mossa-d241 (C262R01), previsione (C262E01), collocaRadio (C255R01), adatta (C259A01), Home in testata (C261H01).
+export const GAME_VERSION = '0.63.0';
