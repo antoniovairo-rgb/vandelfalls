@@ -6,7 +6,7 @@ import { lazy, Suspense, useEffect, type ReactNode, useLayoutEffect, useMemo, us
 import { disponiEtichette } from './etichette.ts';
 
 // Interruttore rosso C05S08: nomi e unità restano al posto fisso (difetto C-008).
-const disponi = (el: HTMLElement) => { if (!spento('C05S08')) disponiEtichette(el); };
+const disponi = (el: HTMLElement) => { if (!spento('C05S08')) disponiEtichette(el); collocaRadio(el); }; // D-255: il riquadro radio dopo le unità
 import type { Disposizione, Missione } from '../../logica/tipi.ts';
 import { spento } from '../../interruttori.ts';
 import { club, t, quante } from '../dati.ts';
@@ -20,7 +20,7 @@ import { follaDellOndata } from './folla.ts';
 import { parolaSegno, simboloSegno, type Segno } from './segni.ts';
 import { useAdatta } from './adatta.ts';
 import { rigaFolla, SchedaSettore } from './scheda-settore.tsx';
-import { RadioMappa } from './radio-mappa.tsx';
+import { collocaRadio, RadioMappa } from './radio-mappa.tsx';
 
 // PixiJS pesa: si carica a parte, dopo il titolo, e solo se WebGL c'è.
 const StratoPixi = lazy(() => import('./StratoPixi.tsx').then((x) => ({ default: x.StratoPixi })));
@@ -51,7 +51,7 @@ export interface MappaProps {
   /** PO-152 (D-241): senza onSettore il tocco su un settore apre la sua scheda di stato (scheda-settore.tsx) */
   schede?: boolean;
   /** D-241 idea B (mossa-ui.tsx): si toccano solo le unità spostabili («risorsa@settore»), poi solo i settori ammessi */
-  mossa?: { spostabili: string[]; inMano: string | null; ammessi: string[] };
+  mossa?: { spostabili: string[]; inMano: string | null; ammessi: string[]; fatta?: boolean };
   /** PO-152 (D-241): rapporto radio del costo dopo «Conferma», sopra la mappa (RadioMappa) */
   radio?: ReactNode;
   /** D-165 (fischio dell'ultimo derby): settori già spenti, città vuota (niente folla né cortei), sala al buio */
@@ -124,7 +124,7 @@ export function Mappa(p: MappaProps) {
   }, []);
 
   return (
-    <div className={`mappa${atmosfera.notte ? ' notte' : ''}${p.buio ? ' buio' : ''}`} ref={contenitore} data-vuota={p.vuota ? 'si' : undefined} data-mappa={conWebgl ? 'webgl' : 'html'} data-pronta={pronta ? 'si' : 'no'} aria-label="Mappa tattica">
+    <div className={`mappa${atmosfera.notte ? ' notte' : ''}${p.buio ? ' buio' : ''}${p.mossa ? ' mossa' : ''}`} ref={contenitore} data-vuota={p.vuota ? 'si' : undefined} data-mappa={conWebgl ? 'webgl' : 'html'} data-pronta={pronta ? 'si' : 'no'} aria-label="Mappa tattica">
       {p.home && <TastoHome vai={p.home} angolo={angolo} />}
       {/* C20-07: segni di una chiamata senza settore (squadre dalla centrale), al centro in basso della mappa */}
       {(p.segni ?? []).some((x) => !x.settore) && (
@@ -165,7 +165,7 @@ export function Mappa(p: MappaProps) {
                   </span>
                 ))}
                 {qui.map(([r, n]) => (
-                  <button key={r} type="button" className={`${spento('C05R05') ? 'pastiglia-rossa' : 'tocco-pastiglia'}${p.mossa?.inMano === `${r}@${s.id}` ? ' in-mano' : ''}`} data-presenza={`${r}@${s.id}`}
+                  <button key={r} type="button" className={`${spento('C05R05') ? 'pastiglia-rossa' : 'tocco-pastiglia'}${p.mossa?.inMano === `${r}@${s.id}` ? (spento('C262M01') ? ' in-mano' : ' mossa-in-mano') : ''}`} data-presenza={`${r}@${s.id}`}
                     disabled={!p.onTogli || (!!p.mossa && !p.mossa.spostabili.includes(`${r}@${s.id}`))} aria-pressed={p.mossa ? p.mossa.inMano === `${r}@${s.id}` : undefined}
                     aria-label={p.mossa ? `${t('mossa.sposta')} ${t(`risorsa.${r}`)} da ${nome}` : `ritira ${t(`risorsa.${r}`)} da ${nome}`} onClick={() => p.onTogli?.(r, s.id)}>
                     <span className="pastiglia"><Icona di={iconaRisorsa(r)} />{n}</span>
@@ -176,8 +176,14 @@ export function Mappa(p: MappaProps) {
           </div>
         );
       })}
-      {p.radio && <RadioMappa settori={settori} segni={p.segni ?? []} home={p.home ? angolo : null}>{p.radio}</RadioMappa>}
-      {schede && aperto && settori.some((s) => s.id === aperto) && (() => { const s = settori.find((x) => x.id === aperto)!; return <SchedaSettore s={statoDi(s)} folla={p.vuota ? null : rigaFolla(s, folla)} chiudi={chiudiScheda} />; })()}
+      {p.radio && <RadioMappa settori={settori} segni={p.segni ?? []} home={p.home ? angolo : null} evita={!!p.mossa} compatto={!!p.mossa?.inMano || !!p.mossa?.fatta}>{p.radio}</RadioMappa>}
+      {schede && aperto && settori.some((s) => s.id === aperto) && (() => {
+        // C55-01 (D-255): la scheda ancorata in basso copriva i settori bassi (strade, parcheggi, piazzale): si apre dalla parte
+        // opposta al settore toccato e, in alto, lascia libero il lato di «Home». Rosso C255S01: sempre in basso, come prima.
+        const s = settori.find((x) => x.id === aperto)!, banda = s.pos.y > 50 && !spento('C255S01') ? 'alto' : 'basso';
+        const libero = banda === 'alto' && p.home && angolo.startsWith('alto') ? (angolo.endsWith('sx') ? 'sx' : 'dx') : undefined;
+        return <SchedaSettore s={statoDi(s)} folla={p.vuota ? null : rigaFolla(s, folla)} chiudi={chiudiScheda} banda={banda} libero={libero} />;
+      })()}
     </div>
   );
 }

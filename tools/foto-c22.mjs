@@ -169,7 +169,7 @@ export async function controllaLargo(pagina, atteso, dove) {
   if (r.v) atteso(`${dove} a 1366×768: versione da ${r.v.sinistra.toFixed(0)} a ${r.v.destra.toFixed(0)} px, colonna da ${r.v.colonnaSx.toFixed(0)} px (C28-11, C32-06, D-168)`, r.v.destra <= r.v.colonnaSx + 1 && r.v.sinistra >= r.v.colonnaSx - 17);
   atteso(`${dove} a 1366×768: la versione tocca ${r.tocca.join(', ')} (C32-06)`, !r.tocca.length);
   await pagina.keyboard.press('Shift'); // da qui il fuoco è «da tastiera» (:focus-visible)
-  const contorni = await pagina.evaluate(() => [...document.querySelectorAll('.tasto-home, .info, .aiuto, .tocco-pastiglia, .indicatore')].filter((e) => e.getClientRects().length && e.matches('button:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])')).map((e) => { // solo i comandi (la pastiglia fissa è un'immagine)
+  const contorni = await pagina.evaluate(() => [...document.querySelectorAll('.tasto-home, .info, .aiuto, .tocco-pastiglia, .indicatore')].filter((e) => e.getClientRects().length && e.checkVisibility({ visibilityProperty: true }) && e.matches('button:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])')).map((e) => { // solo i comandi (la pastiglia fissa è un'immagine)
     e.focus({ preventScroll: true }); const c = getComputedStyle(e); const out = `${e.className.split(' ')[0]} ${c.outlineStyle} ${c.outlineColor}`, ok = c.outlineStyle === 'solid'; // letto prima del blur (stile vivo)
     e.blur(); return { out, ok };
   }));

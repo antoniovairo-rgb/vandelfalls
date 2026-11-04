@@ -7,7 +7,7 @@
 // - La mossa cambia la disposizione: conta per le condizioni «senza» delle chiamate dopo e per la chiusura dell'ondata.
 import { spento } from '../interruttori.ts';
 import { chiamateAperte, missioneFinita, settoriAmmessi, type InCorso } from './missione.ts';
-import type { Missione } from './tipi.ts';
+import type { Missione, Opzione } from './tipi.ts';
 
 export interface Mossa { risorsa: string; da: string; a: string }
 
@@ -42,4 +42,32 @@ export function sposta(m: Missione, s: InCorso, x: Mossa): InCorso {
   d[x.risorsa]![x.da] = d[x.risorsa]![x.da]! - 1;
   d[x.risorsa]![x.a] = (d[x.risorsa]![x.a] ?? 0) + 1;
   return { ...s, disposizione: d, mosse: [...(s.mosse ?? []), t] };
+}
+
+/** C56-02 (D-262): la pausa con la mossa aperta a schermo si segna nel salvataggio («aperta:<turno>» in «mosse», stesso
+ *  formato, SAVE_VERSION 4). Senza questo segno un salvataggio a metà ondata non dice se la risposta era ancora a schermo o già
+ *  lasciata: i salvataggi vecchi (0.4.0 … 0.62.0) riportavano la risposta dell'ultima scelta (giro foto, tools/foto-po121.mjs). */
+const APERTA = 'aperta:';
+export function apriPausa(m: Missione, s: InCorso): InCorso {
+  const t = turnoMossa(m, s);
+  return t === null || !mossaPossibile(m, s) || (s.mosse ?? []).includes(APERTA + t) ? s : { ...s, mosse: [...(s.mosse ?? []), APERTA + t] };
+}
+
+/** C56-02 (D-262): dopo una ricarica la risposta su cui si può ancora muovere torna (la mossa di quella pausa non si perde):
+ *  l'opzione dell'ultima risposta dell'ondata, se la pausa era aperta a schermo (apriPausa), la mossa è ancora possibile e la
+ *  risposta ha il suo testo (come a schermo). */
+export function rispostaDaRiprendere(m: Missione, s: InCorso): Opzione | null {
+  const t = turnoMossa(m, s);
+  if (t === null || !mossaPossibile(m, s) || !(s.mosse ?? []).includes(APERTA + t)) return null;
+  const u = s.scelte.filter((x) => x.ondata === s.ondata).at(-1);
+  const o = u && m.ondate.flatMap((x) => x.chiamate ?? []).find((c) => c.id === u.chiamata)?.opzioni.find((x) => x.id === u.opzione);
+  return o?.risposta ? o : null;
+}
+
+/** C56-02 (D-262): «Avanti» senza mossa chiude la pausa: il turno si segna in «mosse» come una mossa usata, così dopo una
+ *  ricarica la risposta già lasciata non torna (si riprende dalla chiamata dopo, come prima di C56-02; giro foto di
+ *  tools/foto.mjs: «dopo la prima risposta»). Il salvataggio resta nello stesso formato (SAVE_VERSION 4). */
+export function rinunciaMossa(m: Missione, s: InCorso): InCorso {
+  const t = turnoMossa(m, s);
+  return t === null || !mossaPossibile(m, s) ? s : { ...s, mosse: [...(s.mosse ?? []), t] };
 }

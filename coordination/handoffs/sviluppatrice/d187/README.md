@@ -932,3 +932,158 @@ FATTO MISURATO:
 
 Non verificato: telefono reale (tocco sui badge vicini, TalkBack), trascinamento (non fatto).
 - Su c2b3a38e: grafica completa verde (bracci C241B01 e C241M02 compresi); 3 giri governo+logica verdi; CI 40984991278 verde.
+
+## D-255: C55-01 (scheda del settore) e riquadro radio della mossa — 0.60.0 — S-11, 30/10 e 2/11
+
+Base: 9f32eea8 (0.59.0 della principale) unita in e5068acb.
+
+C55-01, la scheda del settore che copriva i settori bassi (`src/resa/mappa/Mappa.tsx`, `scheda-settore.tsx`):
+- La scheda si apre dalla parte opposta al settore toccato.
+- Quando si apre in alto, lascia libero il lato di «Home».
+- Rosso C255S01: la scheda torna sempre in basso, come prima.
+
+FATTO MISURATO per C55-01 (`tools/foto-po152-a.mjs`; per ogni settore, aperta la sua scheda, il centro del settore toccato resta in vista):
+- verde a 360, 375 e 412;
+- rosso C255S01 a 360: 10 problemi (piazzale, strada_cinderwick, strada_larkspire);
+- provate solo le due chiamate di e01.
+
+Riquadro radio della mossa, punto 2 (`src/resa/mappa/radio-mappa.tsx`, `collocaRadio`, chiamata da `disponi` di Mappa dopo le etichette):
+- Prima la sonda ha misurato, alla prima chiamata con mossa dei 36 episodi a 360×640, 210 stati su 241 in cui il riquadro copriva un bersaglio. Sono bersagli le unità toccabili e, con ogni unità in mano, i settori ammessi. Spostare solo la fascia non bastava: i bersagli stanno in tutte e due le metà, la mappa è alta 328 px e il riquadro 73-120 px.
+- Con la mossa il riquadro resta nella sua fascia se è libera. Altrimenti va nella posizione libera più vicina: prima a larghezza piena, poi a mezza larghezza, e mai con il testo tagliato. Fra il riquadro e i bersagli resta un filo d'aria di `--spazio-1`.
+- Con l'unità in mano («compatto») il riquadro mostra solo «Ora tocca il settore…».
+- Se anche prima di toccare il riquadro intero non trova posto («stretto»), resta solo l'indicazione e il rapporto del costo passa al solo lettore di schermo (stile `.solo-lettore`).
+- Se non c'è posto nemmeno per la riga sola («muto»), tutto il riquadro passa al solo lettore di schermo.
+- I segni ▲/▼ contano come ostacoli.
+- Tutto da token. Rosso C255R01: fascia fissa e rapporto sempre intero, come prima.
+
+Primo giro di grafica su 6f059cea: ROSSO in 3 tentativi su 3, quindi non instabile.
+- Il riquadro spostato andava sopra i segni (PO-152 A, e01 porta_servizio a 360×640 e 360×760).
+- In e25 nulla_osta a 375×667 copriva zona_rossa (107 px²). Un registro dentro collocaRadio ha mostrato che non c'era nessuna fascia libera nemmeno per la riga sola (24 px liberi contro 30): era scattato il ripiego del «meno coperto».
+- Corretto in 5cb80844: segni come ostacoli e ripiego «muto» al posto del «meno coperto».
+
+FATTO MISURATO dopo (`tools/foto-po152-b.mjs`, `controllaRadio`, 36 episodi, 241 stati per finestra; via giraAltezze con le parti po152a e po152b, verdi):
+- 360×640: 0 stati coperti; rapporto al solo lettore in 21 stati; riquadro intero al solo lettore in 0.
+- 375×667: 0 stati coperti; rapporto al solo lettore in 16 stati; riquadro intero al solo lettore in 0.
+- 412×760: 0 stati coperti; rapporto al solo lettore in 5 stati; riquadro intero al solo lettore in 0.
+- Rosso C255R01 a 360×640: 210 problemi.
+- Braccio in `passi-grafica`: C255R01 a 360×760, parte po152b.
+- Foto: `d255radio/prima` (e5068acb) e `d255radio/dopo`, e01 ed e36, stati «puoi» e «dove», a 360×640, 375×667 e 412×760.
+
+COSTO, inviato alla principale per una scelta del PO: negli stati «stretto» il rapporto del costo dell'idea A non si vede. Le alternative sono due:
+- B: il rapporto va nella risposta sotto la mappa, con la pagina più lunga;
+- C: il riquadro copre i bersagli finché il giocatore non tocca un'unità.
+
+Non verificato: chiamate oltre la prima con mossa di ogni episodio; telefono reale.
+
+### D-258, D-259 e D-261: il costo si vede sempre, la mappa della risposta si abbassa, «Home» nella testata — S-11, 2/11
+
+Scelte del PO e della principale. D-258 è l'opzione B: il costo va sotto la mappa. D-259 è l'opzione 1: la mappa si abbassa. D-261 allarga la deroga a ogni risposta con la mossa e porta «Home» nella testata.
+- **Costo sotto la mappa** (`Ondata.tsx`, `RapportoCosto sotto`). Nella risposta c'è una copia del rapporto del costo. Si vede solo quando il riquadro della mossa non lo mostra («compatto», «stretto», «muto»), e lì il rapporto del riquadro si nasconde: il lettore di schermo non lo legge due volte. Rosso C258S01.
+- **Mappa più bassa** (`adatta.ts`, deroga a D-197). In ogni risposta con la mossa, anche dopo la mossa, se la pagina scorre la mappa si abbassa fino a `--mappa-altezza-min` (200 px; si tocca ancora). Rosso C259A01.
+- **«Home» nella testata.** Con la deroga, se la mappa abbassata porterebbe «Home» sopra un settore, «Home» passa nella testata. Nella testata c'è una «Home» di riserva, mostrata solo dal CSS con `.mappa[data-casa-fuori]`. Prima l'avevo comandata con uno stato di React, e le «Home» visibili erano 0 per 1,25 s, poi 2 (e35 imp_tram_chiuso). Poi la riserva era invisibile ma occupava posto: la testata si alzava fino a 102 px ed e13 viale_pieno scorreva 82 px. Ora è `display: none` e l'attributo resta durante la misura. Rosso C261H01.
+- **Evidenziazione** (punto 4). Con la mossa, unità e settori toccabili hanno un bordo magenta tratteggiato, l'unità in mano un bordo pieno. Tutto da token. Rosso C261E01 (CSS).
+
+FATTO MISURATO (`tools/foto-po152-b.mjs`, `controllaRadio`; prima chiamata con mossa dei 36 episodi, 277 stati per finestra con «puoi», «dove» e «mossa fatta»). Il guardiano controlla:
+- il costo è visibile;
+- nessun bersaglio è coperto;
+- la risposta resta entro `SOGLIE[vp].risposta`, 0 se manca;
+- c'è una sola «Home» visibile;
+- i bersagli hanno il bordo;
+- ogni unità spostabile per la logica è toccabile.
+
+| Finestra | Esito | Mappa con costo sotto | Riquadro al solo lettore | Scorrimento massimo (soglia) | «Home» nella testata |
+|---|---|---|---|---|---|
+| 360×640 | verde | 239 stati, da 200 a 235 px | 118 | 58 px (68) | 14 |
+| 375×667 | verde | 240 stati, da 200 a 281 px | 73 | 8 px (56) | 6 |
+| 412×760 | verde | 219 stati, da 320 a 380 px | 2 | 0 px (0) | 0 |
+
+Bracci rossi a 360×640:
+- C255R01: 231 problemi;
+- C258S01: 236 problemi (costo non visibile in 236 stati: è il «prima» della richiesta);
+- C259A01: 234 problemi (fino a 210 px);
+- C261E01: 246 problemi;
+- C261H01: 6 problemi (e35 perimetro, 80 px).
+
+I bracci C255R01, C258S01, C259A01 e C261E01 sono stati misurati prima dell'ultimo ritocco di «Home», ma sono indipendenti da quel ritocco; i bracci della catena li rifanno.
+
+Punto 5, gli stati provati che erano 240 invece di 241. È stato misurato con il dettaglio per episodio confrontato col rosso C259A01.
+- Nel riquadro «muto» l'indicazione è un elemento 1×1 px ritagliato. `waitForSelector` di Playwright lo considera invisibile e scade dopo 15 s.
+- Il guardiano allora passava alla chiamata dopo, con meno stati. È successo in 10 episodi (es. e01 corteo_partito → ufficio_insiste).
+- Correzione: si aspetta l'elemento presente (`state: 'attached'`).
+
+Strumento: e30 raduno_silenzio a 375×667 era misurato a 80 ms dal tocco, quando scorreva 79 px; a 250 ms scorre 0 px. Ora il guardiano aspetta la pagina ferma: due letture uguali a 100 ms di distanza, al massimo 3 s.
+
+Foto in `d261/dopo` e `d261/rosso-C261E01`:
+- e01 «muto» a 360, 375 e 412;
+- e13 con il costo sotto a 360;
+- e35 con «Home» nella testata a 360.
+
+## D-262: effetto della mossa, C56-02, C56-03 — 0.63.0 — S-11, 4/11
+
+Base: 63c6a61b, la 0.62.0 consegnata. Ramo claude/valmora-d262.
+
+Aggiunte alla 0.62.0, dopo la sezione D-258/259/261 (commit su claude/valmora-home):
+- c7da29ad: la mappa della risposta si abbassa solo quando la risposta è già sulla pagina. Prima nel cambio di scena faceva 217 → 302 → 328 px e i segni di PO-085 scadevano.
+- e06e7b34: la sonda delle altezze misura ogni risposta con la mossa nella sua scena vera, perché C53-02 in modalità veloce dava 75 px dove la misura vera dà 0. D-197 non vale per le risposte con la mossa.
+- 73612a90: nella stessa risposta la mappa abbassata non si rialza. Prima oscillava (e08: 0 → 78 → 0 px).
+- fe69a434: il guardiano prova al più 4 chiamate per episodio e non tocca opzioni esaurite.
+
+### 1. L'effetto della mossa si vede subito (scelta del PO)
+
+Codice:
+- `src/logica/previsione.ts` è pura. `tensioneStimata` chiude l'ondata come se le chiamate ancora aperte non cambiassero nulla: è la stessa stima del bot (bot.ts). `effettoMossa` confronta lo stato prima e dopo la mossa, sul settore lasciato e su quello coperto.
+- `src/resa/mossa-ui.tsx`: dopo la mossa il riquadro dice «Mossa fatta. Previsione alla chiusura: Piazzale si calma, …», oppure «nessun cambiamento». La mappa mostra ▲/▼ sui due settori, ma non dove la tensione non cambia.
+- Dopo la mossa il riquadro tiene solo l'indicazione e la previsione; il costo passa nella risposta (D-258). Col rapporto intero la previsione veniva tagliata, perché il riquadro è alto al più metà mappa.
+- Rosso C262E01.
+
+FATTO MISURATO (`tests/previsione-d262.test.ts`, motore). Campione: ogni mossa legale di ogni pausa, 36 episodi, bot attento. Confronto con la chiusura vera, finendo l'ondata con le stesse risposte con e senza la mossa.
+- Semi 1-3: 54.216 segni. Coincide in tutto, compreso «non cambia», nell'88,70 %. Di verso opposto: 0.
+- Distribuzione dei casi:
+
+| previsto | reale | casi |
+|---|---|---|
+| invariato | invariato | 38.865 |
+| ▲ | ▲ | 7632 |
+| ▲ | invariato | 4464 |
+| ▼ | ▼ | 1593 |
+| ▼ | invariato | 612 |
+| invariato | ▲ | 564 |
+| invariato | ▼ | 486 |
+
+- IPOTESI: i disaccordi vengono dalle risposte successive, che cambiano la pressione sugli stessi settori; la previsione non le conosce.
+- Il guardiano blocca il verso opposto: 0 casi. Accordo: niente soglia di qualità, ma non sotto 85,7 % (misura del 4/11 meno 3 punti, decisione della principale).
+- Nelle pause in cui qualche mossa cambia la chiusura: 86,4 %.
+- A schermo (`tools/foto-po152-b.mjs`): la riga `data-previsione` e i segni corrispondono a `effettoMossa`, calcolato sui due salvataggi. Rosso C262E01: 3 problemi a 360 (manca la previsione), più 1 riquadro tagliato in «mossa fatta» (e20 viso_scoperto).
+
+### 2. C56-02: la pausa con la mossa torna dopo una ricarica
+
+- Causa (`src/resa/App.tsx`): la risposta a schermo (`eco`) non sta nel salvataggio, e `riprendi` la azzerava.
+- Correzione:
+  - `rispostaDaRiprendere` (in `src/logica/mossa.ts`, pura): se la mossa della pausa è ancora possibile, restituisce l'opzione dell'ultima risposta dell'ondata;
+  - `riprendi` la rimette a schermo;
+  - il salvataggio non cambia.
+- Rosso C262R01.
+- FATTO MISURATO:
+  - `tests/ripresa-d262.test.ts` passa 3 prove su 3: salvataggio vero della 0.57.0; dopo la mossa la pausa non torna; dopo l'ultima chiamata non torna.
+  - Giro «ricarica» del guardiano, e01 a 360 × 640/667/760: verde. Rosso C262R01: 3 problemi.
+
+### 3. C56-03: bersagli che non si toccano al centro
+
+Il guardiano ha un controllo nuovo: in ogni stato della mossa (277 per larghezza), il centro di ogni unità o settore toccabile deve rispondere al tocco (`elementFromPoint`).
+
+Prima della correzione i casi erano 19 a 360, 21 a 375 e 4 a 412. Cause misurate:
+- **La classe dell'unità in mano era `in-mano`.** È la stessa classe del riquadro dello schieramento (stile-schermate.css: padding, margine, spaziatura). L'unità si allargava da 44 a 61 px, le unità andavano a capo e uscivano dalla mappa (e02 ritardo). Ora la classe è `mossa-in-mano`. Rosso C262M01: 14 problemi a 360.
+- **Con la mappa abbassata i dischi dei settori si sovrapponevano.** In e02 a 360×640, con la mappa a 204 px, viale_stazione e curva_ospiti erano a 18,7 px uno dall'altro, con raggio 22. Ora, con la deroga, la mappa non scende sotto l'altezza in cui il centro di un disco cade dentro un altro (`adatta.ts`, `senzaDischiSovrapposti`). Rosso C262D01: 3 problemi a 360.
+- Con la mappa piena (rosso C259A01) restavano solo i casi di e02. La maggior parte veniva dalla mappa abbassata.
+- Avevo provato un CSS che lasciava passare il tocco e metteva i settori sopra le unità (C262T01). L'ho tolto: dopo le due correzioni il rosso era identico al verde a 360, 375 e 412.
+
+Il caso esatto della collaudatrice (e30, 3:10, 412×760, mediatore a piazza_municipio) non l'ho riprodotto, perché il bot equilibrato non mette mai lì il mediatore. Spostato a mano in e30 ondata 3 (semi 1-3), il centro di Piazzale risponde. Col rosso C262M01 l'unità in mano si allarga a 59 px.
+
+Dopo le correzioni, guardiano verde a 360, 375 e 412: 0 casi C56-03, 0 riquadri tagliati, scorrimento massimo 58, 9 e 0 px (soglie 68, 56 e 0).
+
+Foto in `d262/dopo`, e `d262/prima` coi rossi C262E01, R01, M01 e D01 insieme. Per 360, 375 e 412:
+- e01, mossa fatta;
+- e01, dopo una ricarica;
+- e02, unità in mano.
+
+Non verificato: telefono reale; il caso esatto di e30.

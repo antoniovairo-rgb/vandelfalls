@@ -14,6 +14,12 @@ const ESCLUSE_D197 = new Set(['risposta']);
 // D-191: dove la mappa non si tocca (risposta, sala, briefing) può scendere fino a --mappa-altezza-min-lettura (160 px).
 // Rosso C191L01: il minimo di sempre.
 const LETTURA = new Set(['risposta', 'sala', 'briefing']); // «risposta» vale solo col rosso C197R01
+// D-259 e D-261 (opzione 1, deroga a D-197): nella risposta con la mossa (indicazione nel riquadro radio, radio-mappa.tsx), se
+// la pagina scorre, la mappa si abbassa fino a --mappa-altezza-min (si tocca ancora: 200 px, non quello di lettura); succede
+// soprattutto quando il costo non ha posto sopra la mappa e va nella risposta (D-258). Rosso C259A01: mappa piena, come D-197.
+// D-261: in questa deroga, se la mappa abbassata porterebbe «Home» sopra un settore, «Home» passa nella testata (come il
+// rapporto, D-191) invece di rialzare la mappa (S-21). Rosso C261H01: si rialza come prima.
+const CON_MOSSA = '.radio-mappa [data-mossa]';
 // D-191: nel rapporto, se la pagina scorre anche con la mappa al minimo, la mappa non si mostra (resta la scheda dei
 // settori, che dice lo stato di ognuno) e «Home» passa nella testata. Rosso C191R01: la mappa resta.
 const SENZA_MAPPA = new Set(['rapporto']);
@@ -26,17 +32,26 @@ let ridisponi: (m: HTMLElement) => void = () => {};
 // lo stesso: niente rifacimento (il ResizeObserver risponde anche al cambio d'altezza fatto da qui; ogni giro in più
 // rallentava i disegni e in CI a 375 i segni della risposta, 1,8 s di tempo vero, sparivano prima del controllo PO-085).
 const ultima = new WeakMap<HTMLElement, string>();
+// D-259: nella stessa risposta con la mossa la mappa abbassata non si rialza. Prima oscillava: spariti i segni il riquadro ci
+// stava tutto, la copia del costo spariva, la mappa tornava piena, il riquadro non ci stava più e la copia tornava (e08
+// imp_grandine/fermi_in_curva a 360×640: 0 → 78 → 0 px di scorrimento in 2,5 s). Chiave: il messaggio della risposta.
+const tenuta = new WeakMap<Element, { alta: number; fuori: boolean }>();
 
 function adatta(m: HTMLElement) {
   const main = m.closest('main');
-  const chiave = `${main?.dataset.schermata}|${innerHeight}|${Math.round((main?.getBoundingClientRect().height ?? 0) - m.getBoundingClientRect().height)}`;
+  // solo con la risposta già sulla pagina: durante il cambio di scena la pagina è più alta e la mappa si abbassava e si rialzava
+  // (e13 viale_pieno a 360×800: 217 → 302 → 328 px, tre rifacimenti di Pixi da 280-500 ms) e i segni di PO-085 scadevano prima
+  const deroga = main?.dataset.schermata === 'risposta' && !!m.querySelector(CON_MOSSA) && !!main.querySelector('[data-messaggio="risposta"]') && !spento('C259A01');
+  const chiave = `${main?.dataset.schermata}|${deroga}|${innerHeight}|${Math.round((main?.getBoundingClientRect().height ?? 0) - m.getBoundingClientRect().height)}`;
   if (ultima.get(m) === chiave) return;
   ultima.set(m, chiave);
   const era = m.hasAttribute('data-nascosta');
   m.removeAttribute('data-adatta'); m.removeAttribute('data-nascosta'); m.style.removeProperty('--mappa-alta');
   const schermata = main?.dataset.schermata ?? '';
-  const fine = (nascosta: boolean) => { if (nascosta) m.setAttribute('data-nascosta', ''); if (nascosta !== era) avvisa(nascosta); };
-  if (spento('C187M01') || !main || ESCLUSE.has(schermata) || (ESCLUSE_D197.has(schermata) && !spento('C197R01'))) return fine(false);
+  const fine = (nascosta: boolean, fuori = false) => { if (nascosta) m.setAttribute('data-nascosta', ''); if (nascosta !== era) avvisa(nascosta);
+    m.toggleAttribute('data-casa-fuori', fuori); }; // D-261: la «Home» di riserva della testata compare col CSS; l'attributo resta
+    // durante la misura (la testata con la casa è più alta: la misura la conta); la casa della mappa è solo invisibile, «sotto» la vede
+  if (spento('C187M01') || !main || ESCLUSE.has(schermata) || (ESCLUSE_D197.has(schermata) && !spento('C197R01') && !deroga)) return fine(false);
   // eccedenza della pagina, con le vignette nascondibili come nascoste e quelle che si riempiono al loro minimo
   const eccedenza = () => {
     let e = (document.scrollingElement ?? document.documentElement).scrollHeight - innerHeight;
@@ -50,9 +65,12 @@ function adatta(m: HTMLElement) {
     return e;
   };
   let ecc = eccedenza();
+  const risposta = deroga ? main.querySelector('[data-messaggio="risposta"]') : null, tenute = risposta ? tenuta.get(risposta) : undefined;
+  if (ecc <= 0 && tenute) { m.style.setProperty('--mappa-alta', `${tenute.alta}px`); m.setAttribute('data-adatta', ''); return fine(false, tenute.fuori); }
   if (ecc <= 0) return fine(false);
   const radice = getComputedStyle(document.documentElement);
-  const min = parseFloat(radice.getPropertyValue(LETTURA.has(schermata) && !spento('C191L01') ? '--mappa-altezza-min-lettura' : '--mappa-altezza-min')) || 0;
+  const min = Math.max(parseFloat(radice.getPropertyValue(LETTURA.has(schermata) && !deroga && !spento('C191L01') ? '--mappa-altezza-min-lettura' : '--mappa-altezza-min')) || 0,
+    deroga && !spento('C262D01') ? senzaDischiSovrapposti(m, radice) : 0);
   const nat = m.getBoundingClientRect().height;
   let alta = Math.max(min, nat - ecc);
   // S-21: il pulsante «Home» nell'angolo non deve coprire punti e nomi dei settori (CI rossa a 375: il rapporto abbassato portava
@@ -63,14 +81,37 @@ function adatta(m: HTMLElement) {
   const sotto = (sel: string) => { if (!casa) return false; const h = casa.getBoundingClientRect();
     return [...m.querySelectorAll(sel)].some((e) => { const r = e.getBoundingClientRect(); return Math.max(0, Math.min(h.right, r.right) - Math.max(h.left, r.left)) * Math.max(0, Math.min(h.bottom, r.bottom) - Math.max(h.top, r.top)) > 4; }); }; // come S-21 (px²)
   // prima i punti (fermi), poi i nomi dove stanno; si ridispongono (costa) solo se uno tocca «Home»
+  const fuori = deroga && !spento('C261H01');
   for (;;) {
     m.style.setProperty('--mappa-alta', `${Math.round(alta)}px`); m.setAttribute('data-adatta', '');
-    if (alta >= nat) break;
+    if (alta >= nat || fuori) break; // D-261: con la deroga «Home» non rialza la mappa, va nella testata se tocca
     if (!sotto('.settore-punto') && (!sotto('.settore-nome') || (ridisponi(m), !sotto('.settore-nome')))) break;
     alta = Math.min(nat, alta + passo);
   }
+  if (tenute && tenute.alta < alta) { alta = tenute.alta; m.style.setProperty('--mappa-alta', `${Math.round(alta)}px`); m.setAttribute('data-adatta', ''); }
   if (alta >= nat) { m.removeAttribute('data-adatta'); m.style.removeProperty('--mappa-alta'); }
-  fine(SENZA_MAPPA.has(schermata) && !spento('C191R01') && eccedenza() > 0);
+  if (fuori && alta < nat) ridisponi(m); // nomi al loro posto sulla mappa abbassata, prima di guardare «Home»
+  const casaFuori = fuori && alta < nat && (sotto('.settore-punto') || sotto('.settore-nome'));
+  if (risposta && alta < nat) tenuta.set(risposta, { alta: Math.round(alta), fuori: casaFuori || !!tenute?.fuori });
+  fine(SENZA_MAPPA.has(schermata) && !spento('C191R01') && eccedenza() > 0, casaFuori || !!tenute?.fuori);
+}
+
+/** C56-03 (D-262): la mappa abbassata con la mossa avvicina i dischi dei settori; sotto una certa altezza il centro di uno cade
+ *  nel disco di un altro e non si tocca più (e02 ritardo a 360×640, mappa 204 px: viale_stazione e curva_ospiti a 18,7 px, raggio
+ *  22). L'altezza più bassa in cui ogni centro resta fuori dagli altri dischi (raggio + 2 px), dalle posizioni dei settori e dalle
+ *  stesse misure del CSS di .settore (stile.css). Rosso C262D01: nessun vincolo. */
+function senzaDischiSovrapposti(m: HTMLElement, radice: CSSStyleDeclaration): number {
+  const v = (k: string) => parseFloat(radice.getPropertyValue(k)) || 0, r = v('--settore') / 2, nomi = v('--margine-nomi');
+  const cs = getComputedStyle(m), bordo = (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
+  const largo = m.clientWidth - 2 * r, d = r + 2;
+  const pos = [...m.querySelectorAll<HTMLElement>(':scope > [data-settore]')].map((e) => [parseFloat(e.style.getPropertyValue('--x')), parseFloat(e.style.getPropertyValue('--y'))] as const).filter(([x, y]) => !isNaN(x) && !isNaN(y));
+  let alta = 0;
+  for (const [i, a] of pos.entries()) for (const b of pos.slice(i + 1)) {
+    const dx = (largo * Math.abs(a[0] - b[0])) / 100, dy = Math.abs(a[1] - b[1]);
+    if (dx >= d || !dy) continue; // già lontani, o sulla stessa riga (l'altezza non li separa)
+    alta = Math.max(alta, (Math.sqrt(d * d - dx * dx) * 100) / dy + 2 * r + nomi + bordo);
+  }
+  return Math.ceil(alta);
 }
 
 /** Si rifà quando la pagina cambia (passi, testi, caratteri) e quando cambia la finestra. */

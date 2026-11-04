@@ -128,9 +128,9 @@ const piano = (m, v, dich) => { const g = attenta(creaCaso(1), dich); let s = M.
 async function schiera(p, d) { for (const [r, ps] of Object.entries(d)) for (const [s, q] of Object.entries(ps)) for (let x = 0; x < q; x++) { if ((await p.getAttribute(`[data-risorsa="${r}"]`, 'aria-pressed')) !== 'true') await p.click(`[data-risorsa="${r}"]`); await p.click(`[data-settore="${s}"] .settore-punto`); } }
 const lento = (p) => p.waitForFunction(() => { const s = document.querySelectorAll('.scena'); return s.length === 1 && getComputedStyle(s[0]).opacity === '1'; }, null, { timeout: 8000 }).catch(() => {});
 const misura = (p) => p.evaluate(() => { const s = document.scrollingElement, sc = document.querySelector('.scena');
-  return { pagina: s.scrollHeight, ecc: s.scrollHeight - innerHeight, scena: sc?.dataset.scena ?? '?', mappa: Math.round(document.querySelector('.mappa')?.getBoundingClientRect().height ?? 0), testo: sc?.innerText.length ?? 0, titolo: (sc?.querySelector('h1,h2,h3,p')?.textContent ?? '').trim().slice(0, 40),
+  return { pagina: s.scrollHeight, ecc: s.scrollHeight - innerHeight, scena: sc?.dataset.scena ?? '?', mappa: Math.round(document.querySelector('.mappa')?.getBoundingClientRect().height ?? 0), mossa: !!document.querySelector('.mappa .radio-mappa [data-mossa]'), testo: sc?.innerText.length ?? 0, titolo: (sc?.querySelector('h1,h2,h3,p')?.textContent ?? '').trim().slice(0, 40),
     // S-21: il pulsante «Home» della mappa abbassata non copre punti o nomi dei settori
-    casa: (() => { const h = document.querySelector('.mappa > .tasto-home')?.getBoundingClientRect(); if (!h) return 0;
+    casa: (() => { const e = document.querySelector('.mappa > .tasto-home'); if (!e?.checkVisibility({ visibilityProperty: true })) return 0; const h = e.getBoundingClientRect(); // D-261: nascosta quando passa nella testata
       return [...document.querySelectorAll('.mappa .settore-punto, .mappa .settore-nome')].filter((e) => { const r = e.getBoundingClientRect(); return Math.max(0, Math.min(h.right, r.right) - Math.max(h.left, r.left)) * Math.max(0, Math.min(h.bottom, r.bottom) - Math.max(h.top, r.top)) > 4; }).length; })(),
     // D-187 (S-12): nomi dei settori sopra i segni dell'ultima risposta (px², il caso peggiore)
     segni: Math.round(Math.max(0, ...[...document.querySelectorAll('.mappa .settore-nome')].flatMap((n) => { const a = n.getBoundingClientRect();
@@ -279,6 +279,10 @@ export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi
             if (ok) { await q.click(`[data-opzione="${c.op}"]`); await q.click('[data-conferma]'); }
             const visto = ok && await q.waitForSelector('.scena[data-scena="risposta"]', { timeout: 8000 }).then(() => true, () => false); await lento(q);
             if (!visto) { errori.push(`${vp}: risposta ${c.ep} ${c.id}/${c.op} non si apre`); continue; }
+            // D-259: con la mossa la mappa della risposta si abbassa secondo il testo della sua opzione, quindi la scena non è
+            // più la stessa per tutto il gruppo (misura veloce 75 px, vera 0 su e02 imp_acquazzone/settore_coperto): ognuna
+            // nella sua scena vera
+            if (gruppo.length > 1 && await q.$('.mappa .radio-mappa [data-mossa]')) { coda.push(...gruppo.filter((x) => x !== c).map((x) => [x])); gruppo.splice(0, gruppo.length, c); }
             for (const x of gruppo) { const o = opz(x);
               const ecc = await q.evaluate(([etichetta, intanto]) => { const sc = document.querySelector('.scena [data-scelta]'), it = document.querySelector('.scena .intanto');
                 if (sc) sc.textContent = etichetta; if (it) { it.lastChild.textContent = intanto ?? ''; it.hidden = !intanto; }
@@ -369,7 +373,7 @@ export function controllaAltezze({ ris, errori, sopra, chiamate = [], risposte =
   const casa = ris.filter((r) => r.casa).map((r) => `${r.vp} ${r.nome}: il pulsante «Home» copre ${r.casa} fra punti e nomi dei settori (S-21, mappa ${r.mappa} px)`);
   // D-197 (opzione A): nella risposta la mappa è alta come nella chiamata prima (niente ridisegno fra le due). Rosso C197R01.
   const salti = [];
-  for (const [k, r] of ris.entries()) if (r.nome === 'risposta') { const c = ris.slice(0, k).reverse().find((x) => x.vp === r.vp && x.nome === 'chiamata'); if (c && Math.abs(c.mappa - r.mappa) > 1) salti.push(`${r.vp} risposta: mappa ${r.mappa} px dopo ${c.mappa} px nella chiamata (D-197)`); }
+  for (const [k, r] of ris.entries()) if (r.nome === 'risposta' && !r.mossa) { const c = ris.slice(0, k).reverse().find((x) => x.vp === r.vp && x.nome === 'chiamata'); if (c && /* D-259, D-261: con la mossa la mappa della risposta può abbassarsi */ Math.abs(c.mappa - r.mappa) > 1) salti.push(`${r.vp} risposta: mappa ${r.mappa} px dopo ${c.mappa} px nella chiamata (D-197)`); }
   // D-206: chiamate costruite di tutti gli episodi
   const imp = chiamate.filter((c) => c.imprevisto), norm = chiamate.filter((c) => !c.imprevisto), lim = SOGLIE['360x760'].chiamata;
   const lunghe = [...imp.filter((c) => c.ecc > Math.min(lim, IMPREVISTI_MAX)).map((c) => `${c.vp} imprevisto ${c.ep} ${c.id}: la chiamata scorre di ${c.ecc} px (soglia ${Math.min(lim, IMPREVISTI_MAX)}, D-207)`),

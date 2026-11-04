@@ -46,12 +46,13 @@ import { Fiducia } from './fiducia.tsx';
 import { useIndietroApp } from './indietro.ts';
 import { scenaOndata, type TestataApp } from './app-ondata.tsx';
 import { useMossa } from './mossa-ui.tsx';
+import { rinunciaMossa, rispostaDaRiprendere } from '../logica/mossa.ts';
 
 type Schermata = 'titolo' | 'crediti' | 'privacy' | 'conferma' | 'genere' | 'guida' | 'citta' | 'sala' | 'briefing' | 'gioco' | 'rapporto' | 'verbale' | 'fischio' | 'epilogo';
 
 // Interruttori rossi che agiscono sul CSS (token.css): C05R06 testi a 10 px e nomi sul bordo, C05R07 etichetta
 // lunga, C05N01 stato del rapporto che va a capo sotto il nome.
-const ROSSI_CSS = ['C05R06', 'C05R07', 'C05N01', 'C10S03', 'C14T01', 'C35C01', 'C38A01', 'C38R01', 'C40C01', 'C40C02', 'C42V01', 'C44I02', 'C58I01', 'C60I01', 'C89C01', 'C90V01', 'C98V01', 'C113V01', 'C187C01', 'C187V01', 'C191C01', 'C193S01', 'C196V01', 'C201R01', 'C201C01', 'C203R01', 'C206I01', 'C210C01', 'C215L01', 'C218R01', 'C218S01', 'C221R01', 'C224A01', 'C230C01', 'C234V01', 'C236T01', 'C237S01', 'C237P01', 'C241N01', 'C265N01', 'C265C01'];
+const ROSSI_CSS = ['C05R06', 'C05R07', 'C05N01', 'C10S03', 'C14T01', 'C35C01', 'C38A01', 'C38R01', 'C40C01', 'C40C02', 'C42V01', 'C44I02', 'C58I01', 'C60I01', 'C89C01', 'C90V01', 'C98V01', 'C113V01', 'C187C01', 'C187V01', 'C191C01', 'C193S01', 'C196V01', 'C201R01', 'C201C01', 'C203R01', 'C206I01', 'C210C01', 'C215L01', 'C218R01', 'C218S01', 'C221R01', 'C224A01', 'C230C01', 'C234V01', 'C236T01', 'C237S01', 'C237P01', 'C241N01', 'C261E01', 'C265N01', 'C265C01'];
 
 export function App() {
   const [sal, setSal] = useState<Salvataggio | null>(() => carica());
@@ -143,6 +144,9 @@ export function App() {
     }
     const b = sal?.bozza; // C17-16: la bozza di questa ondata, se lo schieramento non è ancora confermato
     if (b && b.missione === ic.missione && b.ondata === ic.ondata && !ic.disposizione && !spento('C35B01')) setBozza(b.d);
+    // C56-02 (D-262): la pausa con la mossa ancora da fare torna dopo una ricarica. Rosso C262R01: si perde, come prima.
+    const daRiprendere = spento('C262R01') ? null : rispostaDaRiprendere(missione(ic.missione), ic);
+    if (daRiprendere) setEco(daRiprendere);
     // Rapporto aperto al momento del salvataggio: si torna lì (C-005 R04).
     setSchermata(missioneFinita(missione(ic.missione), ic) || (sal?.rapporto_aperto && !spento('C05R04')) ? 'rapporto' : 'gioco');
   };
@@ -238,7 +242,8 @@ export function App() {
     testata = { etichetta: `Ondata ${ic.ondata}/${m.ondate.length} · la tua scelta`, titolo: t(m.titolo), info: infoOndata(m, ic.ondata, testoSe) };
     // PO-152 A: il costo per radio sopra la mappa; idea B: lì anche l'indicazione della mossa, e la mappa si tocca per farla
     mappa = { tensione: ic.tensione, presenze: ic.disposizione, fisse: spento('C09S02') ? null : ic.fisse, radio: <><RapportoCosto m={m} ic={ic} o={eco} />{mossa?.indicazione}</>, ...mossa?.mappa };
-    corpo = <Risposta m={m} ic={ic} o={eco} avanti={() => setEco(null)} />;
+    corpo = <Risposta m={m} ic={ic} o={eco} avanti={() => { // C56-02: «Avanti» senza mossa chiude la pausa anche nel salvataggio
+      const ora = icOra(); if (ora && !spento('C262R01')) { const dopo = rinunciaMossa(m, ora); if (dopo !== ora) conIc(dopo); } setEco(null); }} />;
   } else {
     ({ nome, testata, mappa, corpo } = scenaOndata({ m, ic, titolo, bozza, scelta, avviso, riepilogoAperto, annulla: storia.length ? annulla : null,
       setScelta, setAvviso, setRiepilogoAperto, cambiaBozza, vola, mostraSegni, setEco, sospesa, icOra, conIc, alRapporto: () => setSchermata('rapporto') }));
@@ -254,9 +259,9 @@ export function App() {
   return (
     <MotionConfig reducedMotion="user">
       <main data-schermata={nome} data-ondata={ic?.ondata ?? 0} className={ROSSI_CSS.filter((x) => spento(x)).map((x) => `rosso-${x.toLowerCase()}`).join(' ')}>
-        {mappa && m && testata && <Testata numero={due(m.episodio)} etichetta={testata.etichetta} titolo={testata.titolo} info={testata.info} home={mappaNascosta ? home : undefined} />}
+        {mappa && m && testata && <Testata numero={due(m.episodio)} etichetta={testata.etichetta} titolo={testata.titolo} info={testata.info} home={mappaNascosta ? home : undefined} casaRiserva={schermata === 'gioco' && eco && mossa && !spento('C261H01') ? home : undefined} />}
         {fiducia !== null && <Fiducia valore={fiducia} max={Number(dichiarate.get('credito')?.max ?? 10)} />}
-        {mappa && m && <Mappa m={m} home={home} nascosta={setMappaNascosta} segni={segni} ondata={schermata === 'rapporto' ? ic?.rapporti.at(-1)?.n : Math.min(ic?.ondata ?? 1, m.ondate.length)} {...mappa} />}
+        {mappa && m && <Mappa m={m} home={home} nascosta={setMappaNascosta} segni={mossa?.segni.length ? [...segni, ...mossa.segni] : segni} ondata={schermata === 'rapporto' ? ic?.rapporti.at(-1)?.n : Math.min(ic?.ondata ?? 1, m.ondate.length)} {...mappa} />}
         <Voli voli={voli} finito={(id) => setVoli((v) => v.filter((x) => x.id !== id))} />
         {/* PO-097: versione su ogni schermata, in basso a destra, piccola e non toccabile. Rosso C38V01: niente. */}
         {!spento('C38V01') && <small className="versione-angolo" data-versione-angolo aria-hidden="true">v{GAME_VERSION}</small>}
