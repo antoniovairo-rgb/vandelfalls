@@ -91,10 +91,11 @@ for (const passo of CATENE[nome].filter((p) => !scelti || scelti.includes(p))) {
     if (problemi.length) precedenti.push(problemi.slice(0, 20));
   } while (problemi.length && tentativi < 3);
   const esito = problemi.length ? 'rosso' : tentativi > 1 ? 'instabile' : 'verde';
-  giro.passi.push({ passo, esito, tentativi, secondi, problemi, ...(esito === 'instabile' ? { precedenti } : {}) });
+  // D-269: anche col rosso si stampano i tentativi prima dell'ultimo (CI 1249: bracci rossi 3 volte, si vedeva solo l'eccezione del terzo)
+  giro.passi.push({ passo, esito, tentativi, secondi, problemi, ...(tentativi > 1 ? { precedenti: esito === 'rosso' ? precedenti.slice(0, -1) : precedenti } : {}) });
   console.log(`${esito === 'verde' ? '✔' : esito === 'instabile' ? '≈' : '✘'} ${passo}${tentativi > 1 ? ` (${tentativi} tentativi)` : ''} [${secondi.join(' + ')} s]`);
   for (const p of problemi) console.log(`    ${p}`);
-  if (esito === 'instabile') for (const [i, ps] of precedenti.entries()) for (const p of ps) console.log(`    [tentativo ${i + 1} fallito] ${p}`);
+  if (tentativi > 1) for (const [i, ps] of (esito === 'rosso' ? precedenti.slice(0, -1) : precedenti).entries()) for (const p of ps) console.log(`    [tentativo ${i + 1} fallito] ${p}`);
   if (esito === 'rosso') { rosso = true; break; }
 }
 
