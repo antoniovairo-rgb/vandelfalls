@@ -244,13 +244,17 @@ async function controllaPrevisione(browser, url, larghezza, h, rossi, dati, dich
       await p.addInitScript((xs) => { globalThis.__VALMORA_SECONDO_MS = 1; for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi);
       await p.goto(url); await p.evaluate(([k, v]) => localStorage.setItem(k, v), [CHIAVE, c.sal]); await p.reload(); await p.getByRole('button', { name: 'Riprendi' }).click();
       await p.waitForSelector(`[data-messaggio="chiamata-${id}"]`, { timeout: 15000 }); await p.click(`[data-opzione="${ch.opzioni[0].id}"]`); await p.click('[data-conferma]').catch(() => {});
-      await p.waitForSelector('.mappa [data-mossa="puoi"]', { timeout: 15000, state: 'attached' }); await p.waitForTimeout(300);
+      // CI 1256: col rosso C241M02 il «puoi spostare» non c'è; prima era un'eccezione (catena rossa per crash), ora è un problema
+      if (!(await p.waitForSelector('.mappa [data-mossa="puoi"]', { timeout: 15000, state: 'attached' }).then(() => true).catch(() => false))) { await p.close(); return null; }
+      await p.waitForTimeout(300);
       let prima = ''; for (let i = 0; i < 30; i++) { const ora = await p.evaluate(() => `${document.scrollingElement.scrollHeight}|${document.querySelector('.mappa')?.getBoundingClientRect().height}|${document.querySelector('.radio-mappa')?.className}`); if (ora === prima) break; prima = ora; await p.waitForTimeout(100); }
       return p; };
     const altezza = (p) => p.evaluate(() => Math.round(document.querySelector('.mappa').getBoundingClientRect().height));
-    const p0 = await apri(), unita = await p0.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza)); await p0.close();
+    const p0 = await apri(); if (!p0) { male.push(`${vp} ${ep} ${id}: il «puoi spostare» non compare (C57-02)`); continue; }
+    const unita = await p0.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza)); await p0.close();
     for (const u of unita) for (let j = 0, n = 1; j < n; j++) {
-      const p = await apri(), h0 = await altezza(p);
+      const p = await apri(); if (!p) { male.push(`${vp} ${ep} ${id} ${u}: il «puoi spostare» non compare (C57-02)`); break; }
+      const h0 = await altezza(p);
       await p.locator(`.mappa [data-presenza="${u}"]`).click({ force: true }); await p.waitForTimeout(80);
       const ss = await p.$$('.mappa .settore-punto:not(:disabled)'); n = ss.length;
       if (!ss[j]) { await p.close(); break; }
