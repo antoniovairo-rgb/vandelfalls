@@ -42,6 +42,8 @@ main:not(.rosso-c241n01) .mappa.citta .settore-nome { min-width: min-content; }
 /* D-258: dove il riquadro non ha posto per il rapporto, il rapporto si legge nella risposta sotto la mappa (copia «sotto») */
 .radio-mappa:is(.compatto, .stretto, .muto) .rapporto-costo, .rapporto-sotto { display: none; }
 main:has(.mappa .radio-mappa:is(.compatto, .stretto, .muto)) .rapporto-sotto { display: block; }
+/* C57-01 (D-269): durante la misura di adatta.ts la copia conta come visibile (classe tolta prima del disegno) */
+main.misura-copia .rapporto-sotto { display: block; }
 .radio-mappa.muto { position: absolute; width: var(--spazio-px); height: var(--spazio-px); overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .radio-mappa:is(.compatto, .stretto) .rapporto-costo + .mossa-indicazione { margin-top: 0; }
 /* D-261: «Home» nella testata quando la risposta con la mossa abbassa la mappa e la casa coprirebbe un settore (adatta.ts) */

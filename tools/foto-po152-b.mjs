@@ -16,6 +16,8 @@
 // D-259: con la copia sotto la mappa si abbassa (adatta.ts) fino a 200 px; stampa le altezze raggiunte. Rosso C259A01: mappa piena.
 // D-261: in ogni risposta con la mossa (anche dopo la mossa) entro soglia; una sola «Home» visibile (rosso C261H01: la mappa si
 // rialza per «Home» e la risposta scorre); unità e settori toccabili col bordo dell'evidenziazione (rosso C261E01).
+// C57-01 (D-269): dal comparire della risposta la mappa cambia altezza al più una volta, e poi resta ferma in ogni stato (unità
+// in mano, mossa fatta). Rosso C269M01: scende a gradini e di nuovo al tocco dell'unità.
 import { join } from 'node:path';
 import { chiamateCostruite, SOGLIE } from './sonda-altezze.mjs';
 import { effettoMossa } from '../src/logica/previsione.ts';
@@ -149,6 +151,9 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
     let n0 = conto.stati;
     const ok = ch && await p.waitForSelector(`[data-messaggio="chiamata-${c.id}"]`, { timeout: 15000 }).then(() => true).catch(() => false);
     if (ok && await p.$(`[data-opzione="${ch.opzioni[0].id}"]:disabled`)) { await p.close(); continue; } // esaurita: la prossima chiamata
+    // C57-01: le altezze della mappa da quando c'è la risposta, a ogni fotogramma
+    if (ok) await p.evaluate(() => { const t = globalThis.__altezze = []; const reg = () => { const m = document.querySelector('.mappa');
+      if (m && document.querySelector('[data-messaggio="risposta"]')) { const a = Math.round(m.getBoundingClientRect().height); if (t.at(-1) !== a) t.push(a); } requestAnimationFrame(reg); }; reg(); });
     if (ok) { await p.click(`[data-opzione="${ch.opzioni[0].id}"]`); await p.click('[data-conferma]').catch(() => {}); }
     const pronta = ok && await p.waitForSelector('.mappa [data-mossa="puoi"]', { timeout: 15000, state: 'attached' }).then(() => true).catch(() => false);
     if (!pronta) { await p.close(); continue; } // nessuna mossa dopo questa chiamata (ultima dell'ondata): la prossima
@@ -168,6 +173,10 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
       if (x.ecc > soglia) male.push(`${vp} ${ep} ${c.id} ${dove}: la risposta scorre di ${x.ecc} px (soglia ${soglia}, D-258)`);
       if (ch.opzioni[0].costo) { conto.conCosto++; if (!x.costo) { conto.senzaCosto++; male.push(`${vp} ${ep} ${c.id} ${dove}: dopo «Conferma» il costo non si vede (D-258)`); } } };
     await giu('«puoi spostare»');
+    const altezze = await p.evaluate(() => globalThis.__altezze), ferma0 = altezze.at(-1);
+    if (altezze.length > 2) male.push(`${vp} ${ep} ${c.id}: dopo «Conferma» la mappa scende a gradini, ${altezze.join(' → ')} px (C57-01)`);
+    const stessa = async (dove) => { const a = await p.evaluate(() => globalThis.__altezze); if (a.at(-1) !== ferma0 || a.length > altezze.length)
+      male.push(`${vp} ${ep} ${c.id} ${dove}: la mappa cambia altezza, ${a.slice(altezze.length - 1).join(' → ')} px (C57-01)`); };
     // D-259: anche con la mappa abbassata ogni unità spostabile (logica: schierata, non fissa) ha il suo pulsante toccabile
     const sv = await sal(p), attese = Object.entries(sv.in_corso.disposizione ?? {}).filter(([r]) => !dati[`missioni/${ep}.json`].mappa.risorse[r]?.fissa)
       .flatMap(([r, ps]) => Object.entries(ps).filter(([, n]) => n > 0).map(([k]) => `${r}@${k}`));
@@ -175,13 +184,13 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
     for (const u of attese) if (!toccabili.includes(u)) male.push(`${vp} ${ep} ${c.id}: l'unità ${u} si può spostare ma non si tocca sulla mappa (D-259)`);
     for (const id of await p.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza))) {
       await p.locator(`.mappa [data-presenza="${id}"]`).click({ force: true }); await p.waitForTimeout(80);
-      await giu(`«tocca il settore» con ${id} in mano`);
+      await giu(`«tocca il settore» con ${id} in mano`); await stessa(`con ${id} in mano`);
       await p.keyboard.press('Escape'); await p.waitForTimeout(50);
     }
     // la mossa fatta: la risposta resta (entro soglia, costo visibile, una «Home»)
     const id = (await p.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza)))[0];
     if (id) { await p.locator(`.mappa [data-presenza="${id}"]`).click({ force: true }); await p.waitForTimeout(80);
-      const a = await p.$('.mappa .settore-punto:not(:disabled)'); if (a) { await a.click({ force: true }); await p.waitForTimeout(150); await giu('«mossa fatta»'); } }
+      const a = await p.$('.mappa .settore-punto:not(:disabled)'); if (a) { await a.click({ force: true }); await p.waitForTimeout(150); await giu('«mossa fatta»'); await stessa('dopo la mossa'); } }
     if (process.env.VALMORA_DETTAGLIO) console.log(`  ${vp} ${ep} ${c.id}: ${conto.stati - n0} stati`);
     conto.episodi++; await p.close(); break;
   }
