@@ -7,12 +7,16 @@ import { spento } from '../../interruttori.ts';
 
 export type Rett = { left: number; top: number; right: number; bottom: number };
 
-const visti = new WeakMap<Element, Map<string, { dim: string; r: Rett[] }>>();
+const visti = new WeakMap<Element, Map<string, { dim: string; r: Rett[] }>>(); // per riquadro radio della risposta
 
 /** I segni presenti e, nella stessa risposta con la mossa e con la stessa misura della mappa, quelli già visti (coordinate della finestra). */
 export function segniVisti(mappa: HTMLElement, chi: string, ora: Rett[]): Rett[] {
-  const risposta = mappa.closest('main')?.querySelector('[data-messaggio="risposta"]');
-  if (!risposta || !mappa.querySelector('.radio-mappa [data-mossa]') || spento('C269C01')) return ora;
+  // chiave: il riquadro con la mossa, che c'è già al primo disegno. Prima era il messaggio della risposta, che arriva qualche
+  // centinaio di ms dopo: a 412×915 (verifica della principale su ede76c72) nomi e riquadro si disponevano prima, i segni non
+  // restavano e allo sparire si ridisponevano (e10 imp_cantiere: riquadro in alto 11 → «posto» 262, unità 151 → 63); a 360 e 375
+  // reggeva solo perché adatta ridisegna quando arriva la risposta.
+  const risposta = mappa.querySelector('.radio-mappa [data-mossa]')?.closest('.radio-mappa');
+  if (!risposta || spento('C269C01')) return ora;
   const m = mappa.getBoundingClientRect(), dim = `${Math.round(m.width)}x${Math.round(m.height)}`;
   let per = visti.get(risposta);
   if (!per) visti.set(risposta, (per = new Map()));

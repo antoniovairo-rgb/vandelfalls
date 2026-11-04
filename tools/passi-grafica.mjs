@@ -83,6 +83,10 @@ export const PASSI_GRAFICA = {
     // C53-02: con la risposta in due messaggi (C193R01) la parte «risposte» (carte d'imprevisto e varianti) vede lo scorrimento
     if (larghezzeGiro().includes(360)) compiti.push(async () => { const a = await import('./sonda-altezze.mjs');
       if (!a.controllaAltezze(await a.giraAltezze({ vps: ['360x640'], rossi: ['C193R01'], parti: ['risposte'], limiteRisposte: 24 })).some((x) => x.includes('C53-02'))) ciechi.push('altezze/risposte C193R01 è cieco'); });
+    // D-269 (CI 1249): con il testo intero di «mossa.puoi» nella copia sotto la mappa (C269B01) le risposte di e02 a 360×640 scorrono
+    // oltre soglia (tornelli_falsi/settore_separato 75 px, soglia 68): le prime 120 risposte costruite comprendono e02
+    if (larghezzeGiro().includes(360)) compiti.push(async () => { const a = await import('./sonda-altezze.mjs');
+      if (!a.controllaAltezze(await a.giraAltezze({ vps: ['360x640'], rossi: ['C269B01'], parti: ['risposte'], limiteRisposte: 120 })).some((x) => x.includes('C53-02'))) ciechi.push('altezze/risposte C269B01 è cieco'); });
     // D-207: ogni braccio delle altezze gira solo la parte dove il suo rosso si vede
     // D-202: i bracci sono indipendenti (rossi come parametro, cartelle separate): PARALLELI insieme, ognuno col suo browser
     await insieme(compiti, PARALLELI);
