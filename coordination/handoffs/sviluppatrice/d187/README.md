@@ -1244,3 +1244,31 @@ Test: 489/489.
 Effetto da sapere: a 360×640 la mappa più bassa già prima del tocco cambia due conteggi. Il riquadro al solo lettore va da 105 a 144 stati, e «Home» nella testata da 7 a 22. Prima ci arrivavano solo dopo il tocco dell'unità. Il costo resta visibile in tutti gli stati (0 non visibili).
 
 Non verificato: telefono reale; testo al 130 % (resta a S-26).
+
+### D-269 a/b/c/d — richiesta della sessione principale dopo la misura indipendente su 614c5103
+
+- **a)** Con il riquadro muto si vede sempre anche l'istruzione della mossa («puoi spostare…», «tocca il settore…», «fatta…»). La copia sotto la mappa (`.istruzione-sotto`, mossa-ui.tsx) porta istruzione e previsione insieme. Prima della mossa `adatta` riserva lo spazio della riga più lunga. Rosso C269I01.
+- **b)** La copia sta sopra il fumetto della risposta, subito sotto la mappa: non finisce più sotto «Avanti» a pagina ferma. Con la copia visibile la punta del fumetto è nascosta: lo spazio per la punta (19 px) portava e21 corteo_dal_cortile a 71 px di scorrimento a 360×640, soglia 68. Rosso C269A01: la copia torna in fondo alla risposta.
+- **c)** FATTO MISURATO: il cambio senza input era reale. Su 0f28754c il guardiano a 2,5 s fermi ne trovava 8-10 per larghezza. Causa: i segni ▲/▼ spariscono (1,8 s di gioco), i nomi dei settori si ridispongono (per loro i segni sono ostacoli), le unità si spostano con i nomi e il riquadro si ricolloca. Esempio: e35 perimetro a 412×760, un'unità da y 170 a y 258. Correzione: `src/resa/mappa/segni-visti.ts`. Nella stessa risposta con la mossa e con la stessa misura della mappa, i segni già visti restano ostacoli per nomi e riquadro. In `collocaRadio`, se testo, misura e ostacoli non cambiano, il riquadro resta com'è. Rosso C269C01.
+- **d)** Guardiano po152b, in ogni stato:
+  - l'istruzione della mossa si vede (nel riquadro non muto, o nella copia);
+  - nessuna riga della copia è coperta da «Avanti» (elementFromPoint, 9 punti per riga, pagina a scorrimento 0);
+  - fermo 2,5 s a «puoi spostare», il riquadro non cambia classe né posto.
+  - Bracci in `tools/passi-grafica.mjs`: C269C01, C269I01, C269A01, po152b a 360×760.
+
+Effetto collaterale: la riserva della copia abbassa la mappa a 360×640 quando il riquadro è muto, nella fascia 200-240 px (per esempio e03 da 247 a 207 px). Lo scorrimento resta entro soglia.
+
+FATTO MISURATO (po152b, f9092cf3, dist del ramo, una prova per braccio):
+
+| | riquadro muto | «Home» in testata | mappa | scorrimento massimo | previsione sotto la mappa | esito |
+|---|---|---|---|---|---|---|
+| 360×640 | 145 su 276 | 22 | 200-240 | 60 (soglia 68) | 5 su 24 | verde |
+| 375×667 | 117 su 277 | 7 | 200-242 | 33 (soglia 56) | 5 su 24 | verde |
+| 412×760 | 1 su 277 | 0 | 281-351 | 0 (soglia 0) | 0 su 24 | verde |
+| rosso C269C01, 360 | | | | | | rosso, 8 (cambi senza input) |
+| rosso C269I01, 360 | | | | | | rosso, 150 (istruzione non visibile) |
+| rosso C269A01, 360 | | | | | | rosso, 9 (copia sotto «Avanti») |
+| rosso C269P01, 360 | | | | | | rosso, 10 (previsione e istruzione di e16) |
+| rosso C269M01, 360 | | | | | | rosso, 78 (gradini) |
+
+Test: 489/489.
