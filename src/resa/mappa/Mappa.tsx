@@ -51,7 +51,7 @@ export interface MappaProps {
   /** PO-152 (D-241): senza onSettore il tocco su un settore apre la sua scheda di stato (scheda-settore.tsx) */
   schede?: boolean;
   /** D-241 idea B (mossa-ui.tsx): si toccano solo le unità spostabili («risorsa@settore»), poi solo i settori ammessi */
-  mossa?: { spostabili: string[]; inMano: string | null; ammessi: string[] };
+  mossa?: { spostabili: string[]; inMano: string | null; ammessi: string[]; fatta?: boolean };
   /** PO-152 (D-241): rapporto radio del costo dopo «Conferma», sopra la mappa (RadioMappa) */
   radio?: ReactNode;
   /** D-165 (fischio dell'ultimo derby): settori già spenti, città vuota (niente folla né cortei), sala al buio */
@@ -176,7 +176,7 @@ export function Mappa(p: MappaProps) {
           </div>
         );
       })}
-      {p.radio && <RadioMappa settori={settori} segni={p.segni ?? []} home={p.home ? angolo : null} evita={!!p.mossa} compatto={!!p.mossa?.inMano}>{p.radio}</RadioMappa>}
+      {p.radio && <RadioMappa settori={settori} segni={p.segni ?? []} home={p.home ? angolo : null} evita={!!p.mossa} compatto={!!p.mossa?.inMano || !!p.mossa?.fatta}>{p.radio}</RadioMappa>}
       {schede && aperto && settori.some((s) => s.id === aperto) && (() => {
         // C55-01 (D-255): la scheda ancorata in basso copriva i settori bassi (strade, parcheggi, piazzale): si apre dalla parte
         // opposta al settore toccato e, in alto, lascia libero il lato di «Home». Rosso C255S01: sempre in basso, come prima.

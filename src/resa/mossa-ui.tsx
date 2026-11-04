@@ -43,7 +43,9 @@ export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: bo
     onSettore: muovi,
     mossa: { spostabili: spostabili(m, ic).map((x) => `${x.risorsa}@${x.settore}`), inMano: inMano && `${inMano.risorsa}@${inMano.settore}`,
       ammessi: inMano ? settoriAmmessi(m, inMano.risorsa).filter((k) => k !== inMano.settore) : [] },
-  } : {};
+  // D-262: dopo la mossa il riquadro tiene solo l'indicazione e la previsione (compatto, il costo va nella risposta, D-258):
+  // col rapporto intero la previsione era tagliata dal riquadro (alto al più metà mappa). Rosso C262E01: come prima.
+  } : fatta && !spento('C262E01') ? { mossa: { spostabili: [], inMano: null, ammessi: [], fatta: true } } : {};
   const stato = fatta && !possibile ? 'fatta' : inMano ? 'dove' : 'puoi';
   // D-262: dopo la mossa, la riga della previsione e i segni ▲/▼ sui due settori (niente segno dove non cambia)
   const cambi = stato === 'fatta' ? (effetto ?? []).filter((e) => e.verso !== 'pari') : [];
