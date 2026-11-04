@@ -22,6 +22,11 @@ export async function controllaCittaSenzaWebgl(stati, build = 'dist', rossi = []
     for (const [i, { larghezza, stato }] of stati.entries()) {
       const pagina = await browser.newPage({ viewport: { width: larghezza, height: 800 }, reducedMotion: 'reduce' });
       if (rossi.length) await pagina.addInitScript((xs) => { for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi);
+      // D-265: il braccio rosso dipendeva dall'ordine fra la fine dell'ingresso e la prima chiamata del ResizeObserver della
+      // mappa, che rifà il nome per caso (su main dopo il controllo, con la striscia di PO-158 prima: cieco 3 volte su 3).
+      // Col rosso C128N01 quella chiamata non arriva alla mappa: resta solo il ricalcolo a ingresso finito, che il rosso spegne.
+      if (rossi.includes('C128N01')) await pagina.addInitScript(() => { const RO = globalThis.ResizeObserver; if (!RO) return;
+        globalThis.ResizeObserver = class extends RO { constructor(cb) { super((es, o) => { const altri = es.filter((e) => !e.target.classList?.contains('mappa')); if (altri.length) cb(altri, o); }); } }; });
       await pagina.goto(url);
       await pagina.evaluate((st) => { localStorage.clear(); for (const [k, v] of Object.entries(st)) localStorage.setItem(k, v); }, stato);
       await pagina.reload();
