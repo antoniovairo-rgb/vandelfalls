@@ -189,6 +189,12 @@ main:not(.rosso-c40c01):not(.rosso-c90v01):not(.rosso-c98v01) .versione-angolo {
 /* D-168 (S-03 a 360: copriva l'ombra delle opzioni, che sporge a destra di 5-7 px): nel margine SINISTRO, dove le ombre non
    arrivano; su tablet e PC subito fuori dalla colonna a sinistra. Rosso C113V01: a destra, come prima */
 main:not(.rosso-c40c01):not(.rosso-c90v01):not(.rosso-c98v01):not(.rosso-c113v01) .versione-angolo { right: auto; left: max(0%, calc((100% - var(--larghezza-max)) / 2 - var(--spazio-4))); }
+/* D-271 (PO-159, «dopo un pò di tempo il numero di versione può anche sparire»): fuori da Titolo e Crediti la versione resta
+   --versione-attesa e poi svanisce; con la riduzione del movimento sparisce di colpo. Solo opacità: l'elemento resta dov'è e
+   i guardiani che lo misurano (C38V01, C40C01, C90V01, C187V01) lo trovano ancora. Rosso C271V01: sempre visibile. */
+main:not(.rosso-c271v01):not([data-schermata="titolo"]):not([data-schermata="crediti"]) .versione-angolo { animation: versione-svanisce var(--versione-svanire) ease-in var(--versione-attesa) both; }
+@keyframes versione-svanisce { to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { main:not(.rosso-c271v01):not([data-schermata="titolo"]):not([data-schermata="crediti"]) .versione-angolo { animation-duration: 0s; } }
 /* C17-22: nel riepilogo dello schieramento i pulsanti stanno sotto l'elenco, non fissi: su schermi bassi coprivano il testo. Rosso C38R01: fissi. */
 main:not(.rosso-c38r01) .scena .azioni.riepilogo-azioni { position: static; }
 /* PO-098: la riga «Fiducia ±N» del rapporto era verde o magenta sul giallo (2,46:1 e 3,32:1): ora nero su fondino bianco,

@@ -16,9 +16,12 @@
 // D-259: con la copia sotto la mappa si abbassa (adatta.ts) fino a 200 px; stampa le altezze raggiunte. Rosso C259A01: mappa piena.
 // D-261: in ogni risposta con la mossa (anche dopo la mossa) entro soglia; una sola «Home» visibile (rosso C261H01: la mappa si
 // rialza per «Home» e la risposta scorre); unità e settori toccabili col bordo dell'evidenziazione (rosso C261E01).
+// D-271 (PO-159): niente tratteggio nella mossa; l'anello pieno sta a ≥ 3:1 coi colori accanto, misurato sui pixel della foto
+// (anelli-mossa.mjs); gli anelli dei settori d'arrivo non si sovrappongono. Rosso C271T01: il tratteggio di prima.
 import { join } from 'node:path';
 import { chiamateCostruite, SOGLIE } from './sonda-altezze.mjs';
 import { effettoMossa } from '../src/logica/previsione.ts';
+import { misuraAnelli } from './anelli-mossa.mjs';
 
 export const ALTEZZE_PO152B = [640, 667, 760];
 export const RADIO_VP = { 360: 640, 375: 667, 412: 760 };
@@ -43,7 +46,7 @@ const coperti = (p) => p.evaluate(() => {
     .map((e) => `${e.dataset.presenza ?? e.closest('[data-settore]').dataset.settore} sotto ${(() => { const b = e.getBoundingClientRect(), q = document.elementFromPoint((b.left + b.right) / 2, (b.top + b.bottom) / 2); return q?.closest('[data-presenza]')?.dataset.presenza ?? q?.className ?? '?'; })()}`);
   const case_ = [...document.querySelectorAll('[data-azione^="home"]')].filter((e) => e.checkVisibility({ visibilityProperty: true })).length, fuori = !!document.querySelector('.mappa[data-casa-fuori]');
   const senzaBordo = [...document.querySelectorAll('.mappa.mossa [data-presenza]:not(:disabled) .pastiglia, .mappa.mossa .settore-punto:not(:disabled)')]
-    .filter((e) => getComputedStyle(e).outlineStyle === 'none').map((e) => e.closest('[data-presenza]')?.dataset.presenza ?? e.closest('[data-settore]').dataset.settore);
+    .filter((e) => getComputedStyle(e).outlineStyle === 'none' && getComputedStyle(e, '::after').outlineStyle === 'none').map((e) => e.closest('[data-presenza]')?.dataset.presenza ?? e.closest('[data-settore]').dataset.settore);
   if (q.classList.contains('muto')) return { xs: [], stretto: true, muto: true, costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, tagliato: false }; // al solo lettore: non copre niente
   const sop = (x) => Math.max(0, Math.min(r.right, x.right) - Math.max(r.left, x.left)) * Math.max(0, Math.min(r.bottom, x.bottom) - Math.max(r.top, x.top));
   return { costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, tagliato: q.scrollHeight > q.clientHeight + 1, stretto: q.classList.contains('stretto'), xs: [...document.querySelectorAll('.mappa [data-presenza]:not(:disabled), .mappa [data-settore] .settore-punto:not(:disabled)')]
@@ -136,7 +139,7 @@ export async function controllaPo152b(browser, url, larghezza, rossi = [], carte
 
 /** D-255 punto 2: prima chiamata con mossa di ogni episodio; stati «puoi», «dove» (ogni unità in mano) e «mossa fatta». */
 async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
-  const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'radio', episodi: 0, stati: 0, stretti: 0, muti: 0, conCosto: 0, senzaCosto: 0, scorreMax: 0, sotto: 0, mappaMin: Infinity, mappaMax: 0, casaFuori: 0 }, soglia = SOGLIE[vp]?.risposta ?? 0;
+  const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'radio', episodi: 0, stati: 0, stretti: 0, muti: 0, conCosto: 0, senzaCosto: 0, scorreMax: 0, sotto: 0, mappaMin: Infinity, mappaMax: 0, casaFuori: 0, contrastoMin: Infinity, latiVisti: 0, latiProvati: 0 }, soglia = SOGLIE[vp]?.risposta ?? 0;
   // al più 4 chiamate per episodio: col rosso C241M02 (mappa che non si tocca) nessuna ha la mossa e si giravano tutte le chiamate
   // dei 36 episodi (4 ore e 20 nel giro dei bracci), fino a un'opzione esaurita (e28 blocca_corteo) che faceva saltare il passo
   for (const ep of [...new Set(tutte.map((c) => c.ep))]) for (const c of tutte.filter((x) => x.ep === ep).slice(0, 4)) {
@@ -164,6 +167,11 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
       if (x.tagliato) male.push(`${vp} ${ep} ${c.id} ${dove}: il riquadro radio è tagliato (D-262)`);
       if (x.coperto.length) male.push(`${vp} ${ep} ${c.id} ${dove}: il centro non si tocca: ${x.coperto.join(', ')} (C56-03)`);
       if (x.senzaBordo.length) male.push(`${vp} ${ep} ${c.id} ${dove}: senza evidenziazione ${x.senzaBordo.join(', ')} (D-261)`);
+      // D-271: niente tratteggio, anello pieno a ≥ 3:1 coi colori accanto (misurato sui pixel), anelli dei settori separati (rosso C271T01)
+      const an = await misuraAnelli(p); if (an.minimo !== null) conto.contrastoMin = Math.min(conto.contrastoMin, an.minimo); conto.latiVisti += an.lati[0]; conto.latiProvati += an.lati[1];
+      if (an.tratteggi.length) male.push(`${vp} ${ep} ${c.id} ${dove}: tratteggio nella mossa su ${an.tratteggi.join(', ')} (D-271)`);
+      if (an.sotto.length) male.push(`${vp} ${ep} ${c.id} ${dove}: anello sotto 3:1 o assente: ${an.sotto.join(', ')} (D-271)`);
+      if (an.sovrapposti.length) male.push(`${vp} ${ep} ${c.id} ${dove}: anelli dei settori sovrapposti ${an.sovrapposti.join(', ')} (D-271)`);
       if (x.sotto) { conto.sotto++; conto.mappaMin = Math.min(conto.mappaMin, x.mappa); conto.mappaMax = Math.max(conto.mappaMax, x.mappa); }
       if (x.ecc > soglia) male.push(`${vp} ${ep} ${c.id} ${dove}: la risposta scorre di ${x.ecc} px (soglia ${soglia}, D-258)`);
       if (ch.opzioni[0].costo) { conto.conCosto++; if (!x.costo) { conto.senzaCosto++; male.push(`${vp} ${ep} ${c.id} ${dove}: dopo «Conferma» il costo non si vede (D-258)`); } } };
@@ -185,7 +193,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
     if (process.env.VALMORA_DETTAGLIO) console.log(`  ${vp} ${ep} ${c.id}: ${conto.stati - n0} stati`);
     conto.episodi++; await p.close(); break;
   }
-  console.log(`radio della mossa ${vp}: ${conto.episodi} episodi, ${conto.stati} stati, rapporto al solo lettore in ${conto.stretti}, riquadro al solo lettore in ${conto.muti}; con costo ${conto.conCosto}, costo non visibile in ${conto.senzaCosto}; scorrimento massimo ${conto.scorreMax} px (soglia ${soglia}); costo sotto la mappa in ${conto.sotto}, mappa alta da ${conto.mappaMin} a ${conto.mappaMax} px; «Home» nella testata in ${conto.casaFuori}`);
+  console.log(`radio della mossa ${vp}: ${conto.episodi} episodi, ${conto.stati} stati, rapporto al solo lettore in ${conto.stretti}, riquadro al solo lettore in ${conto.muti}; con costo ${conto.conCosto}, costo non visibile in ${conto.senzaCosto}; scorrimento massimo ${conto.scorreMax} px (soglia ${soglia}); costo sotto la mappa in ${conto.sotto}, mappa alta da ${conto.mappaMin} a ${conto.mappaMax} px; «Home» nella testata in ${conto.casaFuori}; anelli: contrasto minimo ${conto.contrastoMin.toFixed(2)}:1, lati visti ${conto.latiVisti} su ${conto.latiProvati}`);
   if (conto.episodi < 30) male.push(`${vp}: radio della mossa provata solo in ${conto.episodi} episodi (D-255)`);
   return { ris: conto, male };
 }
