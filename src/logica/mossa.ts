@@ -44,10 +44,21 @@ export function sposta(m: Missione, s: InCorso, x: Mossa): InCorso {
   return { ...s, disposizione: d, mosse: [...(s.mosse ?? []), t] };
 }
 
+/** C56-02 (D-262): la pausa con la mossa aperta a schermo si segna nel salvataggio («aperta:<turno>» in «mosse», stesso
+ *  formato, SAVE_VERSION 4). Senza questo segno un salvataggio a metà ondata non dice se la risposta era ancora a schermo o già
+ *  lasciata: i salvataggi vecchi (0.4.0 … 0.62.0) riportavano la risposta dell'ultima scelta (giro foto, tools/foto-po121.mjs). */
+const APERTA = 'aperta:';
+export function apriPausa(m: Missione, s: InCorso): InCorso {
+  const t = turnoMossa(m, s);
+  return t === null || !mossaPossibile(m, s) || (s.mosse ?? []).includes(APERTA + t) ? s : { ...s, mosse: [...(s.mosse ?? []), APERTA + t] };
+}
+
 /** C56-02 (D-262): dopo una ricarica la risposta su cui si può ancora muovere torna (la mossa di quella pausa non si perde):
- *  l'opzione dell'ultima risposta dell'ondata, se la mossa è ancora possibile e la risposta ha il suo testo (come a schermo). */
+ *  l'opzione dell'ultima risposta dell'ondata, se la pausa era aperta a schermo (apriPausa), la mossa è ancora possibile e la
+ *  risposta ha il suo testo (come a schermo). */
 export function rispostaDaRiprendere(m: Missione, s: InCorso): Opzione | null {
-  if (!mossaPossibile(m, s)) return null;
+  const t = turnoMossa(m, s);
+  if (t === null || !mossaPossibile(m, s) || !(s.mosse ?? []).includes(APERTA + t)) return null;
   const u = s.scelte.filter((x) => x.ondata === s.ondata).at(-1);
   const o = u && m.ondate.flatMap((x) => x.chiamate ?? []).find((c) => c.id === u.chiamata)?.opzioni.find((x) => x.id === u.opzione);
   return o?.risposta ? o : null;

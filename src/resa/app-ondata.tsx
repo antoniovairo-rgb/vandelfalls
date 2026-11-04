@@ -2,6 +2,7 @@
 // Staccato da App.tsx (D-241, debito) a codice invariato: lo stato resta in App, qui arriva come contesto.
 import type { ReactNode } from 'react';
 import { spento } from '../interruttori.ts';
+import { apriPausa } from '../logica/mossa.ts';
 import { chiamateAperte, chiudiOndata, disponibili, rispondi, schiera, settoriAmmessi, type InCorso } from '../logica/missione.ts';
 import type { Disposizione, Missione, Opzione } from '../logica/tipi.ts';
 import { sospendi, valida, type InSospeso } from '../logica/sospesa.ts';
@@ -80,7 +81,9 @@ export function scenaOndata(cx: ContestoOndata): ScenaApp {
         const ora = icOra();
         if (!spento('C05R01') && (!ora || !chiamateAperte(m, ora).some((c) => c.id === f.chiamata.id))) return; // già risposta
         if (!ora) return;
-        const dopo = rispondi(m, ora, f.chiamata.id, o, dichiarate);
+        const risposta = rispondi(m, ora, f.chiamata.id, o, dichiarate), scelta0 = f.chiamata.opzioni.find((x) => x.id === o);
+        // C56-02 (D-262): la pausa con la mossa che si apre a schermo si segna nel salvataggio (torna dopo una ricarica). Rosso C262R01: no
+        const dopo = scelta0?.risposta && !spento('C262R01') ? apriPausa(m, risposta) : risposta;
         conIc(dopo);
         const scelta = f.chiamata.opzioni.find((x) => x.id === o)!;
         // PO-089: le squadre che la risposta impegna raggiungono il punto della chiamata. Rosso C32D01: no.
