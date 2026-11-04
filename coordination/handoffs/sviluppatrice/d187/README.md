@@ -1087,3 +1087,27 @@ Foto in `d262/dopo`, e `d262/prima` coi rossi C262E01, R01, M01 e D01 insieme. P
 - e02, unità in mano.
 
 Non verificato: telefono reale; il caso esatto di e30.
+
+### Correzioni dopo la consegna, prima della 0.63.0 (3493dd33)
+
+Il primo giro di grafica su f4a6f3ce è risultato ROSSO, sempre con lo stesso errore nei 3 tentativi (`tools/foto.mjs:304`): «dopo la prima risposta: la ripresa non torna a "chiamata"».
+- Causa: il guardiano risponde, preme «Avanti» senza muovere e ricarica. Con C56-02 tornava la risposta già lasciata, perché «Avanti» non lasciava traccia nel salvataggio.
+- Il guardiano di C56-02 provava la ricarica prima di «Avanti», non quella dopo.
+- 5e814b4f: `rinunciaMossa` (pura, mossa.ts). «Avanti» senza mossa segna il turno in `mosse` e chiude la pausa. Guardiano po152b, giro «avanti»: dopo «Avanti», una ricarica riprende dalla chiamata.
+
+Il passo foto su 5e814b4f si fermava sempre dopo 4908 controlli, anche girato da solo (`tools/foto-po121.mjs:66`).
+- Causa: un salvataggio vero della 0.4.0, a metà ondata, alla ripresa tornava sulla risposta dell'ultima scelta. I salvataggi vecchi (dalla 0.4.0 alla 0.62.0) non distinguono «risposta ancora a schermo» da «risposta già lasciata».
+- 3493dd33: `apriPausa` (pura). Quando la risposta con la mossa compare a schermo, il salvataggio segna `aperta:<turno>` in `mosse`: stesso formato, SAVE_VERSION 4 invariata.
+- La pausa torna solo con quel segno. I salvataggi senza segno riprendono dalla chiamata, come prima.
+- Rosso C262R01, sia per il segno sia per la ripresa.
+
+FATTO MISURATO su 3493dd33:
+- passo foto a 360, girato da solo: 8066 controlli, 0 falliti;
+- po152b a 360: verde, 277 stati;
+- `tests/ripresa-d262.test.ts`: 5 prove su 5, compresa quella sul salvataggio vecchio della 0.57.0 che non riporta indietro la risposta;
+- 3 giri governo+logica verdi (ramo claude/valmora-giri-063, 364ebf2f);
+- CI: run 1225, 10 job su 10 verdi.
+
+Pubblicata come 0.63.0 (main b497d626).
+
+Fra f4a6f3ce e 3493dd33 c'è anche d1dc7052. Su decisione della principale, l'accordo della previsione non scende sotto l'85,7 % (`tests/previsione-d262.test.ts`).
