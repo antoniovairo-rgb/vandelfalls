@@ -52,7 +52,7 @@ type Schermata = 'titolo' | 'crediti' | 'privacy' | 'conferma' | 'genere' | 'gui
 
 // Interruttori rossi che agiscono sul CSS (token.css): C05R06 testi a 10 px e nomi sul bordo, C05R07 etichetta
 // lunga, C05N01 stato del rapporto che va a capo sotto il nome.
-const ROSSI_CSS = ['C05R06', 'C05R07', 'C05N01', 'C10S03', 'C14T01', 'C35C01', 'C38A01', 'C38R01', 'C40C01', 'C40C02', 'C42V01', 'C44I02', 'C58I01', 'C60I01', 'C89C01', 'C90V01', 'C98V01', 'C113V01', 'C187C01', 'C187V01', 'C191C01', 'C193S01', 'C196V01', 'C201R01', 'C201C01', 'C203R01', 'C206I01', 'C210C01', 'C215L01', 'C218R01', 'C218S01', 'C221R01', 'C224A01', 'C230C01', 'C234V01', 'C236T01', 'C237S01', 'C237P01', 'C241N01', 'C261E01'];
+const ROSSI_CSS = ['C05R06', 'C05R07', 'C05N01', 'C10S03', 'C14T01', 'C35C01', 'C38A01', 'C38R01', 'C40C01', 'C40C02', 'C42V01', 'C44I02', 'C58I01', 'C60I01', 'C89C01', 'C90V01', 'C98V01', 'C113V01', 'C187C01', 'C187V01', 'C191C01', 'C193S01', 'C196V01', 'C201R01', 'C201C01', 'C203R01', 'C206I01', 'C210C01', 'C215L01', 'C218R01', 'C218S01', 'C221R01', 'C224A01', 'C230C01', 'C234V01', 'C236T01', 'C237S01', 'C237P01', 'C241N01', 'C261E01', 'C262T01'];
 
 export function App() {
   const [sal, setSal] = useState<Salvataggio | null>(() => carica());
