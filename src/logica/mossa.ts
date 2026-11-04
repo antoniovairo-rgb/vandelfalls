@@ -7,7 +7,7 @@
 // - La mossa cambia la disposizione: conta per le condizioni «senza» delle chiamate dopo e per la chiusura dell'ondata.
 import { spento } from '../interruttori.ts';
 import { chiamateAperte, missioneFinita, settoriAmmessi, type InCorso } from './missione.ts';
-import type { Missione } from './tipi.ts';
+import type { Missione, Opzione } from './tipi.ts';
 
 export interface Mossa { risorsa: string; da: string; a: string }
 
@@ -42,4 +42,13 @@ export function sposta(m: Missione, s: InCorso, x: Mossa): InCorso {
   d[x.risorsa]![x.da] = d[x.risorsa]![x.da]! - 1;
   d[x.risorsa]![x.a] = (d[x.risorsa]![x.a] ?? 0) + 1;
   return { ...s, disposizione: d, mosse: [...(s.mosse ?? []), t] };
+}
+
+/** C56-02 (D-262): dopo una ricarica la risposta su cui si può ancora muovere torna (la mossa di quella pausa non si perde):
+ *  l'opzione dell'ultima risposta dell'ondata, se la mossa è ancora possibile e la risposta ha il suo testo (come a schermo). */
+export function rispostaDaRiprendere(m: Missione, s: InCorso): Opzione | null {
+  if (!mossaPossibile(m, s)) return null;
+  const u = s.scelte.filter((x) => x.ondata === s.ondata).at(-1);
+  const o = u && m.ondate.flatMap((x) => x.chiamate ?? []).find((c) => c.id === u.chiamata)?.opzioni.find((x) => x.id === u.opzione);
+  return o?.risposta ? o : null;
 }

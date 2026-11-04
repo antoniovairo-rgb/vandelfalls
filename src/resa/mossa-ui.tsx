@@ -6,16 +6,20 @@ import { useEffect, useState } from 'react';
 import { spento } from '../interruttori.ts';
 import { settoriAmmessi, type InCorso } from '../logica/missione.ts';
 import { mossaPossibile, sposta, spostabili, turnoMossa } from '../logica/mossa.ts';
+import { effettoMossa, type EffettoMossa } from '../logica/previsione.ts';
 import type { Missione } from '../logica/tipi.ts';
-import { t } from './dati.ts';
+import { dichiarate, t } from './dati.ts';
+import type { Segno } from './mappa/segni.ts';
 import type { MappaProps } from './mappa/Mappa.tsx';
 
 type PropsMossa = Pick<MappaProps, 'onTogli' | 'onSettore' | 'mossa'>;
 
 export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: boolean; icOra: () => InCorso | null; conIc: (ic: InCorso) => unknown }) {
   const [inMano, setInMano] = useState<{ risorsa: string; settore: string } | null>(null);
+  // D-262: l'effetto previsto della mossa fatta (settore lasciato e coperto), finché resta questa pausa
+  const [effetto, setEffetto] = useState<EffettoMossa[] | null>(null);
   const pausa = p.ic ? `${p.ic.ondata}:${p.ic.scelte.length}` : '';
-  useEffect(() => setInMano(null), [pausa, p.attiva]);
+  useEffect(() => { setInMano(null); setEffetto(null); }, [pausa, p.attiva]);
   useEffect(() => {
     if (!inMano) return;
     const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setInMano(null); };
@@ -29,7 +33,9 @@ export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: bo
   const muovi = (a: string) => {
     const ora = p.icOra();
     if (!inMano || !ora || !mossaPossibile(m, ora)) return;
-    p.conIc(sposta(m, ora, { risorsa: inMano.risorsa, da: inMano.settore, a }));
+    const mossa = { risorsa: inMano.risorsa, da: inMano.settore, a }, dopo = sposta(m, ora, mossa);
+    p.conIc(dopo);
+    setEffetto(effettoMossa(m, ora, dopo, mossa, dichiarate));
     setInMano(null);
   };
   const mappa: PropsMossa = possibile ? {
@@ -39,6 +45,12 @@ export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: bo
       ammessi: inMano ? settoriAmmessi(m, inMano.risorsa).filter((k) => k !== inMano.settore) : [] },
   } : {};
   const stato = fatta && !possibile ? 'fatta' : inMano ? 'dove' : 'puoi';
-  const indicazione = <p className="mossa-indicazione" data-mossa={stato}>{t(`mossa.${stato}`)}</p>;
-  return { mappa, indicazione };
+  // D-262: dopo la mossa, la riga della previsione e i segni ▲/▼ sui due settori (niente segno dove non cambia)
+  const cambi = stato === 'fatta' ? (effetto ?? []).filter((e) => e.verso !== 'pari') : [];
+  const riga = stato !== 'fatta' || !effetto?.length ? null : cambi.length
+    ? `${t('mossa.previsione')} ${cambi.map((e) => `${t(`settore.${e.settore}`)} ${t(e.verso === 'su' ? 'mossa.si_scalda' : 'mossa.si_calma')}`).join(', ')}.`
+    : t('mossa.non_cambia');
+  const indicazione = <p className="mossa-indicazione" data-mossa={stato}>{t(`mossa.${stato}`)}{riga && <> <span data-previsione={cambi.map((e) => `${e.settore}:${e.verso}`).join(' ')}>{riga}</span></>}</p>;
+  const segni: Segno[] = cambi.map((e) => ({ settore: e.settore, tipo: 'tensione', verso: e.verso as 'su' | 'giu' }));
+  return { mappa, indicazione, segni };
 }

@@ -150,5 +150,9 @@
   "mossa.dove": "Ora tocca il settore dove portarla.",
   "mossa.fatta": "Mossa fatta.",
   "mossa.sposta": "sposta",
-  "mossa.porta_qui": "porta qui"
+  "mossa.porta_qui": "porta qui",
+  "mossa.previsione": "Previsione alla chiusura:",
+  "mossa.si_scalda": "si scalda",
+  "mossa.si_calma": "si calma",
+  "mossa.non_cambia": "Previsione alla chiusura: nessun cambiamento."
 }

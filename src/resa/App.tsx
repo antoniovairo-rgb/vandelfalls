@@ -46,6 +46,7 @@ import { Fiducia } from './fiducia.tsx';
 import { useIndietroApp } from './indietro.ts';
 import { scenaOndata, type TestataApp } from './app-ondata.tsx';
 import { useMossa } from './mossa-ui.tsx';
+import { rispostaDaRiprendere } from '../logica/mossa.ts';
 
 type Schermata = 'titolo' | 'crediti' | 'privacy' | 'conferma' | 'genere' | 'guida' | 'citta' | 'sala' | 'briefing' | 'gioco' | 'rapporto' | 'verbale' | 'fischio' | 'epilogo';
 
@@ -143,6 +144,9 @@ export function App() {
     }
     const b = sal?.bozza; // C17-16: la bozza di questa ondata, se lo schieramento non è ancora confermato
     if (b && b.missione === ic.missione && b.ondata === ic.ondata && !ic.disposizione && !spento('C35B01')) setBozza(b.d);
+    // C56-02 (D-262): la pausa con la mossa ancora da fare torna dopo una ricarica. Rosso C262R01: si perde, come prima.
+    const daRiprendere = spento('C262R01') ? null : rispostaDaRiprendere(missione(ic.missione), ic);
+    if (daRiprendere) setEco(daRiprendere);
     // Rapporto aperto al momento del salvataggio: si torna lì (C-005 R04).
     setSchermata(missioneFinita(missione(ic.missione), ic) || (sal?.rapporto_aperto && !spento('C05R04')) ? 'rapporto' : 'gioco');
   };
@@ -256,7 +260,7 @@ export function App() {
       <main data-schermata={nome} data-ondata={ic?.ondata ?? 0} className={ROSSI_CSS.filter((x) => spento(x)).map((x) => `rosso-${x.toLowerCase()}`).join(' ')}>
         {mappa && m && testata && <Testata numero={due(m.episodio)} etichetta={testata.etichetta} titolo={testata.titolo} info={testata.info} home={mappaNascosta ? home : undefined} casaRiserva={schermata === 'gioco' && eco && mossa && !spento('C261H01') ? home : undefined} />}
         {fiducia !== null && <Fiducia valore={fiducia} max={Number(dichiarate.get('credito')?.max ?? 10)} />}
-        {mappa && m && <Mappa m={m} home={home} nascosta={setMappaNascosta} segni={segni} ondata={schermata === 'rapporto' ? ic?.rapporti.at(-1)?.n : Math.min(ic?.ondata ?? 1, m.ondate.length)} {...mappa} />}
+        {mappa && m && <Mappa m={m} home={home} nascosta={setMappaNascosta} segni={mossa?.segni.length ? [...segni, ...mossa.segni] : segni} ondata={schermata === 'rapporto' ? ic?.rapporti.at(-1)?.n : Math.min(ic?.ondata ?? 1, m.ondate.length)} {...mappa} />}
         <Voli voli={voli} finito={(id) => setVoli((v) => v.filter((x) => x.id !== id))} />
         {/* PO-097: versione su ogni schermata, in basso a destra, piccola e non toccabile. Rosso C38V01: niente. */}
         {!spento('C38V01') && <small className="versione-angolo" data-versione-angolo aria-hidden="true">v{GAME_VERSION}</small>}

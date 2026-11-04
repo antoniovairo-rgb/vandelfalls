@@ -6,6 +6,9 @@
 // D-255 punto 2: il riquadro radio non copre mai un bersaglio della mossa (unità toccabili, poi settori ammessi con ogni unità
 // in mano), nella prima chiamata con mossa di ognuno dei 36 episodi, all'altezza più bassa della larghezza (RADIO_VP).
 // Rosso C255R01 (fascia fissa e rapporto intero, come prima): a 360×640 210 stati coperti.
+// C56-02 (D-262), giro «ricarica»: ricaricata prima di muovere, la pausa con la mossa torna. Rosso C262R01.
+// D-262 punto 1: dopo la mossa la riga della previsione e i segni ▲/▼ sono quelli della logica (effettoMossa sui due
+// salvataggi, prima e dopo). Rosso C262E01: niente previsione.
 // D-258 (opzione B del PO): in ogni stato il costo dopo «Conferma» si vede, nel riquadro o nella risposta sotto la mappa, e la
 // risposta scorre entro la soglia di sonda-altezze (SOGLIE[vp].risposta, 0 se manca). Rosso C258S01: niente copia sotto.
 // D-259: con la copia sotto la mappa si abbassa (adatta.ts) fino a 200 px; stampa le altezze raggiunte. Rosso C259A01: mappa piena.
@@ -13,6 +16,7 @@
 // rialza per «Home» e la risposta scorre); unità e settori toccabili col bordo dell'evidenziazione (rosso C261E01).
 import { join } from 'node:path';
 import { chiamateCostruite, SOGLIE } from './sonda-altezze.mjs';
+import { effettoMossa } from '../src/logica/previsione.ts';
 
 export const ALTEZZE_PO152B = [640, 667, 760];
 export const RADIO_VP = { 360: 640, 375: 667, 412: 760 };
@@ -51,7 +55,7 @@ export async function controllaPo152b(browser, url, larghezza, rossi = [], carte
   const male = [], ris = [], c = chiamateCostruite(dati, dich).find((x) => x.ep === 'e01');
   if (!c) return { ris, male: ['PO-152 B: nessuna chiamata di e01 costruita'] };
   const m = dati['missioni/e01.json'], ch = m.ondate.flatMap((o) => o.chiamate).find((x) => x.id === c.id), opzione = ch.opzioni[0].id;
-  for (const h of ALTEZZE_PO152B) for (const giro of ['mossa', 'avanti']) {
+  for (const h of ALTEZZE_PO152B) for (const giro of ['mossa', 'avanti', 'ricarica']) {
     const vp = `${larghezza}x${h}`, dove = `${vp} e01 ${c.id} (${giro})`, p = await browser.newPage({ viewport: { width: larghezza, height: h }, hasTouch: true, reducedMotion: 'reduce' });
     await p.addInitScript(() => { globalThis.__VALMORA_SECONDO_MS = 1; });
     if (rossi.length) await p.addInitScript((xs) => { for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi);
@@ -69,6 +73,12 @@ export async function controllaPo152b(browser, url, larghezza, rossi = [], carte
     const lim = Math.max(SOGLIE[vp]?.risposta ?? 0, senza);
     if (e0 > lim) male.push(`${dove}: con la mossa la risposta scorre di ${e0} px (soglia ${lim}, PO-152 B)`);
     ris.push({ vp, giro, risposta: e0, senza, unita: s0.attivi.length });
+    if (giro === 'ricarica') { // C56-02 (D-262): ricaricata prima di muovere, la pausa con la mossa torna (rosso C262R01: persa)
+      await p.reload(); await p.getByRole('button', { name: 'Riprendi' }).click();
+      const torna = await p.waitForSelector('.mappa [data-mossa="puoi"]', { timeout: 15000, state: 'attached' }).then(() => true).catch(() => false);
+      if (!torna || !(await stato(p)).attivi.length) male.push(`${dove}: dopo una ricarica prima di muovere la mossa di quella pausa è persa (C56-02)`);
+      await p.close(); continue;
+    }
     if (giro === 'avanti' || !s0.attivi.length) {
       if (giro === 'avanti') { // la mossa è facoltativa: «Avanti» senza toccare niente porta alla chiamata dopo
         await p.click('[data-azione="continua"]');
@@ -94,6 +104,12 @@ export async function controllaPo152b(browser, url, larghezza, rossi = [], carte
     if ((dopo.in_corso.mosse ?? []).length !== (prima.in_corso.mosse ?? []).length + 1) male.push(`${dove}: la mossa non è segnata nel salvataggio (PO-152 B)`);
     if (s2.indicazione !== 'fatta') male.push(`${dove}: dopo la mossa manca «Mossa fatta» (${s2.indicazione}, PO-152 B)`);
     if (s2.attivi.length) male.push(`${dove}: dopo la mossa si toccano ancora ${s2.attivi.length} unità: seconda mossa possibile (PO-152 B)`);
+    // D-262: la previsione a schermo (riga e segni sulla mappa) è quella della logica
+    const attesa = effettoMossa(m, prima.in_corso, dopo.in_corso, { risorsa: r, da, a }, dich).filter((e) => e.verso !== 'pari').map((e) => `${e.settore}:${e.verso}`).join(' ');
+    const vista = await p.evaluate(() => ({ riga: document.querySelector('.mappa [data-previsione]')?.dataset.previsione ?? null, segni: [...document.querySelectorAll('.mappa [data-segno]')].map((x) => x.dataset.segno) }));
+    if (vista.riga === null) male.push(`${dove}: dopo la mossa manca la previsione (D-262)`);
+    else if (vista.riga !== attesa) male.push(`${dove}: previsione a schermo «${vista.riga}», la logica dice «${attesa}» (D-262)`);
+    for (const x of attesa.split(' ').filter(Boolean)) { const [k, v] = x.split(':'); if (!vista.segni.includes(`${k}:tensione:${v}`)) male.push(`${dove}: manca il segno ${v === 'su' ? '▲' : '▼'} su ${k} (D-262)`); }
     await p.close();
   }
   const hr = RADIO_VP[larghezza];
