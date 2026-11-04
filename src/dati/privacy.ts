@@ -18,7 +18,9 @@ const esc = (s: string) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').re
 
 /** Pagina web autonoma (nessun file esterno, nessuno script). Rosso C145T01: l'ultimo paragrafo manca, come in una copia
  *  scritta a mano rimasta indietro. Colori dai token di src/resa/token.css (passati dal build). */
-export function paginaPrivacy(t: TestoPrivacy, stile: string): string {
+// C54-03 (D-268): senza icona il browser chiedeva /favicon.ico e riceveva 404. L'icona è dentro la pagina (data:, dal build:
+// tools/privacy-pagina.mjs), così la pagina continua a non caricare niente da fuori. Rosso C268P01: nessuna icona.
+export function paginaPrivacy(t: TestoPrivacy, stile: string, icona?: string): string {
   const paragrafi = spento('C145T01') ? t.paragrafi.slice(0, -1) : t.paragrafi;
   return `<!doctype html>
 <html lang="it">
@@ -26,7 +28,7 @@ export function paginaPrivacy(t: TestoPrivacy, stile: string): string {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(t.titolo)} – Vandel Falls</title>
-<style>${stile}</style>
+${icona && !spento('C268P01') ? `<link rel="icon" type="image/png" href="${icona}">\n` : ''}<style>${stile}</style>
 </head>
 <body>
 <main>

@@ -3,7 +3,9 @@
 // - la voce «Privacy» è nella home (menu «Altro»). Rosso C145H01: la voce manca;
 // - il testo della schermata e quello della pagina web sono identici. Rosso C145T01: la pagina perde l'ultimo paragrafo;
 // - il build scrive privacy/index.html (plugin di vite.config.ts). Rosso C145W01: non la scrive;
-// - nel rilascio il segnaposto del contatto boccia (tools/aab.mjs, job «aab» su main).
+// - nel rilascio il segnaposto del contatto boccia (tools/aab.mjs, job «aab» su main);
+// - C54-03 (D-268): la pagina web ha la sua icona dentro di sé (data:), quindi il browser non chiede /favicon.ico (prima: 404).
+//   Rosso C268P01: niente icona. L'icona data: è l'unico <link> ammesso: non carica niente da fuori.
 import { readFileSync } from 'node:fs';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -15,8 +17,9 @@ import { FILE_PAGINA, htmlPrivacy, pianoPrivacy } from '../tools/privacy-pagina.
 import { controllaPrivacy } from '../tools/aab.mjs';
 
 const g = globalThis as Record<string, unknown>;
-afterEach(() => { for (const x of ['C145H01', 'C145T01', 'C145W01']) delete g[`__NO_${x}`]; });
+afterEach(() => { for (const x of ['C145H01', 'C145T01', 'C145W01', 'C268P01']) delete g[`__NO_${x}`]; });
 const niente = () => {};
+const ICONA = /<link rel="icon" type="image\/png" href="data:image\/png;base64,[A-Za-z0-9+/=]+">/; // C54-03: l'icona dentro la pagina
 const home = () => renderToStaticMarkup(createElement(Titolo, { puoRiprendere: false, nuova: niente, riprendi: niente, crediti: niente, privacy: niente, sal: null, importata: niente }));
 const decodifica = (s: string) => s.replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&quot;', '"').replaceAll('&#x27;', "'").replaceAll('&#39;', "'").replaceAll('&amp;', '&');
 /** Paragrafi dentro [data-privacy-testo], come testo. */
@@ -55,7 +58,7 @@ describe('privacy (PO-145, D-217)', () => {
   });
 
   it('la pagina web non carica niente da fuori (nessuno script, link o immagine)', () => {
-    expect(htmlPrivacy()).not.toMatch(/<(script|link|img|iframe)\b|https?:\/\//);
+    expect(htmlPrivacy().replace(ICONA, '')).not.toMatch(/<(script|link|img|iframe)\b|https?:\/\//);
   });
 
   it('nel rilascio il segnaposto del contatto boccia; con un contatto vero passa', () => {
@@ -65,5 +68,12 @@ describe('privacy (PO-145, D-217)', () => {
     expect(controllaPrivacy(testi, false)).toEqual([]);
     const rimedio = Object.fromEntries(Object.entries(testi).map(([k, v]) => [k, v.replace(SEGNAPOSTO_CONTATTO, 'x@y.z')]));
     expect(controllaPrivacy(rimedio, true)).toEqual([]);
+  });
+  it('C54-03: la pagina web ha l\'icona dentro di sé, quella del gioco (rosso C268P01: no)', () => {
+    const m = htmlPrivacy().match(ICONA);
+    expect(m).not.toBeNull();
+    expect(m![0]).toContain(readFileSync('public/icone/favicon-32.png').toString('base64'));
+    g.__NO_C268P01 = true;
+    expect(htmlPrivacy()).not.toMatch(ICONA);
   });
 });
