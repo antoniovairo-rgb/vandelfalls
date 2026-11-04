@@ -69,7 +69,8 @@ function adatta(m: HTMLElement) {
   if (ecc <= 0 && tenute) { m.style.setProperty('--mappa-alta', `${tenute.alta}px`); m.setAttribute('data-adatta', ''); return fine(false, tenute.fuori); }
   if (ecc <= 0) return fine(false);
   const radice = getComputedStyle(document.documentElement);
-  const min = parseFloat(radice.getPropertyValue(LETTURA.has(schermata) && !deroga && !spento('C191L01') ? '--mappa-altezza-min-lettura' : '--mappa-altezza-min')) || 0;
+  const min = Math.max(parseFloat(radice.getPropertyValue(LETTURA.has(schermata) && !deroga && !spento('C191L01') ? '--mappa-altezza-min-lettura' : '--mappa-altezza-min')) || 0,
+    deroga && !spento('C262D01') ? senzaDischiSovrapposti(m, radice) : 0);
   const nat = m.getBoundingClientRect().height;
   let alta = Math.max(min, nat - ecc);
   // S-21: il pulsante «Home» nell'angolo non deve coprire punti e nomi dei settori (CI rossa a 375: il rapporto abbassato portava
@@ -93,6 +94,24 @@ function adatta(m: HTMLElement) {
   const casaFuori = fuori && alta < nat && (sotto('.settore-punto') || sotto('.settore-nome'));
   if (risposta && alta < nat) tenuta.set(risposta, { alta: Math.round(alta), fuori: casaFuori || !!tenute?.fuori });
   fine(SENZA_MAPPA.has(schermata) && !spento('C191R01') && eccedenza() > 0, casaFuori || !!tenute?.fuori);
+}
+
+/** C56-03 (D-262): la mappa abbassata con la mossa avvicina i dischi dei settori; sotto una certa altezza il centro di uno cade
+ *  nel disco di un altro e non si tocca più (e02 ritardo a 360×640, mappa 204 px: viale_stazione e curva_ospiti a 18,7 px, raggio
+ *  22). L'altezza più bassa in cui ogni centro resta fuori dagli altri dischi (raggio + 2 px), dalle posizioni dei settori e dalle
+ *  stesse misure del CSS di .settore (stile.css). Rosso C262D01: nessun vincolo. */
+function senzaDischiSovrapposti(m: HTMLElement, radice: CSSStyleDeclaration): number {
+  const v = (k: string) => parseFloat(radice.getPropertyValue(k)) || 0, r = v('--settore') / 2, nomi = v('--margine-nomi');
+  const cs = getComputedStyle(m), bordo = (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
+  const largo = m.clientWidth - 2 * r, d = r + 2;
+  const pos = [...m.querySelectorAll<HTMLElement>(':scope > [data-settore]')].map((e) => [parseFloat(e.style.getPropertyValue('--x')), parseFloat(e.style.getPropertyValue('--y'))] as const).filter(([x, y]) => !isNaN(x) && !isNaN(y));
+  let alta = 0;
+  for (const [i, a] of pos.entries()) for (const b of pos.slice(i + 1)) {
+    const dx = (largo * Math.abs(a[0] - b[0])) / 100, dy = Math.abs(a[1] - b[1]);
+    if (dx >= d || !dy) continue; // già lontani, o sulla stessa riga (l'altezza non li separa)
+    alta = Math.max(alta, (Math.sqrt(d * d - dx * dx) * 100) / dy + 2 * r + nomi + bordo);
+  }
+  return Math.ceil(alta);
 }
 
 /** Si rifà quando la pagina cambia (passi, testi, caratteri) e quando cambia la finestra. */
