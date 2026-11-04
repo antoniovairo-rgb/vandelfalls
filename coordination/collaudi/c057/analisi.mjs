@@ -1,0 +1,25 @@
+// Riassume le righe JSON di sonda-mossa.mjs: node analisi.mjs file.jsonl...
+import { readFileSync } from 'node:fs';
+const righe = process.argv.slice(2).flatMap((f) => readFileSync(f, 'utf8').split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean));
+const r = righe.filter((x) => x.tipo === 'risposta'), rec = (c, xs) => { const m = {}; for (const x of xs) { const k = c(x); m[k] = (m[k] ?? 0) + 1; } return m; };
+console.log('righe', righe.length, rec((x) => x.tipo, righe));
+console.log('mossa per vp/testo', rec((x) => `${x.vp} t${x.testo} ${x.mossa}`, r));
+console.log('mappa non ferma (serie >1 valore):', r.filter((x) => !x.mappaFerma).map((x) => `${x.vp} t${x.testo} ${x.ep}/${x.id} ${x.mappaSerie}`));
+console.log('mappa cambia dopo scroll:', r.filter((x) => x.mappaDopoScroll !== x.mappa).map((x) => `${x.vp} t${x.testo} ${x.ep}/${x.id} ${x.mappa}->${x.mappaDopoScroll}`));
+console.log('costo assente (risposta):', r.filter((x) => !x.costo.length).length, 'su', r.length);
+console.log('costo assente con mossa:', r.filter((x) => x.mossa && !x.costo.length).map((x) => `${x.vp} t${x.testo} ${x.ep}/${x.id}`));
+console.log('scorre con mossa (ecc>0):', r.filter((x) => x.mossa && x.ecc > 0).map((x) => `${x.vp} t${x.testo} ${x.ep}/${x.id} ecc ${x.ecc}`));
+console.log('hit male risposta:', r.filter((x) => x.hitMale?.length).map((x) => `${x.vp} t${x.testo} ${x.ep}/${x.id} ${x.hitMale.join('; ')}`));
+console.log('dopo unità hit male:', r.filter((x) => x.dopoUnita?.hitMale?.length).map((x) => `${x.vp} t${x.testo} ${x.ep}/${x.id} ${x.dopoUnita.hitMale.join('; ')}`));
+console.log('unità non risponde:', r.filter((x) => x.unitaNonRisponde).map((x) => `${x.vp} t${x.testo} ${x.ep}/${x.id} ${x.unitaNonRisponde}`));
+console.log('settore non risponde:', r.filter((x) => x.settoreNonRisponde).map((x) => `${x.vp} t${x.testo} ${x.ep}/${x.id} ${x.settoreNonRisponde}`));
+console.log('puoi senza unità:', r.filter((x) => x.mossa === 'puoi' && !x.unita).map((x) => `${x.vp} t${x.testo} ${x.ep}/${x.id}`));
+console.log('dopo mossa: previsione tagliata:', r.filter((x) => x.radioDopo?.tagliato).map((x) => `${x.vp} t${x.testo} ${x.ep}/${x.id}`));
+console.log('dopo mossa: senza previsione/salvato:', r.filter((x) => x.dopoMossa && (!x.dopoMossa.previsione || !x.dopoMossa.salvato)).map((x) => `${x.vp} t${x.testo} ${x.ep}/${x.id} prev=${x.dopoMossa.previsione} salvato=${x.dopoMossa.salvato}`));
+console.log('dopo mossa: costo non più visibile:', r.filter((x) => x.dopoMossa && x.costo.length && !x.dopoMossa.costo.length).map((x) => `${x.vp} t${x.testo} ${x.ep}/${x.id}`));
+console.log('dopo mossa: mappa cambia:', r.filter((x) => x.dopoMossa && x.dopoMossa.mappa !== x.mappa).map((x) => `${x.vp} t${x.testo} ${x.ep}/${x.id} ${x.mappa}->${x.dopoMossa.mappa}`));
+console.log('dopo mossa: scorre:', r.filter((x) => x.dopoMossa?.ecc > 0).map((x) => `${x.vp} t${x.testo} ${x.ep}/${x.id} ecc ${x.dopoMossa.ecc}`));
+console.log('ricarica dopo mossa fatta:', rec((x) => x.dopoRicaricaFatta, r.filter((x) => x.dopoMossa)));
+console.log('Home: più di una o non in testata quando mappa bassa:', r.filter((x) => x.nHome !== 1).map((x) => `${x.vp} t${x.testo} ${x.ep}/${x.id} nHome ${x.nHome}`));
+console.log('mappa risposta < 200 :', r.filter((x) => x.mappa < 200).map((x) => `${x.vp} t${x.testo} ${x.ep}/${x.id} ${x.mappa}`));
+console.log('errori:', righe.filter((x) => x.tipo === 'errore').slice(0, 5));

@@ -1087,3 +1087,119 @@ Foto in `d262/dopo`, e `d262/prima` coi rossi C262E01, R01, M01 e D01 insieme. P
 - e02, unità in mano.
 
 Non verificato: telefono reale; il caso esatto di e30.
+
+### Correzioni dopo la consegna, prima della 0.63.0 (3493dd33)
+
+Il primo giro di grafica su f4a6f3ce è risultato ROSSO, sempre con lo stesso errore nei 3 tentativi (`tools/foto.mjs:304`): «dopo la prima risposta: la ripresa non torna a "chiamata"».
+- Causa: il guardiano risponde, preme «Avanti» senza muovere e ricarica. Con C56-02 tornava la risposta già lasciata, perché «Avanti» non lasciava traccia nel salvataggio.
+- Il guardiano di C56-02 provava la ricarica prima di «Avanti», non quella dopo.
+- 5e814b4f: `rinunciaMossa` (pura, mossa.ts). «Avanti» senza mossa segna il turno in `mosse` e chiude la pausa. Guardiano po152b, giro «avanti»: dopo «Avanti», una ricarica riprende dalla chiamata.
+
+Il passo foto su 5e814b4f si fermava sempre dopo 4908 controlli, anche girato da solo (`tools/foto-po121.mjs:66`).
+- Causa: un salvataggio vero della 0.4.0, a metà ondata, alla ripresa tornava sulla risposta dell'ultima scelta. I salvataggi vecchi (dalla 0.4.0 alla 0.62.0) non distinguono «risposta ancora a schermo» da «risposta già lasciata».
+- 3493dd33: `apriPausa` (pura). Quando la risposta con la mossa compare a schermo, il salvataggio segna `aperta:<turno>` in `mosse`: stesso formato, SAVE_VERSION 4 invariata.
+- La pausa torna solo con quel segno. I salvataggi senza segno riprendono dalla chiamata, come prima.
+- Rosso C262R01, sia per il segno sia per la ripresa.
+
+FATTO MISURATO su 3493dd33:
+- passo foto a 360, girato da solo: 8066 controlli, 0 falliti;
+- po152b a 360: verde, 277 stati;
+- `tests/ripresa-d262.test.ts`: 5 prove su 5, compresa quella sul salvataggio vecchio della 0.57.0 che non riporta indietro la risposta;
+- 3 giri governo+logica verdi (ramo claude/valmora-giri-063, 364ebf2f);
+- CI: run 1225, 10 job su 10 verdi.
+
+Pubblicata come 0.63.0 (main b497d626).
+
+Fra f4a6f3ce e 3493dd33 c'è anche d1dc7052. Su decisione della principale, l'accordo della previsione non scende sotto l'85,7 % (`tests/previsione-d262.test.ts`).
+
+## D-268: lotto pulizie L2b — S-11, 4/11
+
+Base: b497d626 (0.63.0). Ramo claude/valmora-pulizie. Nessun GAME_VERSION nuovo (lo decide il rilascio). Fuori dal lotto, perché sono della città e restano a S-26: C55-03, C55-04, C55-05, C56-09, testo al 130 % (C52-04/05). Non ho toccato `Citta.tsx`, `vignetta.tsx` né `MappaCitta.tsx`.
+
+### C54-03: la pagina della privacy chiedeva /favicon.ico (404)
+
+- Prima: aperta da dist, la pagina dava 1 errore nel browser (404 su /favicon.ico).
+- Correzione: `src/dati/privacy.ts` mette l'icona dentro la pagina come `data:` (da `public/icone/favicon-32.png`, `tools/privacy-pagina.mjs`). La pagina resta senza richieste esterne; il test «non carica niente da fuori» ignora solo quel link esatto.
+- Rosso C268P01: niente icona.
+- FATTO MISURATO: `tests/privacy.test.ts` 6/6; browser sulla pagina di dist, 0 errori.
+- Il rosso C268P01 si prova solo nel test unitario: VALMORA_ROSSI non arriva a `spento` dentro il plugin di vite.
+
+### C56-08: il salvataggio non diceva quale versione l'aveva scritto
+
+- `src/resa/archivio.ts`, `salva`: scrive `game_version: GAME_VERSION`. SAVE_VERSION non cambia (campo già nello schema).
+- Rosso C268G01: resta la versione di prima.
+- FATTO MISURATO: `tests/versione-salvataggio-d268.test.ts` 2/2. Col salvataggio vero v3 0.57.0, `salva(carica())` porta GAME_VERSION nel salvataggio principale e nella riserva; col rosso resta 0.57.0.
+
+### C56-04: «una squadra» e badge senza numero
+
+- Testo `mossa.puoi` (`data/testi/it/comune.json`):
+  - vecchio: «Puoi spostare una squadra: tocca un'unità sulla mappa, poi il settore.» (resta come `mossa.puoi_c56`, per il rosso)
+  - nuovo: «Puoi spostare un'unità: toccala sulla mappa, poi tocca il settore.»
+- Badge delle unità (`src/resa/mappa/Mappa.tsx`): l'aria-label dice anche quante unità ci sono.
+- Rosso C268M01: testo e badge come prima.
+- Guardiano in `tools/foto-po152-b.mjs`: niente «una squadra» nel testo, e il numero nell'aria-label del badge. FATTO MISURATO: verde a 360 e 412; rosso C268M01, 54 problemi.
+
+### C56-05: dopo la mossa il fuoco andava su «i»
+
+- `src/resa/mossa-ui.tsx`: dopo la mossa il fuoco va su «Avanti» (`[data-azione="continua"]`, senza scorrere).
+- Rosso C268F01: il fuoco resta dov'era.
+- Guardiano in `tools/foto-po152-b.mjs`: a 360×760, dopo la mossa fatta da tastiera, l'elemento attivo deve essere «Avanti». FATTO MISURATO: verde a 360 e 412; rosso C268F01, 1 problema.
+- I bracci C268M01 e C268F01 sono in `tools/passi-grafica.mjs` (po152b a 360×760).
+
+### C54-02: bollo della versione nelle schermate dello store
+
+- Le schermate dello store avevano «v0.56.0» con la 0.57.0 (`store/it-IT/schermata-1.jpg`).
+- `tools/store/immagini.mjs`: prima della foto nasconde `[data-versione-angolo]`. Guardiano: se il bollo si vede ancora, lo strumento si ferma. Rosso C268S01: non lo nasconde.
+- FATTO MISURATO (in una cartella di prova, non in `store/`):
+  - verde: esito 0, 6 immagini, nessun bollo in schermata-1;
+  - rosso C268S01: esito 1, «schermata 1: si vede il bollo della versione».
+- Come deciso, le immagini in `store/it-IT` non sono rigenerate qui: si rifanno dopo PO-158.
+
+### C56-07: risposte che scorrono oltre la soglia
+
+(a) Strumento. La sonda delle risposte (`tools/sonda-altezze.mjs`, C53-02) misurava solo carte e varianti (b497d626, riga 88); le chiamate ordinarie non le vedeva. Ora le misura tutte. Rosso C268R01: solo carte e varianti, come prima.
+
+(b) Testi. FATTO MISURATO, sonda risposte coi testi vecchi sulla build del ramo:
+
+375×667, rosso, 5 casi (soglia 56):
+
+| episodio | chiamata/opzione | scorre |
+|---|---|---|
+| e14 | titolo_domani/tipografia_club | 59 px |
+| e02 | biglietti_voce/sequestra | 57 px |
+| e30 | saluto_larkspire/devia_coda | 57 px |
+| e35 | corso_chiuso/steward_pedoni | 57 px |
+| e35 | familiari/steward_familiari | 57 px |
+
+360×640, rosso, 7 casi (soglia 68): gli stessi cinque, più e30 autobus_sera/viale_aperto (71 px) ed e21 striscione_sgombero/togli_striscione21 (69 px).
+
+La collaudatrice aveva visto solo e02; gli altri sei li ha trovati la sonda allargata. Li ho accorciati tutti, con la stessa regola: brevità (PO-085), tono, nessun fatto nuovo.
+
+| chiave | vecchio | nuovo |
+|---|---|---|
+| e02.op.sequestra.r | Una voce alla fermata, qualche domanda. Gli affari calano: ai tornelli arriveranno meno biglietti sbagliati. | Una voce alla fermata, qualche domanda. Ai tornelli arriveranno meno biglietti falsi. |
+| e14.op.tipografia_club.r | La parola «tipografia» finisce nel sottotitolo. In piazzale qualcuno la legge e la prende come un'accusa al club. | La parola «tipografia» finisce nel sottotitolo. In piazzale suona come un'accusa al club. |
+| e21.op.togli_striscione21.r | Lo striscione viene giù. Dalla piazza piovono fischi, e il nome del centro sociale cantato come un coro. | Lo striscione viene giù. Dalla piazza fischi e cori per il centro sociale. |
+| e30.op.devia_coda.r | La coda gira a sinistra e attraversa il quartiere. Dalle finestre, qualcuno guarda passare duecento sciarpe. | La coda gira e attraversa il quartiere. Dalle finestre si contano duecento sciarpe. |
+| e30.op.viale_aperto.r | Autobus e corteo sullo stesso viale, a un metro. I clacson provano a farsi sentire sopra il silenzio. | Autobus e corteo sullo stesso viale, a un metro. I clacson contro il silenzio. |
+| e35.op.steward_pedoni.r | Due steward del club, pettorina sopra il cappotto, guidano i passeggeri verso le traverse. Nessuno verso la banca. | Due steward in pettorina guidano i passeggeri verso le traverse. Nessuno verso la banca. |
+| e35.op.steward_familiari.r | Due steward accompagnano i familiari in una sala del comune, a due isolati. Lì almeno ci sono le sedie. | Due steward portano i familiari in una sala del comune. Lì almeno ci sono le sedie. |
+
+FATTO MISURATO dopo i testi (stessa sonda, build del ramo con 6a11bab5): verde a 375×667 e a 360×640, 0 casi, comprese le carte di e28 ed e29.
+
+### C56-06: testi delle carte
+
+e16 era già risolto sulla 0.63.0. Le altre due:
+
+| chiave | vecchio | nuovo |
+|---|---|---|
+| e29.imp.sposi.tovagliolo.r | Il vice disegna la strada su un tovagliolo, gli sposi vanno. Niente riso. | Il vice disegna la strada su un tovagliolo. Gli sposi ripartono verso la chiesa. |
+| e28.imp.nebbia_porto.colonna_fari.r | Le auto avanzano in colonna. Si passa, ma in colonna ognuno ha un'opinione sulla nebbia. | Le auto avanzano a fari bassi. Si passa, ma ognuno ha un'opinione sulla nebbia. |
+
+Il testo nuovo di e29 è più lungo di 9 caratteri; la stessa sonda delle risposte lo misura.
+
+### C55-02: non riprodotto, chiuso
+
+FATTO MISURATO: 568 tocchi immediati, pagina spostata 0 volte. Nessuna correzione.
+
+Non verificato: telefono reale.

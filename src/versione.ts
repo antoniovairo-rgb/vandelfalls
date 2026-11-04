@@ -338,4 +338,12 @@
 //   (SAVE_VERSION 4 invariata, provato su salvataggi veri 0.4.0 e 0.57.0); bersagli: centro di ogni bersaglio risponde al tocco.
 //   guardiano: tools/foto-po152-a.mjs (C255S01), foto-po152-b (C262M01, C262D01, giri «ricarica» e «avanti»), tests ripresa-d262 e
 //   mossa-d241 (C262R01), previsione (C262E01), collocaRadio (C255R01), adatta (C259A01), Home in testata (C261H01).
-export const GAME_VERSION = '0.63.0';
+// 0.64.0 – pulizie L2b (D-268, collaudi C-054/C-056): privacy con la sua icona, il salvataggio scrive game_version, mossa
+//   «un'unità» col numero nel nome accessibile, fuoco su «Avanti» dopo la mossa da tastiera, foto dello store senza bollo di
+//   versione, sonda «risposte» estesa alle chiamate ordinarie con 9 testi accorciati.
+//   causa: rilievi bassi C54-02/03 e C56-04..08; la sonda C53-02 non guardava le chiamate ordinarie.
+//   misura: sonda risposte rossa coi testi vecchi (5 casi a 375×667, 7 a 360×640, 1-3 px oltre soglia) → verde; po152b verde a 360
+//   e 412 (rossi C268M01 54 problemi, C268F01 1); pagina privacy 0 errori; test 489/489. C55-02 non riprodotto (568 tocchi, 0).
+//   guardiano: tests/privacy, versione-salvataggio-d268, foto-po152-b, tools/store/immagini.mjs, sonda-altezze; rossi C268P01,
+//   C268G01, C268M01, C268F01, C268S01, C268R01.
+export const GAME_VERSION = '0.64.0';

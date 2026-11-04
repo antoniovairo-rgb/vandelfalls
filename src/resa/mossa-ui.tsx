@@ -37,6 +37,9 @@ export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: bo
     p.conIc(dopo);
     setEffetto(effettoMossa(m, ora, dopo, mossa, dichiarate));
     setInMano(null);
+    // C56-05 (D-268): dopo la mossa il fuoco va su «Avanti» (prima finiva su «i» in cima: da tastiera si ripassava tutta
+    // l'intestazione). Rosso C268F01: il fuoco resta dove lo mette il browser.
+    if (!spento('C268F01')) requestAnimationFrame(() => document.querySelector<HTMLElement>('[data-azione="continua"]')?.focus({ preventScroll: true }));
   };
   const mappa: PropsMossa = possibile ? {
     onTogli: (r, s) => setInMano((x) => (x && x.risorsa === r && x.settore === s ? null : { risorsa: r, settore: s })),
@@ -52,7 +55,7 @@ export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: bo
   const riga = stato !== 'fatta' || !effetto?.length ? null : cambi.length
     ? `${t('mossa.previsione')} ${cambi.map((e) => `${t(`settore.${e.settore}`)} ${t(e.verso === 'su' ? 'mossa.si_scalda' : 'mossa.si_calma')}`).join(', ')}.`
     : t('mossa.non_cambia');
-  const indicazione = <p className="mossa-indicazione" data-mossa={stato}>{t(`mossa.${stato}`)}{riga && <> <span data-previsione={cambi.map((e) => `${e.settore}:${e.verso}`).join(' ')}>{riga}</span></>}</p>;
+  const indicazione = <p className="mossa-indicazione" data-mossa={stato}>{t(stato === 'puoi' && spento('C268M01') ? 'mossa.puoi_c56' : `mossa.${stato}`) /* C56-04: «un'unità», non «una squadra»; rosso C268M01: come prima */}{riga && <> <span data-previsione={cambi.map((e) => `${e.settore}:${e.verso}`).join(' ')}>{riga}</span></>}</p>;
   const segni: Segno[] = cambi.map((e) => ({ settore: e.settore, tipo: 'tensione', verso: e.verso as 'su' | 'giu' }));
   return { mappa, indicazione, segni };
 }

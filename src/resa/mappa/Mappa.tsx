@@ -167,7 +167,7 @@ export function Mappa(p: MappaProps) {
                 {qui.map(([r, n]) => (
                   <button key={r} type="button" className={`${spento('C05R05') ? 'pastiglia-rossa' : 'tocco-pastiglia'}${p.mossa?.inMano === `${r}@${s.id}` ? (spento('C262M01') ? ' in-mano' : ' mossa-in-mano') : ''}`} data-presenza={`${r}@${s.id}`}
                     disabled={!p.onTogli || (!!p.mossa && !p.mossa.spostabili.includes(`${r}@${s.id}`))} aria-pressed={p.mossa ? p.mossa.inMano === `${r}@${s.id}` : undefined}
-                    aria-label={p.mossa ? `${t('mossa.sposta')} ${t(`risorsa.${r}`)} da ${nome}` : `ritira ${t(`risorsa.${r}`)} da ${nome}`} onClick={() => p.onTogli?.(r, s.id)}>
+                    aria-label={p.mossa ? `${t('mossa.sposta')} ${t(`risorsa.${r}`)} da ${nome}${spento('C268M01') ? '' : `, ${quante(n, r)}`}` /* C56-04: quante ce ne sono */ : `ritira ${t(`risorsa.${r}`)} da ${nome}`} onClick={() => p.onTogli?.(r, s.id)}>
                     <span className="pastiglia"><Icona di={iconaRisorsa(r)} />{n}</span>
                   </button>
                 ))}
