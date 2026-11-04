@@ -6,6 +6,8 @@
 // D-255 punto 2: il riquadro radio non copre mai un bersaglio della mossa (unità toccabili, poi settori ammessi con ogni unità
 // in mano), nella prima chiamata con mossa di ognuno dei 36 episodi, all'altezza più bassa della larghezza (RADIO_VP).
 // Rosso C255R01 (fascia fissa e rapporto intero, come prima): a 360×640 210 stati coperti.
+// C56-04 (D-268): «un'unità» e quante unità nel nome del badge. Rosso C268M01.
+// C56-05 (D-268): dopo la mossa da tastiera (760) il fuoco è su «Avanti». Rosso C268F01.
 // C56-02 (D-262), giro «ricarica»: ricaricata prima di muovere, la pausa con la mossa torna. Rosso C262R01.
 // D-262 punto 1: dopo la mossa la riga della previsione e i segni ▲/▼ sono quelli della logica (effettoMossa sui due
 // salvataggi, prima e dopo). Rosso C262E01: niente previsione.
@@ -74,6 +76,10 @@ export async function controllaPo152b(browser, url, larghezza, rossi = [], carte
     const s0 = await stato(p), e0 = await ecc(p), senza = await p.evaluate(() => { const e = document.querySelector('[data-radio-mappa]'); if (e) e.style.display = 'none'; const x = document.scrollingElement.scrollHeight - innerHeight; if (e) e.style.display = ''; return x; });
     if (s0.indicazione !== 'puoi' || !s0.dentro) male.push(`${dove}: nella risposta manca l'indicazione «Puoi spostare una squadra» sopra la mappa (${s0.indicazione}, PO-152 B)`);
     if (!s0.attivi.length) male.push(`${dove}: nessuna unità si tocca nella risposta (PO-152 B)`);
+    // C56-04 (D-268): si spostano anche steward e mediatore, quindi «un'unità»; il badge dice anche quante unità ci sono
+    const nomi = await p.evaluate(() => ({ testo: document.querySelector('.mappa [data-mossa]')?.textContent ?? '', badge: [...document.querySelectorAll('.mappa [data-presenza]:not(:disabled)')].map((b) => [b.getAttribute('aria-label'), b.querySelector('.pastiglia')?.textContent?.trim()]) }));
+    if (/una squadra/i.test(nomi.testo)) male.push(`${dove}: l'indicazione dice «una squadra» ma si spostano tutte le unità (C56-04)`);
+    for (const [a, n] of nomi.badge) if (!a?.includes(`, ${n} `)) male.push(`${dove}: il nome del badge «${a}» non dice quante unità (${n}) ci sono (C56-04)`);
     if (s0.settori.length) male.push(`${dove}: settori toccabili prima di scegliere l'unità (PO-152 B)`);
     for (const b of s0.attivi) if (b.lato < s0.min) male.push(`${dove}: unità ${b.id} toccabile su ${Math.round(b.lato)} px, serve ≥ ${s0.min} (PO-152 B)`);
     const lim = Math.max(SOGLIE[vp]?.risposta ?? 0, senza);
@@ -111,6 +117,8 @@ export async function controllaPo152b(browser, url, larghezza, rossi = [], carte
     if (cartella) await p.screenshot({ path: join(cartella, `${vp}-po152b-mossa.png`) });
     if ((dopo.in_corso.disposizione[r]?.[da] ?? 0) !== (prima.in_corso.disposizione[r]?.[da] ?? 0) - 1 || (dopo.in_corso.disposizione[r]?.[a] ?? 0) !== (prima.in_corso.disposizione[r]?.[a] ?? 0) + 1) male.push(`${dove}: la mossa ${r} ${da} → ${a} non è nel salvataggio (PO-152 B)`);
     if ((dopo.in_corso.mosse ?? []).length !== (prima.in_corso.mosse ?? []).length + 1) male.push(`${dove}: la mossa non è segnata nel salvataggio (PO-152 B)`);
+    // C56-05 (D-268): dopo la mossa da tastiera il fuoco è su «Avanti» (rosso C268F01: su «i» in cima)
+    if (h === 760) { const f = await p.evaluate(() => document.activeElement?.dataset?.azione ?? document.activeElement?.className ?? ''); if (f !== 'continua') male.push(`${dove}: dopo la mossa da tastiera il fuoco è su «${f}», non su «Avanti» (C56-05)`); }
     if (s2.indicazione !== 'fatta') male.push(`${dove}: dopo la mossa manca «Mossa fatta» (${s2.indicazione}, PO-152 B)`);
     if (s2.attivi.length) male.push(`${dove}: dopo la mossa si toccano ancora ${s2.attivi.length} unità: seconda mossa possibile (PO-152 B)`);
     // D-262: la previsione a schermo (riga e segni sulla mappa) è quella della logica
