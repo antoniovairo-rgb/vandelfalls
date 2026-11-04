@@ -55,18 +55,28 @@ export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: bo
   const riga = stato !== 'fatta' || !effetto?.length ? null : cambi.length
     ? `${t('mossa.previsione')} ${cambi.map((e) => `${t(`settore.${e.settore}`)} ${t(e.verso === 'su' ? 'mossa.si_scalda' : 'mossa.si_calma')}`).join(', ')}.`
     : t('mossa.non_cambia');
-  const indicazione = <p className="mossa-indicazione" data-mossa={stato}>{t(stato === 'puoi' && spento('C268M01') ? 'mossa.puoi_c56' : `mossa.${stato}`) /* C56-04: «un'unità», non «una squadra»; rosso C268M01: come prima */}{riga && <> <span data-previsione={cambi.map((e) => `${e.settore}:${e.verso}`).join(' ')}>{riga}</span></>}</p>;
+  const testo = t(stato === 'puoi' && spento('C268M01') ? 'mossa.puoi_c56' : `mossa.${stato}`); // C56-04: «un'unità», non «una squadra»; rosso C268M01: come prima
+  const indicazione = <p className="mossa-indicazione" data-mossa={stato}>{testo}{riga && <> <span data-previsione={cambi.map((e) => `${e.settore}:${e.verso}`).join(' ')}>{riga}</span></>}</p>;
   const segni: Segno[] = cambi.map((e) => ({ settore: e.settore, tipo: 'tensione', verso: e.verso as 'su' | 'giu' }));
-  // C57-02 (D-269): se dopo la mossa il riquadro non trova posto («muto»), la previsione si legge nella risposta sotto la mappa
-  // (come il costo, D-258), mai solo al lettore di schermo. Prima della mossa la copia porta la riga più lunga fra le mosse
-  // possibili: adatta.ts la conta nella misura (C57-01), così la mappa non cambia altezza quando la previsione arriva.
-  // Rosso C269P01: niente copia, come prima.
+  // C57-02 e D-269 punto a: se il riquadro non trova posto («muto»), istruzione e previsione si leggono sotto la mappa (come il
+  // costo, D-258), mai solo al lettore di schermo: nessuno stato lascia il giocatore senza istruzione. Nella misura di adatta.ts
+  // (C57-01) la copia porta il testo più lungo fra gli stati possibili («riserva»), così la mappa non cambia altezza.
+  // Rossi: C269P01 niente previsione nella copia; C269I01 niente istruzione (solo la previsione, come in 614c5103).
   let sotto: ReactNode = null;
-  if (!spento('C269P01') && !spento('C262E01') && (possibile || riga)) {
+  const conPrev = !spento('C269P01') && !spento('C262E01'), conIstr = !spento('C269I01');
+  if ((conPrev || conIstr) && (possibile || riga)) {
+    const unisci = (...xs: string[]) => xs.filter(Boolean).join(' ');
     const verbo = t('mossa.si_scalda').length >= t('mossa.si_calma').length ? t('mossa.si_scalda') : t('mossa.si_calma');
-    const riserva = possibile ? spostabili(m, ic).flatMap((x) => settoriAmmessi(m, x.risorsa).filter((k) => k !== x.settore)
-      .map((a) => `${t('mossa.previsione')} ${t(`settore.${x.settore}`)} ${verbo}, ${t(`settore.${a}`)} ${verbo}.`)).reduce((a, b) => (b.length > a.length ? b : a), t('mossa.non_cambia')) : '';
-    sotto = <p className="previsione-sotto" data-previsione-sotto={riga ? 'vera' : 'riserva'} aria-hidden="true">{riga ?? riserva}</p>;
+    const prevLunga = !conPrev ? '' : spostabili(m, ic).flatMap((x) => settoriAmmessi(m, x.risorsa).filter((k) => k !== x.settore)
+      .map((a) => `${t('mossa.previsione')} ${t(`settore.${x.settore}`)} ${verbo}, ${t(`settore.${a}`)} ${verbo}.`)).reduce((a, b) => (b.length > a.length ? b : a), t('mossa.non_cambia'));
+    const ora = unisci(conIstr ? testo : '', conPrev && riga ? riga : '');
+    const riserva = !possibile ? ora : [conIstr ? t('mossa.puoi') : '', conIstr ? t('mossa.dove') : '', unisci(conIstr ? t('mossa.fatta') : '', prevLunga)].reduce((a, b) => (b.length > a.length ? b : a), ora);
+    sotto = (
+      <p className="istruzione-sotto" data-istruzione-sotto={ora ? 'vera' : 'vuota'} aria-hidden="true">
+        <span className="vera">{conIstr && testo}{conIstr && conPrev && riga ? ' ' : ''}{conPrev && riga && <span data-previsione-sotto>{riga}</span>}</span>
+        <span className="riserva">{riserva}</span>
+      </p>
+    );
   }
   return { mappa, indicazione, segni, sotto };
 }

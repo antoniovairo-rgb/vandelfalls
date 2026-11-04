@@ -242,7 +242,7 @@ export function App() {
     testata = { etichetta: `Ondata ${ic.ondata}/${m.ondate.length} · la tua scelta`, titolo: t(m.titolo), info: infoOndata(m, ic.ondata, testoSe) };
     // PO-152 A: il costo per radio sopra la mappa; idea B: lì anche l'indicazione della mossa, e la mappa si tocca per farla
     mappa = { tensione: ic.tensione, presenze: ic.disposizione, fisse: spento('C09S02') ? null : ic.fisse, radio: <><RapportoCosto m={m} ic={ic} o={eco} />{mossa?.indicazione}</>, ...mossa?.mappa };
-    corpo = <Risposta m={m} ic={ic} o={eco} previsione={mossa?.sotto} avanti={() => { // C56-02: «Avanti» senza mossa chiude la pausa anche nel salvataggio
+    corpo = <Risposta m={m} ic={ic} o={eco} istruzione={mossa?.sotto} avanti={() => { // C56-02: «Avanti» senza mossa chiude la pausa anche nel salvataggio
       const ora = icOra(); if (ora && !spento('C262R01')) { const dopo = rinunciaMossa(m, ora); if (dopo !== ora) conIc(dopo); } setEco(null); }} />;
   } else {
     ({ nome, testata, mappa, corpo } = scenaOndata({ m, ic, titolo, bozza, scelta, avviso, riepilogoAperto, annulla: storia.length ? annulla : null,

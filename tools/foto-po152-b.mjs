@@ -21,6 +21,9 @@
 // C57-02 (D-269): dopo la mossa la previsione si vede (nel riquadro, intero, o sotto la mappa), in ogni stato del giro radio e in
 // ogni combinazione unità → settore delle chiamate di CASI_PREVISIONE (e16 imp_nebbia: 4 su 24 col riquadro «muto» a 360×640).
 // Rosso C269P01: previsione al solo lettore di schermo.
+// D-269 a, b, c: in ogni stato l'istruzione della mossa si vede (nel riquadro o nella copia sotto la mappa; rosso C269I01);
+// a pagina ferma nessuna riga della copia (istruzione, previsione) sta sotto «Avanti» (elementFromPoint su ogni riga; rosso
+// C269A01); dopo l'assestamento il riquadro non cambia classe né posto per 2,5 s senza input (al «puoi spostare»).
 import { join } from 'node:path';
 import { chiamateCostruite, SOGLIE } from './sonda-altezze.mjs';
 import { effettoMossa } from '../src/logica/previsione.ts';
@@ -49,12 +52,24 @@ const coperti = (p) => p.evaluate(() => {
   const case_ = [...document.querySelectorAll('[data-azione^="home"]')].filter((e) => e.checkVisibility({ visibilityProperty: true })).length, fuori = !!document.querySelector('.mappa[data-casa-fuori]');
   const senzaBordo = [...document.querySelectorAll('.mappa.mossa [data-presenza]:not(:disabled) .pastiglia, .mappa.mossa .settore-punto:not(:disabled)')]
     .filter((e) => getComputedStyle(e).outlineStyle === 'none').map((e) => e.closest('[data-presenza]')?.dataset.presenza ?? e.closest('[data-settore]').dataset.settore);
-  // C57-02: la previsione (se c'è) si vede: nel riquadro non muto e non tagliato, oppure nella copia sotto la mappa
-  const pr = document.querySelector('.mappa [data-previsione]'), prSotto = document.querySelector('[data-previsione-sotto="vera"]');
-  const previsione = !pr || (!q.classList.contains('muto') && q.scrollHeight <= q.clientHeight + 1 && pr.checkVisibility()) || (!!prSotto?.checkVisibility() && prSotto.textContent === pr.textContent);
-  if (q.classList.contains('muto')) return { xs: [], stretto: true, muto: true, costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, previsione, tagliato: false }; // al solo lettore: non copre niente
+  // C57-02 e D-269 a: istruzione e previsione (se c'è) si vedono: nel riquadro non muto e non tagliato, oppure nella copia sotto
+  // la mappa con lo stesso testo; D-269 b: a pagina ferma nessuna riga della copia è coperta (da «Avanti») o fuori dallo schermo
+  const intero = !q.classList.contains('muto') && q.scrollHeight <= q.clientHeight + 1;
+  const ind = document.querySelector('.mappa [data-mossa]'), pr = document.querySelector('.mappa [data-previsione]');
+  const copia = document.querySelector('.istruzione-sotto[data-istruzione-sotto="vera"]'), vera = copia?.querySelector('.vera'), prSotto = copia?.querySelector('[data-previsione-sotto]');
+  const istruzione = !ind || (intero && ind.checkVisibility()) || (!!vera?.checkVisibility() && vera.textContent === ind.textContent);
+  const previsione = !pr || (intero && pr.checkVisibility()) || (!!prSotto?.checkVisibility() && prSotto.textContent === pr.textContent);
+  const y0 = scrollY; scrollTo(0, 0);
+  const righe = [];
+  if (copia?.checkVisibility()) { const rg = document.createRange(); rg.selectNodeContents(vera);
+    for (const b of rg.getClientRects()) { if (b.width < 2 || b.height < 2) continue; const y = (b.top + b.bottom) / 2; // 9 punti per riga: anche la punta del fumetto
+      const e = y < innerHeight ? [1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => document.elementFromPoint(b.left + (b.width * i) / 10, y)).find((x) => !x || !copia.contains(x)) ?? copia : null;
+      if (!e || !copia.contains(e)) righe.push(`riga a y ${Math.round(b.top)}-${Math.round(b.bottom)} sotto ${e ? (e.closest('[data-azione]')?.dataset.azione ?? e.className) : 'il bordo dello schermo'}`); } }
+  scrollTo(0, y0);
+  if (q.classList.contains('muto')) return { xs: [], stretto: true, muto: true, costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, previsione, istruzione, righe, tagliato: false };
+ // al solo lettore: non copre niente
   const sop = (x) => Math.max(0, Math.min(r.right, x.right) - Math.max(r.left, x.left)) * Math.max(0, Math.min(r.bottom, x.bottom) - Math.max(r.top, x.top));
-  return { costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, previsione, tagliato: q.scrollHeight > q.clientHeight + 1, stretto: q.classList.contains('stretto'), xs: [...document.querySelectorAll('.mappa [data-presenza]:not(:disabled), .mappa [data-settore] .settore-punto:not(:disabled)')]
+  return { costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, previsione, istruzione, righe, tagliato: q.scrollHeight > q.clientHeight + 1, stretto: q.classList.contains('stretto'), xs: [...document.querySelectorAll('.mappa [data-presenza]:not(:disabled), .mappa [data-settore] .settore-punto:not(:disabled)')]
     .map((e) => [e.dataset.presenza ?? e.closest('[data-settore]').dataset.settore, sop(e.getBoundingClientRect())]).filter(([, a]) => a > 0.5).map(([k, a]) => `${k} ${Math.round(a)} px²`) };
 });
 const stato = (p) => p.evaluate(() => {
@@ -175,12 +190,18 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
       if (x.case_ !== 1) male.push(`${vp} ${ep} ${c.id} ${dove}: ${x.case_} pulsanti «Home» visibili, ne serve uno (D-261)`);
       if (x.tagliato) male.push(`${vp} ${ep} ${c.id} ${dove}: il riquadro radio è tagliato (D-262)`);
       if (!x.previsione) male.push(`${vp} ${ep} ${c.id} ${dove}: la previsione non si vede (C57-02)`);
+      if (!x.istruzione) male.push(`${vp} ${ep} ${c.id} ${dove}: l'istruzione della mossa non si vede (D-269 a)`);
+      if (x.righe.length) male.push(`${vp} ${ep} ${c.id} ${dove}: copia sotto la mappa coperta a pagina ferma: ${x.righe.join(', ')} (D-269 b)`);
       if (x.coperto.length) male.push(`${vp} ${ep} ${c.id} ${dove}: il centro non si tocca: ${x.coperto.join(', ')} (C56-03)`);
       if (x.senzaBordo.length) male.push(`${vp} ${ep} ${c.id} ${dove}: senza evidenziazione ${x.senzaBordo.join(', ')} (D-261)`);
       if (x.sotto) { conto.sotto++; conto.mappaMin = Math.min(conto.mappaMin, x.mappa); conto.mappaMax = Math.max(conto.mappaMax, x.mappa); }
       if (x.ecc > soglia) male.push(`${vp} ${ep} ${c.id} ${dove}: la risposta scorre di ${x.ecc} px (soglia ${soglia}, D-258)`);
       if (ch.opzioni[0].costo) { conto.conCosto++; if (!x.costo) { conto.senzaCosto++; male.push(`${vp} ${ep} ${c.id} ${dove}: dopo «Conferma» il costo non si vede (D-258)`); } } };
     await giu('«puoi spostare»');
+    // D-269 c: dopo l'assestamento il riquadro resta com'è senza input (i segni spariscono in 1,8 s di gioco)
+    const posto = () => p.evaluate(() => { const r = document.querySelector('.radio-mappa'); return `${r?.className} ${r?.style.getPropertyValue('--radio-y')}`; });
+    const posto0 = await posto(); await p.waitForTimeout(2500); const posto1 = await posto();
+    if (posto1 !== posto0) male.push(`${vp} ${ep} ${c.id}: senza input il riquadro passa da «${posto0}» a «${posto1}» (D-269 c)`);
     const altezze = await p.evaluate(() => globalThis.__altezze), ferma0 = altezze.at(-1);
     if (altezze.length > 2) male.push(`${vp} ${ep} ${c.id}: dopo «Conferma» la mappa scende a gradini, ${altezze.join(' → ')} px (C57-01)`);
     const stessa = async (dove) => { const a = await p.evaluate(() => globalThis.__altezze); if (a.at(-1) !== ferma0 || a.length > altezze.length)
@@ -232,6 +253,8 @@ async function controllaPrevisione(browser, url, larghezza, h, rossi, dati, dich
       const a = await ss[j].evaluate((e) => e.closest('[data-settore]').dataset.settore); await ss[j].click({ force: true }); await p.waitForTimeout(600);
       const x = await coperti(p), h1 = await altezza(p), dove = `${vp} ${ep} ${id} ${u} → ${a}`; conto.mosse++; if (x.muto) conto.sotto++;
       if (!x.previsione) male.push(`${dove}: la previsione non si vede (C57-02)`);
+      if (!x.istruzione) male.push(`${dove}: l'istruzione della mossa non si vede (D-269 a)`);
+      if (x.righe.length) male.push(`${dove}: copia sotto la mappa coperta a pagina ferma: ${x.righe.join(', ')} (D-269 b)`);
       if (h1 !== h0) male.push(`${dove}: dopo la mossa la mappa passa da ${h0} a ${h1} px (C57-01)`);
       if (x.ecc > soglia) male.push(`${dove}: la risposta scorre di ${x.ecc} px (soglia ${soglia})`);
       await p.close();
