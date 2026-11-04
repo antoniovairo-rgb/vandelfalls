@@ -1051,7 +1051,7 @@ FATTO MISURATO (`tests/previsione-d262.test.ts`, motore). Campione: ogni mossa l
 | invariato | ▼ | 486 |
 
 - IPOTESI: i disaccordi vengono dalle risposte successive, che cambiano la pressione sugli stessi settori; la previsione non le conosce.
-- Il guardiano blocca il verso opposto: 0 casi. La percentuale di accordo è una misura stampata, non una soglia.
+- Il guardiano blocca il verso opposto: 0 casi. Accordo: niente soglia di qualità, ma non sotto 85,7 % (misura del 4/11 meno 3 punti, decisione della principale).
 - Nelle pause in cui qualche mossa cambia la chiusura: 86,4 %.
 - A schermo (`tools/foto-po152-b.mjs`): la riga `data-previsione` e i segni corrispondono a `effettoMossa`, calcolato sui due salvataggi. Rosso C262E01: 3 problemi a 360 (manca la previsione), più 1 riquadro tagliato in «mossa fatta» (e20 viso_scoperto).
 

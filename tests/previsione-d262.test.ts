@@ -2,8 +2,10 @@
 // coperto (src/logica/previsione.ts). Guardiano: su ogni mossa legale di ogni pausa (36 episodi, bot attento, semi 1-2) il
 // segno previsto si confronta con la chiusura vera, finendo l'ondata con le stesse risposte con e senza la mossa.
 // - mai di verso opposto (previsto ▲ e vero ▼, o il contrario): 0 casi;
-// - quante volte coincide in tutto (anche «non cambia»): misura stampata, non soglia (le risposte che vengono dopo possono
-//   cambiare la pressione degli stessi settori, e la previsione non le conosce).
+// - quante volte coincide in tutto (anche «non cambia»): misurato 88,70 % il 4/11 (semi 1-3); le risposte che vengono dopo
+//   possono cambiare la pressione degli stessi settori, e la previsione non le conosce. Decisione della principale (4/11):
+//   niente soglia di qualità, ma l'accordo non scende sotto la misura di quel giorno meno 3 punti (85,7 %), così non peggiora
+//   in silenzio.
 // Rosso __NO_C262E01: nessun effetto, il guardiano non trova segni.
 import { afterEach, describe, expect, it } from 'vitest';
 import { leggiDati } from '../tools/dati-disco.mjs';
@@ -62,6 +64,7 @@ describe('D-262: effetto della mossa previsto sulla chiusura', () => {
     expect(tot).toBeGreaterThan(10000);
     expect((tab['su>su'] ?? 0) + (tab['giu>giu'] ?? 0)).toBeGreaterThan(0);
     expect((tab['su>giu'] ?? 0) + (tab['giu>su'] ?? 0)).toBe(0);
+    expect(uguali / tot).toBeGreaterThanOrEqual(0.857);
   });
   it('rosso C262E01: nessun effetto, il guardiano non vede segni', () => {
     g0.__NO_C262E01 = true;
