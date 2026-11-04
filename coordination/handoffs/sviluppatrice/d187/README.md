@@ -1017,3 +1017,73 @@ Foto in `d261/dopo` e `d261/rosso-C261E01`:
 - e01 «muto» a 360, 375 e 412;
 - e13 con il costo sotto a 360;
 - e35 con «Home» nella testata a 360.
+
+## D-262: effetto della mossa, C56-02, C56-03 — 0.63.0 — S-11, 4/11
+
+Base: 63c6a61b, la 0.62.0 consegnata. Ramo claude/valmora-d262.
+
+Aggiunte alla 0.62.0, dopo la sezione D-258/259/261 (commit su claude/valmora-home):
+- c7da29ad: la mappa della risposta si abbassa solo quando la risposta è già sulla pagina. Prima nel cambio di scena faceva 217 → 302 → 328 px e i segni di PO-085 scadevano.
+- e06e7b34: la sonda delle altezze misura ogni risposta con la mossa nella sua scena vera, perché C53-02 in modalità veloce dava 75 px dove la misura vera dà 0. D-197 non vale per le risposte con la mossa.
+- 73612a90: nella stessa risposta la mappa abbassata non si rialza. Prima oscillava (e08: 0 → 78 → 0 px).
+- fe69a434: il guardiano prova al più 4 chiamate per episodio e non tocca opzioni esaurite.
+
+### 1. L'effetto della mossa si vede subito (scelta del PO)
+
+Codice:
+- `src/logica/previsione.ts` è pura. `tensioneStimata` chiude l'ondata come se le chiamate ancora aperte non cambiassero nulla: è la stessa stima del bot (bot.ts). `effettoMossa` confronta lo stato prima e dopo la mossa, sul settore lasciato e su quello coperto.
+- `src/resa/mossa-ui.tsx`: dopo la mossa il riquadro dice «Mossa fatta. Previsione alla chiusura: Piazzale si calma, …», oppure «nessun cambiamento». La mappa mostra ▲/▼ sui due settori, ma non dove la tensione non cambia.
+- Dopo la mossa il riquadro tiene solo l'indicazione e la previsione; il costo passa nella risposta (D-258). Col rapporto intero la previsione veniva tagliata, perché il riquadro è alto al più metà mappa.
+- Rosso C262E01.
+
+FATTO MISURATO (`tests/previsione-d262.test.ts`, motore). Campione: ogni mossa legale di ogni pausa, 36 episodi, bot attento. Confronto con la chiusura vera, finendo l'ondata con le stesse risposte con e senza la mossa.
+- Semi 1-3: 54.216 segni. Coincide in tutto, compreso «non cambia», nell'88,70 %. Di verso opposto: 0.
+- Distribuzione dei casi:
+
+| previsto | reale | casi |
+|---|---|---|
+| invariato | invariato | 38.865 |
+| ▲ | ▲ | 7632 |
+| ▲ | invariato | 4464 |
+| ▼ | ▼ | 1593 |
+| ▼ | invariato | 612 |
+| invariato | ▲ | 564 |
+| invariato | ▼ | 486 |
+
+- IPOTESI: i disaccordi vengono dalle risposte successive, che cambiano la pressione sugli stessi settori; la previsione non le conosce.
+- Il guardiano blocca il verso opposto: 0 casi. La percentuale di accordo è una misura stampata, non una soglia.
+- Nelle pause in cui qualche mossa cambia la chiusura: 86,4 %.
+- A schermo (`tools/foto-po152-b.mjs`): la riga `data-previsione` e i segni corrispondono a `effettoMossa`, calcolato sui due salvataggi. Rosso C262E01: 3 problemi a 360 (manca la previsione), più 1 riquadro tagliato in «mossa fatta» (e20 viso_scoperto).
+
+### 2. C56-02: la pausa con la mossa torna dopo una ricarica
+
+- Causa (`src/resa/App.tsx`): la risposta a schermo (`eco`) non sta nel salvataggio, e `riprendi` la azzerava.
+- Correzione:
+  - `rispostaDaRiprendere` (in `src/logica/mossa.ts`, pura): se la mossa della pausa è ancora possibile, restituisce l'opzione dell'ultima risposta dell'ondata;
+  - `riprendi` la rimette a schermo;
+  - il salvataggio non cambia.
+- Rosso C262R01.
+- FATTO MISURATO:
+  - `tests/ripresa-d262.test.ts` passa 3 prove su 3: salvataggio vero della 0.57.0; dopo la mossa la pausa non torna; dopo l'ultima chiamata non torna.
+  - Giro «ricarica» del guardiano, e01 a 360 × 640/667/760: verde. Rosso C262R01: 3 problemi.
+
+### 3. C56-03: bersagli che non si toccano al centro
+
+Il guardiano ha un controllo nuovo: in ogni stato della mossa (277 per larghezza), il centro di ogni unità o settore toccabile deve rispondere al tocco (`elementFromPoint`).
+
+Prima della correzione i casi erano 19 a 360, 21 a 375 e 4 a 412. Cause misurate:
+- **La classe dell'unità in mano era `in-mano`.** È la stessa classe del riquadro dello schieramento (stile-schermate.css: padding, margine, spaziatura). L'unità si allargava da 44 a 61 px, le unità andavano a capo e uscivano dalla mappa (e02 ritardo). Ora la classe è `mossa-in-mano`. Rosso C262M01: 14 problemi a 360.
+- **Con la mappa abbassata i dischi dei settori si sovrapponevano.** In e02 a 360×640, con la mappa a 204 px, viale_stazione e curva_ospiti erano a 18,7 px uno dall'altro, con raggio 22. Ora, con la deroga, la mappa non scende sotto l'altezza in cui il centro di un disco cade dentro un altro (`adatta.ts`, `senzaDischiSovrapposti`). Rosso C262D01: 3 problemi a 360.
+- Con la mappa piena (rosso C259A01) restavano solo i casi di e02. La maggior parte veniva dalla mappa abbassata.
+- Avevo provato un CSS che lasciava passare il tocco e metteva i settori sopra le unità (C262T01). L'ho tolto: dopo le due correzioni il rosso era identico al verde a 360, 375 e 412.
+
+Il caso esatto della collaudatrice (e30, 3:10, 412×760, mediatore a piazza_municipio) non l'ho riprodotto, perché il bot equilibrato non mette mai lì il mediatore. Spostato a mano in e30 ondata 3 (semi 1-3), il centro di Piazzale risponde. Col rosso C262M01 l'unità in mano si allarga a 59 px.
+
+Dopo le correzioni, guardiano verde a 360, 375 e 412: 0 casi C56-03, 0 riquadri tagliati, scorrimento massimo 58, 9 e 0 px (soglie 68, 56 e 0).
+
+Foto in `d262/dopo`, e `d262/prima` coi rossi C262E01, R01, M01 e D01 insieme. Per 360, 375 e 412:
+- e01, mossa fatta;
+- e01, dopo una ricarica;
+- e02, unità in mano.
+
+Non verificato: telefono reale; il caso esatto di e30.
