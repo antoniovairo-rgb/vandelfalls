@@ -1161,7 +1161,7 @@ La collaudatrice aveva visto solo e02; gli altri sei li ha trovati la sonda alla
 | e35.op.steward_pedoni.r | Due steward del club, pettorina sopra il cappotto, guidano i passeggeri verso le traverse. Nessuno verso la banca. | Due steward in pettorina guidano i passeggeri verso le traverse. Nessuno verso la banca. |
 | e35.op.steward_familiari.r | Due steward accompagnano i familiari in una sala del comune, a due isolati. Lì almeno ci sono le sedie. | Due steward portano i familiari in una sala del comune. Lì almeno ci sono le sedie. |
 
-Misura verde dopo i testi: vedi sotto (MISURA_VERDE).
+FATTO MISURATO dopo i testi (stessa sonda, build del ramo con 6a11bab5): verde a 375×667 e a 360×640, 0 casi, comprese le carte di e28 ed e29.
 
 ### C56-06: testi delle carte
 
