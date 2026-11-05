@@ -1382,3 +1382,7 @@ Il giro in parallelo girava con un'altra sonda e i test del pre-push. Non lo con
 Il passo ora dura quanto i due bracci più lunghi, che non sono po152b e non sono stati toccati: C206I01 (1157 s) e C215L01+C241A01 (1153 s), parte «chiamate». Un tentativo su 4e445af4 (1553 s) non conta: C269C01 cieco, da cui la riparazione qui sopra.
 
 **Verde intero invariato** (CI 1270 su 0e9e19a6, con `puoi`): radio 360×640 su 36 episodi, 276 stati; 375×667 e 412×760 su 36 episodi, 277 stati; previsione 24 mosse a ogni larghezza; fermo 412×915 su 36 episodi. Col D-269 c riparato, verde radio 360×640 in locale: 36 episodi, 276 stati, 0 problemi.
+
+**CI 1277 su 28cdaab1** (codice di D-270): 10 job verdi al primo tentativo.
+- «grafica (360 bracci)»: bracci-rossi-grafica 1950 s, nessun cieco. Nella 1257 era 7189 s, nella 0.64.0 3655 s.
+- Verde intero col D-269 c nei fotogrammi: radio a 360×640 su 36 episodi e 276 stati; a 375×667 e 412×760 su 36 episodi e 277 stati. In tutte e tre le larghezze i segni sono visti a riquadro fermo in 36 episodi e in nessuno manca la misura. Previsione: 24 mosse a ogni larghezza. Fermo 412×915: 36 episodi.
