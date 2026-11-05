@@ -2,7 +2,7 @@
 
 Sviluppatrice S-26, ramo `claude/valmora-citta-158`.
 - «Prima»: build 0.61.0, cioè main prima di PO-158.
-- «Dopo»: build del merge della 0.64.0 (`e8e63953`, la versione si legge in basso a sinistra).
+- «Dopo»: build del merge della 0.65.0 + D-274 (`11f33352`, la versione si legge in basso a sinistra).
 
 ## Come sono fatte le foto e le misure
 - Comando: `node coordination/handoffs/sviluppatrice/d265/misura.mjs <cartella> [dist]`, dal repo. Lo strumento:
@@ -45,12 +45,13 @@ Nome dell'episodio scelto fuori dal suo disco (C20-03 a 412×915): 3 → 0. Ross
 | 412×830 | ![](po158/prima/citta-412x830.png) | ![](po158/dopo/citta-412x830.png) |
 | 412×915 | ![](po158/prima/citta-412x915.png) | ![](po158/dopo/citta-412x915.png) |
 
-## Sul merge della 0.64.0 (`e8e63953`)
+## Sul merge della 0.65.0 + D-274 (`11f33352`)
 
 | Controllo | Esito |
 |---|---|
-| Sonda-altezze, tutte le 13 parti, a 360x640, 360x760, 375x667, 375x760, 412x830, 412x760 | 0 errori |
-| Passo «foto» a 360/375/412, città senza WebGL compresa | 0 problemi, 2256 s |
-| Misure qui sopra | uguali a quelle su 684e6ece |
+| Sonda-altezze, parti della città (citta36, po149, po158, c52nomi), a 360x640, 360x760, 375x667, 375x760, 412x830, 412x760 | 0 errori |
+| Sonda-altezze, tutte le 13 parti, sul merge della 0.64.0 (`e8e63953`) | 0 errori |
+| Passo «foto» a 360/375/412, città senza WebGL compresa | 0 problemi, 1446 s |
+| Misure qui sopra | uguali a quelle su 684e6ece e su e8e63953 (48 stati su 48) |
 
 Le misure dei tempi del passo «altezze» stanno in DECISIONI, D-265-S.
