@@ -12,7 +12,7 @@ export const BRACCI_PO152B = {
   C261E01: { giri: ['radio'], episodi: ['e01', 'e02'], segno: '(D-261)', almeno: 11 }, // 6 + 5
   C262R01: { giri: ['e01'], segno: 'la mossa di quella pausa è persa (C56-02)', almeno: 3 }, // giro «ricarica» alle 3 altezze
   C262E01: { giri: ['e01'], segno: 'dopo la mossa manca la previsione (D-262)', almeno: 3 }, // giro «mossa» alle 3 altezze
-  C262M01: { giri: ['radio'], episodi: ['e02', 'e03'], segno: '(C56-03)', almeno: 5 }, // 3 + 2
+  'C262M01,C271U01': { giri: ['radio'], episodi: ['e02', 'e03'], segno: '(C56-03)', almeno: 5 }, // 3 + 2
   C262D01: { giri: ['radio'], episodi: ['e02'], segno: '(C56-03)', almeno: 3 }, // solo e02 ritardo
   C268F01: { giri: ['e01'], segno: '(C56-05)', almeno: 1 }, // solo da tastiera, 760
   C268M01: { giri: ['e01'], segno: '(C56-04)', almeno: 54 }, // 3 altezze × 3 giri × 6
@@ -20,8 +20,10 @@ export const BRACCI_PO152B = {
   C269P01: { giri: ['previsione'], segno: 'la previsione non si vede (C57-02)', almeno: 5 }, // e16 imp_nebbia
   C269I01: { giri: ['radio'], episodi: ['e03', 'e04'], segno: '(D-269 a)', almeno: 12 }, // 7 + 5
   C269A01: { giri: ['radio'], episodi: ['e21'], segno: '(D-269 b)', almeno: 1 }, // solo e21 corteo_dal_cortile nel giro radio
-  C269C01: { giri: ['radio'], episodi: ['e02', 'e25', 'e26'], segno: 'allo sparire dei segni ▲/▼', almeno: 3 }, // 1 + 1 + 1: il controllo nei fotogrammi (D-270), 3 su 3 in 9 prove a 5 processi; 8 episodi su 36
-  // D-271 (S-27): misure sul merge della 0.66.0 (360×760, giro ristretto come qui)
+  'C269C01,C271U01': { giri: ['radio'], episodi: ['e02', 'e25', 'e26'], segno: 'allo sparire dei segni ▲/▼', almeno: 3 }, // 1 + 1 + 1: il controllo nei fotogrammi (D-270), 3 su 3 in 9 prove a 5 processi; 8 episodi su 36
+  // D-271 (S-27): misure sul merge della 0.66.0 (360×760, giro ristretto come qui). Lo spostamento piccolo delle unità (C271U01)
+  // toglie a C262M01 e C269C01 i casi che li rendevano visibili (CI 74eb83f: 1 su 5 e 2 su 3; spento C271U01: 5 e 3): girano con
+  // C271U01, come C215L01 con C241A01. Conteggi invariati.
   C271T01: { giri: ['radio'], episodi: ['e01', 'e02'], segno: 'tratteggio nella mossa', almeno: 11 }, // e01 6 + e02 5 stati con tratteggio
   C271U01: { giri: ['radio'], episodi: ['e04', 'e16'], segno: '(D-271, C271U01)', almeno: 13 }, // e04 arance 7 + e16 magazzino_sette 6
   C271V01: { giri: ['versione'], segno: 'la versione non svanisce (D-271)', almeno: 2 }, // movimento e movimento ridotto
