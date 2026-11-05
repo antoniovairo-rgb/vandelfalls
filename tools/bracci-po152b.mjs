@@ -20,7 +20,7 @@ export const BRACCI_PO152B = {
   C269P01: { giri: ['previsione'], segno: 'la previsione non si vede (C57-02)', almeno: 5 }, // e16 imp_nebbia
   C269I01: { giri: ['radio'], episodi: ['e03', 'e04'], segno: '(D-269 a)', almeno: 12 }, // 7 + 5
   C269A01: { giri: ['radio'], episodi: ['e21'], segno: '(D-269 b)', almeno: 1 }, // solo e21 corteo_dal_cortile nel giro radio
-  C269C01: { giri: ['radio'], episodi: ['e02', 'e25', 'e26'], segno: '(D-269 c)', almeno: 3 }, // 1 + 1 + 1 (D-269 c riparato: 8 episodi su 36, segni presenti in 36)
+  C269C01: { giri: ['radio'], episodi: ['e02', 'e25', 'e26'], segno: 'allo sparire dei segni ▲/▼', almeno: 3 }, // 1 + 1 + 1: il controllo nei fotogrammi (D-270), 3 su 3 in 9 prove a 5 processi; 8 episodi su 36
 };
 
 /** Il braccio è cieco se i problemi col suo segno sono meno del conteggio dichiarato; ritorna il messaggio o ''. */
