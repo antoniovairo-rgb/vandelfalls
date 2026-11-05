@@ -203,7 +203,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, epi
     // la pagina ferma: la mappa che si abbassa (D-259) e i nomi si ridispongono dopo il tocco; due letture uguali a 100 ms, al più 3 s
     // (e30 raduno_silenzio a 375: 79 px a 80 ms, 0 a 250 ms)
     const ferma = async () => { let prima = ''; for (let i = 0; i < 30; i++) { const ora = await p.evaluate(() => `${document.scrollingElement.scrollHeight}|${document.querySelector('.mappa')?.getBoundingClientRect().height}|${document.querySelector('.radio-mappa')?.className}`); if (ora === prima) return; prima = ora; await p.waitForTimeout(100); } };
-    const giu = async (dove) => { await ferma(); const x = await coperti(p); conto.stati++; if (x.muto) conto.muti++; else if (x.stretto) conto.stretti++;
+    const giu = async (dove, conRighe = true) => { await ferma(); const x = await coperti(p); conto.stati++; if (x.muto) conto.muti++; else if (x.stretto) conto.stretti++;
       if (x.xs.length) male.push(`${vp} ${ep} ${c.id} ${dove}: il riquadro radio copre ${x.xs.join(', ')} (D-255)`);
       conto.scorreMax = Math.max(conto.scorreMax, x.ecc);
       if (x.fuori) conto.casaFuori++;
@@ -211,7 +211,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, epi
       if (x.tagliato) male.push(`${vp} ${ep} ${c.id} ${dove}: il riquadro radio è tagliato (D-262)`);
       if (!x.previsione) male.push(`${vp} ${ep} ${c.id} ${dove}: la previsione non si vede (C57-02)`);
       if (!x.istruzione) male.push(`${vp} ${ep} ${c.id} ${dove}: l'istruzione della mossa non si vede (D-269 a)`);
-      if (x.righe.length) male.push(`${vp} ${ep} ${c.id} ${dove}: copia sotto la mappa coperta a pagina ferma: ${x.righe.join(', ')} (D-269 b)`);
+      if (conRighe && x.righe.length) male.push(`${vp} ${ep} ${c.id} ${dove}: copia sotto la mappa coperta a pagina ferma: ${x.righe.join(', ')} (D-269 b)`);
       if (x.coperto.length) male.push(`${vp} ${ep} ${c.id} ${dove}: il centro non si tocca: ${x.coperto.join(', ')} (C56-03)`);
       if (x.senzaBordo.length) male.push(`${vp} ${ep} ${c.id} ${dove}: senza evidenziazione ${x.senzaBordo.join(', ')} (D-261)`);
       if (x.sotto) { conto.sotto++; conto.mappaMin = Math.min(conto.mappaMin, x.mappa); conto.mappaMax = Math.max(conto.mappaMax, x.mappa); }
@@ -221,9 +221,14 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, epi
     // D-270: la sola lettura da fuori veniva spesso a segni già spariti (rosso C269C01 visto a caso, 0-8 episodi su 36 secondo il
     // carico): ora si confronta anche il posto dell'ultimo fotogramma coi segni (fermo da ≥ 300 ms) con quello a segni spariti
     const posto = () => p.evaluate(() => { const r = document.querySelector('.radio-mappa'); return `${r?.className} ${r?.style.getPropertyValue('--radio-y')}`; });
-    await giu('«puoi spostare»'); const t0 = Date.now(), posto0 = await posto();
+    // lotto «altezze» (S-11): D-269 b del «puoi spostare» si guarda a segni spariti. Prima si guardava subito, ma i segni della
+    // risposta (fiducia, tensione: 1,8 s veri) alzano la testata di 2 px e, sotto carico, la lettura veniva a volte dopo: il rosso
+    // C269A01 su e21 si vedeva o no secondo il carico (CI 1295 su main: cieco in 2 tentativi su 3; qui 1 giro su 8 a 8 processi)
+    await giu('«puoi spostare»', false); const t0 = Date.now(), posto0 = await posto();
     await p.waitForFunction(() => !document.querySelector('.mappa [data-segno]'), null, { timeout: 5000 }).catch(() => {});
     await p.waitForTimeout(Math.max(500, 2500 - (Date.now() - t0))); const posto1 = await posto();
+    await p.waitForFunction(() => !document.querySelector('.segni-effetto, .mappa [data-segno]'), null, { timeout: 5000 }).catch(() => {});
+    const r1 = await coperti(p); if (r1.righe.length) male.push(`${vp} ${ep} ${c.id} «puoi spostare», a segni spariti: copia sotto la mappa coperta a pagina ferma: ${r1.righe.join(', ')} (D-269 b)`);
     if (posto1 !== posto0) male.push(`${vp} ${ep} ${c.id}: senza input il riquadro passa da «${posto0}» a «${posto1}» (D-269 c)`);
     const st = await p.evaluate(() => globalThis.__posti), iv = st.findIndex((x, i) => i > 0 && !x.s && st[i - 1].s);
     if (iv > 0 && st[iv].t - st[iv - 1].t >= 300) { conto.conSegni++;
