@@ -1386,3 +1386,28 @@ Il passo ora dura quanto i due bracci più lunghi, che non sono po152b e non son
 **CI 1277 su 28cdaab1** (codice di D-270): 10 job verdi al primo tentativo.
 - «grafica (360 bracci)»: bracci-rossi-grafica 1950 s, nessun cieco. Nella 1257 era 7189 s, nella 0.64.0 3655 s.
 - Verde intero col D-269 c nei fotogrammi: radio a 360×640 su 36 episodi e 276 stati; a 375×667 e 412×760 su 36 episodi e 277 stati. In tutte e tre le larghezze i segni sono visti a riquadro fermo in 36 episodi e in nessuno manca la misura. Previsione: 24 mosse a ogni larghezza. Fermo 412×915: 36 episodi.
+
+## D-274b: bracci rossi della parte «chiamate» più corti (solo strumenti)
+
+**Cosa cambia.** `giraAltezze({ chiamateDi })` filtra le chiamate costruite (782, di cui 284 imprevisti) e il giro verde resta su tutte. In `tools/bracci-po152b.mjs` c'è `BRACCI_CHIAMATE`, con lo stesso cieco a conteggio di D-270:
+- C215L01+C241A01: rosso di D-215, la mediana degli imprevisti (DECISIONI D-215). Gira solo sugli imprevisti, ma su tutti e 284: la mediana ha senso solo lì. Segno «mediana degli imprevisti», almeno 1.
+- C206I01: gira solo sugli imprevisti di e04, e06, e09, e13. Segno «(soglia 339, D-207)», almeno 5.
+
+**Prove sotto carico** (tre processi insieme, FATTO MISURATO):
+
+| prova | tempo | problemi |
+|---|---|---|
+| C215L01+C241A01 ristretto | 273 s | mediana 286 (soglia 285) e 3 imprevisti oltre 339 |
+| C206I01 ristretto | 49 s | 5 |
+| verde «chiamate» su 782 | 485 s | 0 |
+
+**Durata del passo «bracci-rossi-grafica»** (360, 5 in parallelo, stesso cronometro). «Prima» è la misura su 28cdaab1, che ha src, data e tools uguali a main 09ea6727:
+
+| codice | passo | somma dei bracci | C206I01 | C215L01+C241A01 | ciechi |
+|---|---|---|---|---|---|
+| 28cdaab1 (= main 09ea6727) | 1528 s | 7136 s | 1157 s | 1153 s | nessuno |
+| claude/valmora-chiamate | 1160 s | 5268 s | 55 s | 459 s | nessuno |
+
+Ora il passo è vicino alla somma diviso 5: nessun braccio da solo lo allunga.
+
+**Instabilità vista una volta, non riprodotta.** Nella misura su 28cdaab1 i due bracci «chiamate» hanno scritto «chiamata e19 imp_camion_rifiuti non si apre» (attesa di 8 s). C206I01 ha scritto anche «e19 consiglio». È successo sotto il carico del passo e non ha reso ciechi i bracci. Non è comparsa nel «prima» su 7e753289, nelle tre prove qui sopra né nella misura «dopo». Nel giro verde farebbe rosso il passo: la tengo come candidata del lotto «altezze», non corretta qui.
