@@ -18,6 +18,7 @@
 // rialza per «Home» e la risposta scorre); unità e settori toccabili col bordo dell'evidenziazione (rosso C261E01).
 // D-271 (PO-159): niente tratteggio nella mossa; l'anello pieno sta a ≥ 3:1 coi colori accanto, misurato sui pixel della foto
 // (anelli-mossa.mjs); gli anelli dei settori d'arrivo non si sovrappongono. Rosso C271T01: il tratteggio di prima.
+// D-271: ogni pastiglia d'unità sta dentro la mappa, in ogni stato del giro radio, a ogni larghezza. Rosso C271U01: posti di prima.
 // C57-01 (D-269): dal comparire della risposta la mappa cambia altezza al più una volta, e poi resta ferma in ogni stato (unità
 // in mano, mossa fatta). Rosso C269M01: scende a gradini e di nuovo al tocco dell'unità.
 // C57-02 (D-269): dopo la mossa la previsione si vede (nel riquadro, intero, o sotto la mappa), in ogni stato del giro radio e in
@@ -55,6 +56,10 @@ const coperti = (p) => p.evaluate(() => {
     const b = e.getBoundingClientRect(), x = (b.left + b.right) / 2, y = (b.top + b.bottom) / 2; if (y < 0 || y > innerHeight) return false;
     const sopra = document.elementFromPoint(x, y); return !!sopra && sopra !== e && !e.contains(sopra); })
     .map((e) => `${e.dataset.presenza ?? e.closest('[data-settore]').dataset.settore} sotto ${(() => { const b = e.getBoundingClientRect(), q = document.elementFromPoint((b.left + b.right) / 2, (b.top + b.bottom) / 2); return q?.closest('[data-presenza]')?.dataset.presenza ?? q?.className ?? '?'; })()}`);
+  // D-271 (C271U01): ogni pastiglia d'unità sta dentro la mappa (che la ritaglia: fuori non si vede né si tocca)
+  const mr = document.querySelector('.mappa').getBoundingClientRect();
+  const fuoriMappa = [...document.querySelectorAll('.mappa [data-presenza] .pastiglia')].map((e) => [e, e.getBoundingClientRect()]).filter(([, b]) => b.width && (b.left < mr.left || b.right > mr.right || b.top < mr.top || b.bottom > mr.bottom))
+    .map(([e, b]) => `${e.closest('[data-presenza]').dataset.presenza} (x ${Math.round(b.left)}..${Math.round(b.right)}, y ${Math.round(b.top)}..${Math.round(b.bottom)}; mappa x ${Math.round(mr.left)}..${Math.round(mr.right)}, y ${Math.round(mr.top)}..${Math.round(mr.bottom)})`);
   const case_ = [...document.querySelectorAll('[data-azione^="home"]')].filter((e) => e.checkVisibility({ visibilityProperty: true })).length, fuori = !!document.querySelector('.mappa[data-casa-fuori]');
   const senzaBordo = [...document.querySelectorAll('.mappa.mossa [data-presenza]:not(:disabled) .pastiglia, .mappa.mossa .settore-punto:not(:disabled)')]
     .filter((e) => getComputedStyle(e).outlineStyle === 'none' && getComputedStyle(e, '::after').outlineStyle === 'none').map((e) => e.closest('[data-presenza]')?.dataset.presenza ?? e.closest('[data-settore]').dataset.settore);
@@ -72,10 +77,10 @@ const coperti = (p) => p.evaluate(() => {
       const e = y < innerHeight ? [1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => document.elementFromPoint(b.left + (b.width * i) / 10, y)).find((x) => !x || !copia.contains(x)) ?? copia : null;
       if (!e || !copia.contains(e)) righe.push(`riga a y ${Math.round(b.top)}-${Math.round(b.bottom)} sotto ${e ? (e.closest('[data-azione]')?.dataset.azione ?? e.className) : 'il bordo dello schermo'}`); } }
   scrollTo(0, y0);
-  if (q.classList.contains('muto')) return { xs: [], stretto: true, muto: true, costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, previsione, istruzione, righe, tagliato: false };
+  if (q.classList.contains('muto')) return { xs: [], stretto: true, muto: true, costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, previsione, istruzione, righe, fuoriMappa, tagliato: false };
  // al solo lettore: non copre niente
   const sop = (x) => Math.max(0, Math.min(r.right, x.right) - Math.max(r.left, x.left)) * Math.max(0, Math.min(r.bottom, x.bottom) - Math.max(r.top, x.top));
-  return { costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, previsione, istruzione, righe, tagliato: q.scrollHeight > q.clientHeight + 1, stretto: q.classList.contains('stretto'), xs: [...document.querySelectorAll('.mappa [data-presenza]:not(:disabled), .mappa [data-settore] .settore-punto:not(:disabled)')]
+  return { costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, previsione, istruzione, righe, fuoriMappa, tagliato: q.scrollHeight > q.clientHeight + 1, stretto: q.classList.contains('stretto'), xs: [...document.querySelectorAll('.mappa [data-presenza]:not(:disabled), .mappa [data-settore] .settore-punto:not(:disabled)')]
     .map((e) => [e.dataset.presenza ?? e.closest('[data-settore]').dataset.settore, sop(e.getBoundingClientRect())]).filter(([, a]) => a > 0.5).map(([k, a]) => `${k} ${Math.round(a)} px²`) };
 });
 const stato = (p) => p.evaluate(() => {
@@ -201,6 +206,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
       if (x.righe.length) male.push(`${vp} ${ep} ${c.id} ${dove}: copia sotto la mappa coperta a pagina ferma: ${x.righe.join(', ')} (D-269 b)`);
       if (x.coperto.length) male.push(`${vp} ${ep} ${c.id} ${dove}: il centro non si tocca: ${x.coperto.join(', ')} (C56-03)`);
       if (x.senzaBordo.length) male.push(`${vp} ${ep} ${c.id} ${dove}: senza evidenziazione ${x.senzaBordo.join(', ')} (D-261)`);
+      if (x.fuoriMappa.length) male.push(`${vp} ${ep} ${c.id} ${dove}: unità fuori dalla mappa, non si vede né si tocca: ${x.fuoriMappa.join(', ')} (D-271, C271U01)`);
       // D-271: niente tratteggio, anello pieno a ≥ 3:1 coi colori accanto (misurato sui pixel), anelli dei settori separati (rosso C271T01)
       const an = await misuraAnelli(p); if (an.minimo !== null) conto.contrastoMin = Math.min(conto.contrastoMin, an.minimo); conto.latiVisti += an.lati[0]; conto.latiProvati += an.lati[1]; if (an.copia) conto.anelliCopia++; if (dove.includes('in mano')) conto.anelliDove++;
       if (an.tratteggi.length) male.push(`${vp} ${ep} ${c.id} ${dove}: tratteggio nella mossa su ${an.tratteggi.join(', ')} (D-271)`);

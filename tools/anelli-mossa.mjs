@@ -58,8 +58,8 @@ export async function misuraAnelli(p) {
   for (const x of g.bersagli) {
     // una pastiglia sul bordo della mappa è tagliata: centro della parte che si vede, e i lati fuori dalla mappa non si misurano
     const M = g.mappa ?? { l: -Infinity, t: -Infinity, r: Infinity, b: Infinity };
-    // tutta fuori dalla mappa (che la ritaglia): non si vede né si tocca; il guardiano D-259 non lo vede (l'elemento ha misure)
-    if (x.r <= M.l || x.l >= M.r || x.b <= M.t || x.t >= M.b) { sotto.push(`${x.tipo} ${x.id} fuori dalla mappa (x ${Math.round(x.l)}-${Math.round(x.r)}, mappa ${Math.round(M.l)}-${Math.round(M.r)})`); minimo = 0; continue; }
+    // tutta fuori dalla mappa (che la ritaglia): non si vede né si tocca, non c'è anello da misurare
+    if (x.r <= M.l || x.l >= M.r || x.b <= M.t || x.t >= M.b) continue; // controllo a sé in foto-po152-b (C271U01)
     const cx = Math.round((Math.max(x.l, M.l) + Math.min(x.r, M.r)) / 2), cy = Math.round((Math.max(x.t, M.t) + Math.min(x.b, M.b)) / 2);
     const dentroMappa = [x.l - 8 > M.l, x.r + 8 < M.r, x.t - 8 > M.t, x.b + 8 < M.b];
     // dal bordo verso fuori, sui quattro lati: si parte 6 px dentro il bordo; la fascia magenta è la prima che COMINCIA dopo
