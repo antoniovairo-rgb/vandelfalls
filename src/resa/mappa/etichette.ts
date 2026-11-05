@@ -190,12 +190,14 @@ export function disponiEtichette(contenitore: HTMLElement) {
     // D-271 (C271U01): con la mappa bassa della risposta può non esserci un posto pulito per le unità (e04 arance a 360: ogni
     // posto dentro la mappa ha il centro di un tocco sotto il disco di un altro settore). Come per i nomi (C128-02), si prova
     // a spostare le unità di poco, a passi di un ottavo di disco fino a mezzo tocco, e si tiene lo spostamento che costa meno.
-    // Solo quando il posto scelto ha un quasi vincolo (≥ VERA × 1e6): altrove niente cambia. Rosso C271U01: niente.
+    // Solo quando il posto scelto ha un quasi vincolo (≥ VERA × 1e6) o un tocco che ruba un nome (D-145: col vincolo «fuori» le
+    // unità di Parcheggi in e03 o1 a 360×760 finivano sul nome; CI 6cd24c5, passi foto e schieramenti): altrove niente cambia.
+    // Rosso C271U01: niente.
     const nn = nomeDi(s);
     if (conUnita && gruppo && nn && !spento('C271U01')) {
       const prova = () => { const u = unitaDi(s); return u ? costoUnita(nn, u) : Infinity; };
       let meglio = { c: prova(), dx: 0, dy: 0 };
-      if (meglio.c >= VERA * 1e6) for (let k = 1; k <= 4; k++) for (const [ax, ay] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]] as const) {
+      if (meglio.c >= VERA * 1e6 || ruba() > 0) for (let k = 1; k <= 4; k++) for (const [ax, ay] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]] as const) {
         muovi(ax * k * passo, ay * k * passo); const c = prova(); if (c < meglio.c) meglio = { c, dx: ax * k * passo, dy: ay * k * passo }; }
       if (meglio.dx || meglio.dy) muovi(meglio.dx, meglio.dy); else { gruppo.style.removeProperty('--unita-dx'); gruppo.style.removeProperty('--unita-dy'); }
     }
