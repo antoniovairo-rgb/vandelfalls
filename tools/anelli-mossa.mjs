@@ -72,6 +72,7 @@ export async function misuraAnelli(p) {
       const mg = (k) => !!fila[k] && vicino(fila[k], MAGENTA);
       const a = fila.findIndex((c, k) => k >= 1 && k <= 10 && mg(k) && !mg(k - 1)); if (a < 0) continue;
       let z = a; while (z + 1 < fila.length && mg(z + 1)) z++;
+      if (z - a < 1) continue; // un solo pixel magenta è la sfumatura di un anello coperto (e20 viso_scoperto: il nome «Strada da Skyfield» sopra il punto)
       const m = fila[(a + z) >> 1], dentro = [1, 2, 3].map((d) => fila[a - d]).filter(Boolean), fuori = [1, 2, 3].map((d) => fila[z + d]).filter(Boolean);
       if (!dentro.length || !fuori.length) continue;
       visti++; peggio = Math.min(peggio, Math.max(...dentro.map((c) => contrasto(m, c))), Math.max(...fuori.map((c) => contrasto(m, c))));
