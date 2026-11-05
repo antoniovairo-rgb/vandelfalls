@@ -19,7 +19,10 @@ export const BRACCI_PO152B = {
   C269M01: { giri: ['radio'], episodi: ['e02', 'e03'], segno: '(C57-01)', almeno: 8 }, // 1 + 7
   C269P01: { giri: ['previsione'], segno: 'la previsione non si vede (C57-02)', almeno: 5 }, // e16 imp_nebbia
   C269I01: { giri: ['radio'], episodi: ['e03', 'e04'], segno: '(D-269 a)', almeno: 12 }, // 7 + 5
-  C269A01: { giri: ['radio'], episodi: ['e21'], segno: '(D-269 b)', almeno: 1 }, // solo e21 corteo_dal_cortile nel giro radio
+  // lotto «altezze» (S-11): su e21 nel giro radio il rosso si vedeva solo coi segni della risposta (1,8 s veri) ancora in pagina,
+  // cioè secondo il carico (CI 1295 su main: cieco in 2 tentativi su 3). A segni spariti il giro radio non lo mostra in nessuno
+  // dei 36 episodi; il giro previsione sì: e16 imp_nebbia, 5 mosse su 24, 5 su 5 in 9 prove (8 insieme a 8 processi)
+  C269A01: { giri: ['previsione'], segno: '(D-269 b)', almeno: 5 },
   C269C01: { giri: ['radio'], episodi: ['e02', 'e25', 'e26'], segno: 'allo sparire dei segni ▲/▼', almeno: 3 }, // 1 + 1 + 1: il controllo nei fotogrammi (D-270), 3 su 3 in 9 prove a 5 processi; 8 episodi su 36
 };
 
