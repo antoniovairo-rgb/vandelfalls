@@ -117,6 +117,12 @@ export function disponiEtichette(contenitore: HTMLElement) {
     const toccoFuori = () => [...(s.querySelector('.settore-unita')?.children ?? [])].some((c) => { const u = c.getBoundingClientRect(), x = (u.left + u.right) / 2, y = (u.top + u.bottom) / 2;
       return x < mappa.left + MARGINE || x > mappa.right - MARGINE || y < mappa.top + MARGINE || y > mappa.bottom - MARGINE; }) ? VERA * 1e6 : 0;
     const bordoUnita = (u: Rett) => (c27 ? VERA * 10 * fuori(pastiglie() ?? u, mappa) + toccoFuori() : VERA * 10 * fuori(u, mappa));
+    // D-271 (C271U01): una pastiglia fuori dai bordi della mappa (margine MARGINE, come i nomi) non si vede né si tocca. Il tocco
+    // fuori costava VERA × 1e6, come il centro sotto un disco: con la mappa bassa della risposta ogni posto aveva un quasi vincolo
+    // e vinceva un posto fuori (e04 arance a 360 con la 0.65.0: «sinistra», x −30..102 con la mappa da 16; e16 magazzino_sette
+    // già con la 0.64.0: «destra-alto», x 299..431 con la mappa fino a 344). Ora è un vincolo: pesa più di ogni altro costo.
+    // Rosso C271U01: come prima.
+    const pastiglieFuori = () => (spento('C271U01') ? 0 : [...s.querySelectorAll('.settore-unita .pastiglia')].reduce((a, e) => a + fuori(e.getBoundingClientRect() as Rett, mappa), 0) * VERA * 1e12);
     // C28-14 / D-136: con le pastiglie sui nomi rimaste (e05, e13, e16, e35) si provano anche due posti in più per le
     // unità (destra-basso, sinistra-basso) e, se il posto migliore costa ancora, il nome più stretto su più righe (80%,
     // 60% di --nome-max), come nella città. Rosso C94N01: posti e larghezza di prima.
@@ -161,6 +167,9 @@ export function disponiEtichette(contenitore: HTMLElement) {
       if (via) { dx += via[0]; dy += via[1]; }
       if (!dx && !dy) return [0, 0] as const;
       spingi(dx, dy); return [dx, dy] as const; };
+    const costoUnita = (n: Rett, u: Rett) => sottoDisco() + costoDi(u, perUnita) + VERA * area(n, u) + bordoUnita(u) + pastiglieFuori() + suNomi(pastiglie() ?? u, n) * (c33 ? 20 : 1) + lontano(pastiglie() ?? u) + ruba();
+    const gruppo = s.querySelector<HTMLElement>('.settore-unita'), muovi = (dx: number, dy: number) => { gruppo?.style.setProperty('--unita-dx', `${dx}px`); gruppo?.style.setProperty('--unita-dy', `${dy}px`); };
+    gruppo?.style.removeProperty('--unita-dx'); gruppo?.style.removeProperty('--unita-dy');
     let migliore = { nome: NOMI[0] as string, unita: UNITA[0] as string, costo: Infinity, largo: '', dx: 0, dy: 0 };
     cerca: for (const largo of d136 ? ['', 'calc(var(--nome-max) * 0.8)', 'calc(var(--nome-max) * 0.6)'] : ['']) {
     if (largo && migliore.costo === 0) break;
@@ -171,14 +180,30 @@ export function disponiEtichette(contenitore: HTMLElement) {
       const [dx, dy] = sposta();
       const n = nomeDi(s), u = conUnita ? unitaDi(s) : null;
       if (!n || (conUnita && !u)) continue;
-      const costo = costoDi(n, perNome) + nomeLontano(n, punti, i) + VERA * (c27 ? 1e4 : 10) * fuori(n, mappa) + nomiSopra(n) * (c27 ? 2e3 : 1) + sottoPastiglie(n) + (u ? sottoDisco() : 0)
-        + (u ? costoDi(u, perUnita) + VERA * area(n, u) + bordoUnita(u) + suNomi(pastiglie() ?? u, n) * (c33 ? 20 : 1) + lontano(pastiglie() ?? u) + ruba() : 0);
+      const costo = costoDi(n, perNome) + nomeLontano(n, punti, i) + VERA * (c27 ? 1e4 : 10) * fuori(n, mappa) + nomiSopra(n) * (c27 ? 2e3 : 1) + sottoPastiglie(n) + (u ? costoUnita(n, u) : 0);
       if (costo < migliore.costo - (largo ? 0.5 : 0)) migliore = { nome, unita, costo, largo, dx, dy };
       if (costo === 0) break cerca;
     }
     }
     if (el) el.style.maxWidth = migliore.largo;
     s.setAttribute('data-nome', migliore.nome); s.setAttribute('data-unita', migliore.unita); if (c128) spingi(migliore.dx, migliore.dy);
+    // D-271 (C271U01): con la mappa bassa della risposta può non esserci un posto pulito per le unità (e04 arance a 360: ogni
+    // posto dentro la mappa ha il centro di un tocco sotto il disco di un altro settore). Come per i nomi (C128-02), si prova
+    // a spostare le unità di poco, a passi di un ottavo di disco fino a mezzo tocco, e si tiene lo spostamento che costa meno.
+    // Solo quando il posto scelto ha un quasi vincolo (≥ VERA × 1e6) o un tocco che ruba un nome (D-145: col vincolo «fuori» le
+    // unità di Parcheggi in e03 o1 a 360×760 finivano sul nome; CI 6cd24c5, passi foto e schieramenti): altrove niente cambia.
+    // Rosso C271U01: niente.
+    const nn = nomeDi(s);
+    if (conUnita && gruppo && nn && !spento('C271U01')) {
+      // spostate, le unità non devono coprire il centro del PROPRIO disco (C56-03: e06 palco a 360 e 375, piazza_concerto):
+      // il costo conta solo i dischi degli altri settori, perché nei posti fissi il proprio non si copre mai
+      const [px, py] = centro(punti[i]!), proprio = () => tocchiDi(s).some((q) => dentro([px, py], q));
+      const prova = () => { const u = unitaDi(s); return u && !proprio() ? costoUnita(nn, u) : Infinity; };
+      let meglio = { c: (() => { const u = unitaDi(s); return u ? costoUnita(nn, u) : Infinity; })(), dx: 0, dy: 0 };
+      if (meglio.c >= VERA * 1e6 || ruba() > 0) for (let k = 1; k <= 4; k++) for (const [ax, ay] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]] as const) {
+        muovi(ax * k * passo, ay * k * passo); const c = prova(); if (c < meglio.c) meglio = { c, dx: ax * k * passo, dy: ay * k * passo }; }
+      if (meglio.dx || meglio.dy) muovi(meglio.dx, meglio.dy); else { gruppo.style.removeProperty('--unita-dx'); gruppo.style.removeProperty('--unita-dy'); }
+    }
   }
 }
 
