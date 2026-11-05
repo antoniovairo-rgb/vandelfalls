@@ -23,7 +23,7 @@ for (const [w, h] of VP) {
     .sx { border-left: 2px solid #111; } img { display: block; border: 1px solid #999; } .manca { background: #ddd; display: grid; place-items: center; }
     .q { font-weight: 700; } .dopo { color: #b00045; }</style>
     <h1>D-271 (PO-159): la mossa senza tratteggio · ${w}×${h}</h1>
-    <p>PRIMA = main 6015826 (0.64.0); DOPO = ramo claude/valmora-ux159. Foto col movimento ridotto: l'alone che pulsa è fermo, si vede l'anello pieno. La versione in basso a sinistra c'è PRIMA e nel DOPO è già svanita (dopo 4 s).</p>
+    <p>PRIMA = main 6015826 (0.64.0); DOPO = ramo claude/valmora-ux159 dopo il merge della 0.65.0 (settori d'arrivo con l'anello dentro il punto). Foto col movimento ridotto: l'alone che pulsa è fermo, si vede l'anello pieno. La versione in basso a sinistra c'è PRIMA e nel DOPO è già svanita (dopo 4 s).</p>
     <table><tr><th></th>${STATI.map((st) => `<th class="stato sx" colspan="2">${NOMI[st]}</th>`).join('')}</tr>
     <tr><th></th>${STATI.map(() => '<th class="q sx">PRIMA</th><th class="q dopo">DOPO</th>').join('')}</tr>
     ${EPISODI.map(([ep, id]) => `<tr><th class="ep">${ep}${id ? `<br>${id}` : ''}</th>${STATI.map((st) => `<td class="sx">${cella('prima', ep, st)}</td><td>${cella('dopo', ep, st)}</td>`).join('')}</tr>`).join('')}
