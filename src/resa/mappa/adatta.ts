@@ -36,8 +36,15 @@ const ultima = new WeakMap<HTMLElement, string>();
 // stava tutto, la copia del costo spariva, la mappa tornava piena, il riquadro non ci stava più e la copia tornava (e08
 // imp_grandine/fermi_in_curva a 360×640: 0 → 78 → 0 px di scorrimento in 2,5 s). Chiave: il messaggio della risposta.
 const tenuta = new WeakMap<Element, { alta: number; fuori: boolean }>();
+// C57-01 (D-269): la mappa scendeva a gradini (e35 curiosi_notte a 360×640: 328 → 302 → 247 → 231 px in 1,3 s) e di nuovo al primo
+// tocco sull'unità (e03 laser: 302 → 247). Ogni abbassamento cambiava ciò che sta fuori dalla mappa: il riquadro non ci stava più
+// («stretto», «muto») o l'unità in mano lo rendeva «compatto», e la copia del costo compariva nella risposta (D-258, +55 px);
+// oppure «Home» passava nella testata (D-261, +16 px). Ora la misura conta la copia come già visibile (con la mossa compare
+// comunque al tocco dell'unità) e, se «Home» passa nella testata, rimisura subito: la mappa scende una volta sola.
+// Rosso C269M01: come prima.
+const MISURA_COPIA = 'misura-copia';
 
-function adatta(m: HTMLElement) {
+function adatta(m: HTMLElement, giro = false) {
   const main = m.closest('main');
   // solo con la risposta già sulla pagina: durante il cambio di scena la pagina è più alta e la mappa si abbassava e si rialzava
   // (e13 viale_pieno a 360×800: 217 → 302 → 328 px, tre rifacimenti di Pixi da 280-500 ms) e i segni di PO-085 scadevano prima
@@ -53,8 +60,11 @@ function adatta(m: HTMLElement) {
     // durante la misura (la testata con la casa è più alta: la misura la conta); la casa della mappa è solo invisibile, «sotto» la vede
   if (spento('C187M01') || !main || ESCLUSE.has(schermata) || (ESCLUSE_D197.has(schermata) && !spento('C197R01') && !deroga)) return fine(false);
   // eccedenza della pagina, con le vignette nascondibili come nascoste e quelle che si riempiono al loro minimo
+  const copia = deroga && !spento('C269M01');
   const eccedenza = () => {
+    if (copia) main.classList.add(MISURA_COPIA); // stile-idee.css: la copia «sotto» si vede durante la misura (niente disegno in mezzo)
     let e = (document.scrollingElement ?? document.documentElement).scrollHeight - innerHeight;
+    if (copia) main.classList.remove(MISURA_COPIA);
     if (e <= 0) return e;
     for (const v of main.querySelectorAll<SVGSVGElement>('svg.vignetta')) {
       const r = v.getBoundingClientRect(), cs = getComputedStyle(v);
@@ -93,7 +103,10 @@ function adatta(m: HTMLElement) {
   if (fuori && alta < nat) ridisponi(m); // nomi al loro posto sulla mappa abbassata, prima di guardare «Home»
   const casaFuori = fuori && alta < nat && (sotto('.settore-punto') || sotto('.settore-nome'));
   if (risposta && alta < nat) tenuta.set(risposta, { alta: Math.round(alta), fuori: casaFuori || !!tenute?.fuori });
+  const casaPrima = m.hasAttribute('data-casa-fuori');
   fine(SENZA_MAPPA.has(schermata) && !spento('C191R01') && eccedenza() > 0, casaFuori || !!tenute?.fuori);
+  // C57-01: «Home» appena passata nella testata la allunga; si rimisura ora, non al giro dopo del ResizeObserver
+  if (copia && !giro && !casaPrima && m.hasAttribute('data-casa-fuori') && eccedenza() > 0) { ultima.delete(m); adatta(m, true); }
 }
 
 /** C56-03 (D-262): la mappa abbassata con la mossa avvicina i dischi dei settori; sotto una certa altezza il centro di uno cade

@@ -18,6 +18,14 @@
 // rialza per «Home» e la risposta scorre); unità e settori toccabili col bordo dell'evidenziazione (rosso C261E01).
 // D-271 (PO-159): niente tratteggio nella mossa; l'anello pieno sta a ≥ 3:1 coi colori accanto, misurato sui pixel della foto
 // (anelli-mossa.mjs); gli anelli dei settori d'arrivo non si sovrappongono. Rosso C271T01: il tratteggio di prima.
+// C57-01 (D-269): dal comparire della risposta la mappa cambia altezza al più una volta, e poi resta ferma in ogni stato (unità
+// in mano, mossa fatta). Rosso C269M01: scende a gradini e di nuovo al tocco dell'unità.
+// C57-02 (D-269): dopo la mossa la previsione si vede (nel riquadro, intero, o sotto la mappa), in ogni stato del giro radio e in
+// ogni combinazione unità → settore delle chiamate di CASI_PREVISIONE (e16 imp_nebbia: 4 su 24 col riquadro «muto» a 360×640).
+// Rosso C269P01: previsione al solo lettore di schermo.
+// D-269 a, b, c: in ogni stato l'istruzione della mossa si vede (nel riquadro o nella copia sotto la mappa; rosso C269I01);
+// a pagina ferma nessuna riga della copia (istruzione, previsione) sta sotto «Avanti» (elementFromPoint su ogni riga; rosso
+// C269A01); dopo l'assestamento il riquadro non cambia classe né posto per 2,5 s senza input (al «puoi spostare»; rosso C269C01).
 import { join } from 'node:path';
 import { chiamateCostruite, SOGLIE } from './sonda-altezze.mjs';
 import { effettoMossa } from '../src/logica/previsione.ts';
@@ -25,6 +33,9 @@ import { misuraAnelli } from './anelli-mossa.mjs';
 
 export const ALTEZZE_PO152B = [640, 667, 760];
 export const RADIO_VP = { 360: 640, 375: 667, 412: 760 };
+// D-269 c (verifica della principale su ede76c72): a 412×915 il riquadro cambiava ancora senza input (e10 imp_cantiere, e16
+// imp_nebbia): la mappa non si abbassa e nomi e riquadro si disponevano prima che arrivasse la risposta. Giro di solo fermo.
+export const FERMO_VP = { 412: 915 };
 const CHIAVE = 'vandelfalls-salvataggio';
 const sal = (p) => p.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? 'null'), CHIAVE);
 const ecc = (p) => p.evaluate(() => document.scrollingElement.scrollHeight - innerHeight);
@@ -47,9 +58,24 @@ const coperti = (p) => p.evaluate(() => {
   const case_ = [...document.querySelectorAll('[data-azione^="home"]')].filter((e) => e.checkVisibility({ visibilityProperty: true })).length, fuori = !!document.querySelector('.mappa[data-casa-fuori]');
   const senzaBordo = [...document.querySelectorAll('.mappa.mossa [data-presenza]:not(:disabled) .pastiglia, .mappa.mossa .settore-punto:not(:disabled)')]
     .filter((e) => getComputedStyle(e).outlineStyle === 'none' && getComputedStyle(e, '::after').outlineStyle === 'none').map((e) => e.closest('[data-presenza]')?.dataset.presenza ?? e.closest('[data-settore]').dataset.settore);
-  if (q.classList.contains('muto')) return { xs: [], stretto: true, muto: true, costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, tagliato: false }; // al solo lettore: non copre niente
+  // C57-02 e D-269 a: istruzione e previsione (se c'è) si vedono: nel riquadro non muto e non tagliato, oppure nella copia sotto
+  // la mappa con lo stesso testo; D-269 b: a pagina ferma nessuna riga della copia è coperta (da «Avanti») o fuori dallo schermo
+  const intero = !q.classList.contains('muto') && q.scrollHeight <= q.clientHeight + 1;
+  const ind = document.querySelector('.mappa [data-mossa]'), pr = document.querySelector('.mappa [data-previsione]');
+  const copia = document.querySelector('.istruzione-sotto[data-istruzione-sotto="vera"]'), vera = copia?.querySelector('.vera'), prSotto = copia?.querySelector('[data-previsione-sotto]');
+  const istruzione = !ind || (intero && ind.checkVisibility()) || (!!vera?.checkVisibility() && vera.dataset.mossaSotto === ind.dataset.mossa && !!vera.textContent.replace(prSotto?.textContent ?? '', '').trim() && (ind.querySelector('[data-previsione]')?.textContent ?? '') === (prSotto?.textContent ?? '')); // D-269: nella copia lo stesso stato (testo breve per «puoi») e la stessa previsione
+  const previsione = !pr || (intero && pr.checkVisibility()) || (!!prSotto?.checkVisibility() && prSotto.textContent === pr.textContent);
+  const y0 = scrollY; scrollTo(0, 0);
+  const righe = [];
+  if (copia?.checkVisibility()) { const rg = document.createRange(); rg.selectNodeContents(vera);
+    for (const b of rg.getClientRects()) { if (b.width < 2 || b.height < 2) continue; const y = (b.top + b.bottom) / 2; // 9 punti per riga: anche la punta del fumetto
+      const e = y < innerHeight ? [1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => document.elementFromPoint(b.left + (b.width * i) / 10, y)).find((x) => !x || !copia.contains(x)) ?? copia : null;
+      if (!e || !copia.contains(e)) righe.push(`riga a y ${Math.round(b.top)}-${Math.round(b.bottom)} sotto ${e ? (e.closest('[data-azione]')?.dataset.azione ?? e.className) : 'il bordo dello schermo'}`); } }
+  scrollTo(0, y0);
+  if (q.classList.contains('muto')) return { xs: [], stretto: true, muto: true, costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, previsione, istruzione, righe, tagliato: false };
+ // al solo lettore: non copre niente
   const sop = (x) => Math.max(0, Math.min(r.right, x.right) - Math.max(r.left, x.left)) * Math.max(0, Math.min(r.bottom, x.bottom) - Math.max(r.top, x.top));
-  return { costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, tagliato: q.scrollHeight > q.clientHeight + 1, stretto: q.classList.contains('stretto'), xs: [...document.querySelectorAll('.mappa [data-presenza]:not(:disabled), .mappa [data-settore] .settore-punto:not(:disabled)')]
+  return { costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, previsione, istruzione, righe, tagliato: q.scrollHeight > q.clientHeight + 1, stretto: q.classList.contains('stretto'), xs: [...document.querySelectorAll('.mappa [data-presenza]:not(:disabled), .mappa [data-settore] .settore-punto:not(:disabled)')]
     .map((e) => [e.dataset.presenza ?? e.closest('[data-settore]').dataset.settore, sop(e.getBoundingClientRect())]).filter(([, a]) => a > 0.5).map(([k, a]) => `${k} ${Math.round(a)} px²`) };
 });
 const stato = (p) => p.evaluate(() => {
@@ -134,12 +160,14 @@ export async function controllaPo152b(browser, url, larghezza, rossi = [], carte
   }
   const hr = RADIO_VP[larghezza];
   if (hr) { const r = await controllaRadio(browser, url, larghezza, hr, rossi, dati, dich); male.push(...r.male); ris.push(r.ris); }
+  if (hr) { const r = await controllaPrevisione(browser, url, larghezza, hr, rossi, dati, dich); male.push(...r.male); ris.push(r.ris); }
+  if (FERMO_VP[larghezza]) { const r = await controllaFermo(browser, url, larghezza, FERMO_VP[larghezza], rossi, dati, dich); male.push(...r.male); ris.push(r.ris); }
   return { ris, male };
 }
 
 /** D-255 punto 2: prima chiamata con mossa di ogni episodio; stati «puoi», «dove» (ogni unità in mano) e «mossa fatta». */
 async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
-  const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'radio', episodi: 0, stati: 0, stretti: 0, muti: 0, conCosto: 0, senzaCosto: 0, scorreMax: 0, sotto: 0, mappaMin: Infinity, mappaMax: 0, casaFuori: 0, contrastoMin: Infinity, latiVisti: 0, latiProvati: 0 }, soglia = SOGLIE[vp]?.risposta ?? 0;
+  const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'radio', episodi: 0, stati: 0, stretti: 0, muti: 0, conCosto: 0, senzaCosto: 0, scorreMax: 0, sotto: 0, mappaMin: Infinity, mappaMax: 0, casaFuori: 0, contrastoMin: Infinity, latiVisti: 0, latiProvati: 0, anelliCopia: 0, anelliDove: 0 }, soglia = SOGLIE[vp]?.risposta ?? 0;
   // al più 4 chiamate per episodio: col rosso C241M02 (mappa che non si tocca) nessuna ha la mossa e si giravano tutte le chiamate
   // dei 36 episodi (4 ore e 20 nel giro dei bracci), fino a un'opzione esaurita (e28 blocca_corteo) che faceva saltare il passo
   for (const ep of [...new Set(tutte.map((c) => c.ep))]) for (const c of tutte.filter((x) => x.ep === ep).slice(0, 4)) {
@@ -152,6 +180,9 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
     let n0 = conto.stati;
     const ok = ch && await p.waitForSelector(`[data-messaggio="chiamata-${c.id}"]`, { timeout: 15000 }).then(() => true).catch(() => false);
     if (ok && await p.$(`[data-opzione="${ch.opzioni[0].id}"]:disabled`)) { await p.close(); continue; } // esaurita: la prossima chiamata
+    // C57-01: le altezze della mappa da quando c'è la risposta, a ogni fotogramma
+    if (ok) await p.evaluate(() => { const t = globalThis.__altezze = []; const reg = () => { const m = document.querySelector('.mappa');
+      if (m && document.querySelector('[data-messaggio="risposta"]')) { const a = Math.round(m.getBoundingClientRect().height); if (t.at(-1) !== a) t.push(a); } requestAnimationFrame(reg); }; reg(); });
     if (ok) { await p.click(`[data-opzione="${ch.opzioni[0].id}"]`); await p.click('[data-conferma]').catch(() => {}); }
     const pronta = ok && await p.waitForSelector('.mappa [data-mossa="puoi"]', { timeout: 15000, state: 'attached' }).then(() => true).catch(() => false);
     if (!pronta) { await p.close(); continue; } // nessuna mossa dopo questa chiamata (ultima dell'ondata): la prossima
@@ -165,10 +196,13 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
       if (x.fuori) conto.casaFuori++;
       if (x.case_ !== 1) male.push(`${vp} ${ep} ${c.id} ${dove}: ${x.case_} pulsanti «Home» visibili, ne serve uno (D-261)`);
       if (x.tagliato) male.push(`${vp} ${ep} ${c.id} ${dove}: il riquadro radio è tagliato (D-262)`);
+      if (!x.previsione) male.push(`${vp} ${ep} ${c.id} ${dove}: la previsione non si vede (C57-02)`);
+      if (!x.istruzione) male.push(`${vp} ${ep} ${c.id} ${dove}: l'istruzione della mossa non si vede (D-269 a)`);
+      if (x.righe.length) male.push(`${vp} ${ep} ${c.id} ${dove}: copia sotto la mappa coperta a pagina ferma: ${x.righe.join(', ')} (D-269 b)`);
       if (x.coperto.length) male.push(`${vp} ${ep} ${c.id} ${dove}: il centro non si tocca: ${x.coperto.join(', ')} (C56-03)`);
       if (x.senzaBordo.length) male.push(`${vp} ${ep} ${c.id} ${dove}: senza evidenziazione ${x.senzaBordo.join(', ')} (D-261)`);
       // D-271: niente tratteggio, anello pieno a ≥ 3:1 coi colori accanto (misurato sui pixel), anelli dei settori separati (rosso C271T01)
-      const an = await misuraAnelli(p); if (an.minimo !== null) conto.contrastoMin = Math.min(conto.contrastoMin, an.minimo); conto.latiVisti += an.lati[0]; conto.latiProvati += an.lati[1];
+      const an = await misuraAnelli(p); if (an.minimo !== null) conto.contrastoMin = Math.min(conto.contrastoMin, an.minimo); conto.latiVisti += an.lati[0]; conto.latiProvati += an.lati[1]; if (an.copia) conto.anelliCopia++; if (dove.includes('in mano')) conto.anelliDove++;
       if (an.tratteggi.length) male.push(`${vp} ${ep} ${c.id} ${dove}: tratteggio nella mossa su ${an.tratteggi.join(', ')} (D-271)`);
       if (an.sotto.length) male.push(`${vp} ${ep} ${c.id} ${dove}: anello sotto 3:1 o assente: ${an.sotto.join(', ')} (D-271)`);
       if (an.sovrapposti.length) male.push(`${vp} ${ep} ${c.id} ${dove}: anelli dei settori sovrapposti ${an.sovrapposti.join(', ')} (D-271)`);
@@ -176,6 +210,14 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
       if (x.ecc > soglia) male.push(`${vp} ${ep} ${c.id} ${dove}: la risposta scorre di ${x.ecc} px (soglia ${soglia}, D-258)`);
       if (ch.opzioni[0].costo) { conto.conCosto++; if (!x.costo) { conto.senzaCosto++; male.push(`${vp} ${ep} ${c.id} ${dove}: dopo «Conferma» il costo non si vede (D-258)`); } } };
     await giu('«puoi spostare»');
+    // D-269 c: dopo l'assestamento il riquadro resta com'è senza input (i segni spariscono in 1,8 s di gioco)
+    const posto = () => p.evaluate(() => { const r = document.querySelector('.radio-mappa'); return `${r?.className} ${r?.style.getPropertyValue('--radio-y')}`; });
+    const posto0 = await posto(); await p.waitForTimeout(2500); const posto1 = await posto();
+    if (posto1 !== posto0) male.push(`${vp} ${ep} ${c.id}: senza input il riquadro passa da «${posto0}» a «${posto1}» (D-269 c)`);
+    const altezze = await p.evaluate(() => globalThis.__altezze), ferma0 = altezze.at(-1);
+    if (altezze.length > 2) male.push(`${vp} ${ep} ${c.id}: dopo «Conferma» la mappa scende a gradini, ${altezze.join(' → ')} px (C57-01)`);
+    const stessa = async (dove) => { const a = await p.evaluate(() => globalThis.__altezze); if (a.at(-1) !== ferma0 || a.length > altezze.length)
+      male.push(`${vp} ${ep} ${c.id} ${dove}: la mappa cambia altezza, ${a.slice(altezze.length - 1).join(' → ')} px (C57-01)`); };
     // D-259: anche con la mappa abbassata ogni unità spostabile (logica: schierata, non fissa) ha il suo pulsante toccabile
     const sv = await sal(p), attese = Object.entries(sv.in_corso.disposizione ?? {}).filter(([r]) => !dati[`missioni/${ep}.json`].mappa.risorse[r]?.fissa)
       .flatMap(([r, ps]) => Object.entries(ps).filter(([, n]) => n > 0).map(([k]) => `${r}@${k}`));
@@ -183,17 +225,83 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich) {
     for (const u of attese) if (!toccabili.includes(u)) male.push(`${vp} ${ep} ${c.id}: l'unità ${u} si può spostare ma non si tocca sulla mappa (D-259)`);
     for (const id of await p.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza))) {
       await p.locator(`.mappa [data-presenza="${id}"]`).click({ force: true }); await p.waitForTimeout(80);
-      await giu(`«tocca il settore» con ${id} in mano`);
+      await giu(`«tocca il settore» con ${id} in mano`); await stessa(`con ${id} in mano`);
       await p.keyboard.press('Escape'); await p.waitForTimeout(50);
     }
     // la mossa fatta: la risposta resta (entro soglia, costo visibile, una «Home»)
     const id = (await p.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza)))[0];
     if (id) { await p.locator(`.mappa [data-presenza="${id}"]`).click({ force: true }); await p.waitForTimeout(80);
-      const a = await p.$('.mappa .settore-punto:not(:disabled)'); if (a) { await a.click({ force: true }); await p.waitForTimeout(150); await giu('«mossa fatta»'); } }
+      const a = await p.$('.mappa .settore-punto:not(:disabled)'); if (a) { await a.click({ force: true }); await p.waitForTimeout(150); await giu('«mossa fatta»'); await stessa('dopo la mossa'); } }
     if (process.env.VALMORA_DETTAGLIO) console.log(`  ${vp} ${ep} ${c.id}: ${conto.stati - n0} stati`);
     conto.episodi++; await p.close(); break;
   }
-  console.log(`radio della mossa ${vp}: ${conto.episodi} episodi, ${conto.stati} stati, rapporto al solo lettore in ${conto.stretti}, riquadro al solo lettore in ${conto.muti}; con costo ${conto.conCosto}, costo non visibile in ${conto.senzaCosto}; scorrimento massimo ${conto.scorreMax} px (soglia ${soglia}); costo sotto la mappa in ${conto.sotto}, mappa alta da ${conto.mappaMin} a ${conto.mappaMax} px; «Home» nella testata in ${conto.casaFuori}; anelli: contrasto minimo ${conto.contrastoMin.toFixed(2)}:1, lati visti ${conto.latiVisti} su ${conto.latiProvati}`);
+  console.log(`radio della mossa ${vp}: ${conto.episodi} episodi, ${conto.stati} stati, rapporto al solo lettore in ${conto.stretti}, riquadro al solo lettore in ${conto.muti}; con costo ${conto.conCosto}, costo non visibile in ${conto.senzaCosto}; scorrimento massimo ${conto.scorreMax} px (soglia ${soglia}); costo sotto la mappa in ${conto.sotto}, mappa alta da ${conto.mappaMin} a ${conto.mappaMax} px; «Home» nella testata in ${conto.casaFuori}; anelli: contrasto minimo ${conto.contrastoMin.toFixed(2)}:1, lati visti ${conto.latiVisti} su ${conto.latiProvati}, stati con la copia sotto la mappa ${conto.anelliCopia}, con un'unità in mano ${conto.anelliDove}`);
   if (conto.episodi < 30) male.push(`${vp}: radio della mossa provata solo in ${conto.episodi} episodi (D-255)`);
   return { ris: conto, male };
+}
+
+/** C57-02 (D-269): ogni combinazione unità → settore delle chiamate di CASI_PREVISIONE; dopo la mossa la previsione si vede, la
+ *  mappa non ha cambiato altezza dal «puoi spostare» (C57-01) e la risposta scorre entro soglia. */
+const CASI_PREVISIONE = [['e16', 'imp_nebbia']];
+async function controllaPrevisione(browser, url, larghezza, h, rossi, dati, dich) {
+  const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'previsione', mosse: 0, sotto: 0 }, soglia = SOGLIE[vp]?.risposta ?? 0;
+  for (const [ep, id] of CASI_PREVISIONE) {
+    const c = tutte.find((x) => x.ep === ep && x.id === id), ch = dati[`missioni/${ep}.json`].ondate.flatMap((o) => o.chiamate ?? []).find((x) => x.id === id);
+    if (!c || !ch) { male.push(`${vp} ${ep} ${id}: chiamata non trovata (C57-02)`); continue; }
+    const apri = async () => { const p = await browser.newPage({ viewport: { width: larghezza, height: h }, hasTouch: true, reducedMotion: 'reduce' });
+      await p.addInitScript((xs) => { globalThis.__VALMORA_SECONDO_MS = 1; for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi);
+      await p.goto(url); await p.evaluate(([k, v]) => localStorage.setItem(k, v), [CHIAVE, c.sal]); await p.reload(); await p.getByRole('button', { name: 'Riprendi' }).click();
+      await p.waitForSelector(`[data-messaggio="chiamata-${id}"]`, { timeout: 15000 }); await p.click(`[data-opzione="${ch.opzioni[0].id}"]`); await p.click('[data-conferma]').catch(() => {});
+      // CI 1256: col rosso C241M02 il «puoi spostare» non c'è; prima era un'eccezione (catena rossa per crash), ora è un problema
+      if (!(await p.waitForSelector('.mappa [data-mossa="puoi"]', { timeout: 15000, state: 'attached' }).then(() => true).catch(() => false))) { await p.close(); return null; }
+      await p.waitForTimeout(300);
+      let prima = ''; for (let i = 0; i < 30; i++) { const ora = await p.evaluate(() => `${document.scrollingElement.scrollHeight}|${document.querySelector('.mappa')?.getBoundingClientRect().height}|${document.querySelector('.radio-mappa')?.className}`); if (ora === prima) break; prima = ora; await p.waitForTimeout(100); }
+      return p; };
+    const altezza = (p) => p.evaluate(() => Math.round(document.querySelector('.mappa').getBoundingClientRect().height));
+    const p0 = await apri(); if (!p0) { male.push(`${vp} ${ep} ${id}: il «puoi spostare» non compare (C57-02)`); continue; }
+    const unita = await p0.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza)); await p0.close();
+    for (const u of unita) for (let j = 0, n = 1; j < n; j++) {
+      const p = await apri(); if (!p) { male.push(`${vp} ${ep} ${id} ${u}: il «puoi spostare» non compare (C57-02)`); break; }
+      const h0 = await altezza(p);
+      await p.locator(`.mappa [data-presenza="${u}"]`).click({ force: true }); await p.waitForTimeout(80);
+      const ss = await p.$$('.mappa .settore-punto:not(:disabled)'); n = ss.length;
+      if (!ss[j]) { await p.close(); break; }
+      const a = await ss[j].evaluate((e) => e.closest('[data-settore]').dataset.settore); await ss[j].click({ force: true }); await p.waitForTimeout(600);
+      const x = await coperti(p), h1 = await altezza(p), dove = `${vp} ${ep} ${id} ${u} → ${a}`; conto.mosse++; if (x.muto) conto.sotto++;
+      if (!x.previsione) male.push(`${dove}: la previsione non si vede (C57-02)`);
+      if (!x.istruzione) male.push(`${dove}: l'istruzione della mossa non si vede (D-269 a)`);
+      if (x.righe.length) male.push(`${dove}: copia sotto la mappa coperta a pagina ferma: ${x.righe.join(', ')} (D-269 b)`);
+      if (h1 !== h0) male.push(`${dove}: dopo la mossa la mappa passa da ${h0} a ${h1} px (C57-01)`);
+      if (x.ecc > soglia) male.push(`${dove}: la risposta scorre di ${x.ecc} px (soglia ${soglia})`);
+      await p.close();
+    }
+  }
+  console.log(`previsione dopo la mossa ${vp}: ${conto.mosse} mosse, previsione sotto la mappa in ${conto.sotto}`);
+  if (!conto.mosse) male.push(`${vp}: nessuna mossa provata (C57-02)`);
+  return { ris: conto, male };
+}
+
+/** D-269 c: prima chiamata con la mossa di ogni episodio; nello stato «puoi», 2,5 s senza input: riquadro (classe, posto) e unità fermi. */
+export async function controllaFermo(browser, url, larghezza, h, rossi, dati, dich) {
+  const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'fermo', episodi: 0 };
+  for (const ep of [...new Set(tutte.map((c) => c.ep))]) for (const c of tutte.filter((x) => x.ep === ep).slice(0, 4)) {
+    const ch = dati[`missioni/${ep}.json`].ondate.flatMap((o) => o.chiamate ?? []).find((x) => x.id === c.id);
+    const p = await browser.newPage({ viewport: { width: larghezza, height: h }, hasTouch: true, reducedMotion: 'reduce' });
+    await p.addInitScript(() => { globalThis.__VALMORA_SECONDO_MS = 1; });
+    if (rossi.length) await p.addInitScript((xs) => { for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi);
+    await p.goto(url); await p.evaluate(([k, v]) => localStorage.setItem(k, v), [CHIAVE, c.sal]); await p.reload();
+    await p.getByRole('button', { name: 'Riprendi' }).click();
+    const ok = ch && await p.waitForSelector(`[data-messaggio="chiamata-${c.id}"]`, { timeout: 15000 }).then(() => true).catch(() => false);
+    if (!ok || await p.$(`[data-opzione="${ch.opzioni[0].id}"]:disabled`)) { await p.close(); continue; }
+    await p.click(`[data-opzione="${ch.opzioni[0].id}"]`); await p.click('[data-conferma]').catch(() => {});
+    if (!(await p.waitForSelector('.mappa [data-mossa="puoi"]', { timeout: 15000, state: 'attached' }).then(() => true).catch(() => false))) { await p.close(); continue; }
+    await p.waitForTimeout(300);
+    const posto = () => p.evaluate(() => { const r = document.querySelector('.radio-mappa'), m = document.querySelector('.mappa').getBoundingClientRect();
+      return `${r?.className} ${r?.style.getPropertyValue('--radio-y')} | unità ${[...document.querySelectorAll('.mappa [data-presenza]')].map((b) => Math.round(b.getBoundingClientRect().top - m.top)).join(',')}`; });
+    const posto0 = await posto(); await p.waitForTimeout(2500); const posto1 = await posto();
+    if (posto1 !== posto0) male.push(`${vp} ${ep} ${c.id}: senza input riquadro o unità cambiano, da «${posto0}» a «${posto1}» (D-269 c)`);
+    conto.episodi++; await p.close(); break;
+  }
+  console.log(`fermo della mossa ${vp}: ${conto.episodi} episodi`);
+  return { male, ris: conto };
 }

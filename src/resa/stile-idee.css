@@ -42,6 +42,18 @@ main:not(.rosso-c241n01) .mappa.citta .settore-nome { min-width: min-content; }
 /* D-258: dove il riquadro non ha posto per il rapporto, il rapporto si legge nella risposta sotto la mappa (copia «sotto») */
 .radio-mappa:is(.compatto, .stretto, .muto) .rapporto-costo, .rapporto-sotto { display: none; }
 main:has(.mappa .radio-mappa:is(.compatto, .stretto, .muto)) .rapporto-sotto { display: block; }
+/* C57-01 (D-269): durante la misura di adatta.ts la copia conta come visibile (classe tolta prima del disegno) */
+main.misura-copia .rapporto-sotto { display: block; }
+/* C57-02 e D-269 a: istruzione e previsione della mossa si leggono sotto la mappa quando il riquadro è al solo lettore («muto»);
+   nella misura di adatta.ts conta sempre, col testo più lungo fra gli stati («riserva»), così la mappa non cambia altezza */
+.istruzione-sotto { display: none; margin: var(--spazio-1) 0 0; font-size: var(--testo-piccolo); line-height: var(--linea-stretta); font-weight: 700; }
+.istruzione-sotto .riserva { display: none; }
+main:has(.mappa .radio-mappa.muto) .istruzione-sotto[data-istruzione-sotto="vera"], main.misura-copia .istruzione-sotto { display: block; }
+main.misura-copia .istruzione-sotto .vera { display: none; }
+main.misura-copia .istruzione-sotto .riserva { display: inline; }
+/* la punta del fumetto della risposta (stile.css) entrava nella copia: con la copia sopra il fumetto la punta non c'è (lo spazio
+   per lei, 19 px, a 360×640 portava e21 corteo_dal_cortile a 71 px di scorrimento, soglia 68) */
+main:has(.mappa .radio-mappa.muto) .istruzione-sotto[data-istruzione-sotto="vera"] + .messaggio::before, main.misura-copia .istruzione-sotto + .messaggio::before { display: none; }
 .radio-mappa.muto { position: absolute; width: var(--spazio-px); height: var(--spazio-px); overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .radio-mappa:is(.compatto, .stretto) .rapporto-costo + .mossa-indicazione { margin-top: 0; }
 /* D-261: «Home» nella testata quando la risposta con la mossa abbassa la mappa e la casa coprirebbe un settore (adatta.ts) */

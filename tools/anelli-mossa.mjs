@@ -31,7 +31,8 @@ const vicino = (c, t, d = 60) => Math.hypot(c[0] - t[0], c[1] - t[1], c[2] - t[2
 /** Bersagli della mossa (unità spostabili, settori d'arrivo), tratteggi e anelli dei settori, letti nella pagina. */
 const leggiPagina = (p) => p.evaluate(() => {
   const tratteggi = [];
-  for (const e of document.querySelectorAll('.mappa.mossa, .mappa.mossa *')) for (const ps of [null, '::before', '::after']) {
+  // anche la copia dell'istruzione sotto la mappa (D-269, quando il riquadro radio è «muto»)
+  for (const e of document.querySelectorAll('.mappa.mossa, .mappa.mossa *, .istruzione-sotto, .istruzione-sotto *')) for (const ps of [null, '::before', '::after']) {
     const s = getComputedStyle(e, ps); if (ps && s.content === 'none') continue;
     if ([s.outlineStyle, s.borderTopStyle, s.borderRightStyle, s.borderBottomStyle, s.borderLeftStyle].some((x) => x === 'dashed' || x === 'dotted'))
       tratteggi.push(`${e.closest('[data-presenza]')?.dataset.presenza ?? e.closest('[data-settore]')?.dataset.settore ?? e.className}${ps ?? ''}`); }
@@ -41,10 +42,11 @@ const leggiPagina = (p) => p.evaluate(() => {
     const l = r.left + parseFloat(s.left), t = r.top + parseFloat(s.top), w = parseFloat(s.width), h = parseFloat(s.height);
     const fascia = Math.max(0, ...(s.boxShadow.match(/-?[\d.]+px/g) ?? []).map(parseFloat)); // la fascia bianca più larga (spread)
     return { id: e.closest('[data-settore]').dataset.settore, l, t, r: l + w, b: t + h, raggio: w / 2 + Math.max(fascia, parseFloat(s.outlineWidth) || 0) }; });
-  return { tratteggi: [...new Set(tratteggi)], bersagli: [...unita.map((x) => ({ ...x, tipo: 'unità' })), ...settori.map((x) => ({ ...x, tipo: 'settore' }))], settori };
+  const copia = !!document.querySelector('.istruzione-sotto[data-istruzione-sotto="vera"]')?.checkVisibility();
+  return { copia, tratteggi: [...new Set(tratteggi)], bersagli: [...unita.map((x) => ({ ...x, tipo: 'unità' })), ...settori.map((x) => ({ ...x, tipo: 'settore' }))], settori };
 });
 
-/** Misura in uno stato: { tratteggi, sotto (bersagli con un lato sotto 3:1, o senza anello su nessun lato), minimo (contrasto
+/** Misura in uno stato: { copia (la copia sotto la mappa si vede), tratteggi, sotto (bersagli con un lato sotto 3:1, o senza anello su nessun lato), minimo (contrasto
  *  più basso), lati (visti, provati), sovrapposti, n }. Un lato coperto (da «Home», da un nome, da un'altra pastiglia) non si
  *  misura: l'anello deve vedersi almeno da un lato e ogni lato visto deve stare a ≥ 3:1. */
 export async function misuraAnelli(p) {
@@ -74,5 +76,5 @@ export async function misuraAnelli(p) {
   for (let i = 0; i < g.settori.length; i++) for (let j = i + 1; j < g.settori.length; j++) { const a = g.settori[i], b = g.settori[j];
     const d = Math.hypot((a.l + a.r) / 2 - (b.l + b.r) / 2, (a.t + a.b) / 2 - (b.t + b.b) / 2);
     if (d < a.raggio + b.raggio) sovrapposti.push(`${a.id}/${b.id} (${Math.round(a.raggio + b.raggio - d)} px)`); }
-  return { tratteggi: g.tratteggi, sotto, minimo: g.bersagli.length ? minimo : null, lati, sovrapposti, n: g.bersagli.length };
+  return { copia: g.copia, tratteggi: g.tratteggi, sotto, minimo: g.bersagli.length ? minimo : null, lati, sovrapposti, n: g.bersagli.length };
 }
