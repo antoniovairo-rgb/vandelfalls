@@ -147196,6 +147196,177 @@
         }
       ],
       "esito": "verde"
+    },
+    {
+      "catena": "governo",
+      "data": "2026-11-05T04:08:28.820Z",
+      "commit": "c140917f",
+      "modifiche_non_committate": true,
+      "passi": [
+        {
+          "passo": "documenti",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "backlog",
+          "esito": "rosso",
+          "tentativi": 3,
+          "secondi": [
+            0,
+            0,
+            0
+          ],
+          "problemi": [
+            "PO-159: tipo «grafica/usabilità» non ammesso",
+            "PO-160: tipo «grafica/usabilità» non ammesso",
+            "PO-160: stato «DA FARE (D-272) – lotto mappa dopo la 0.66.0 (S-11): pastiglie e nomi legati al proprio disco, disposizione ferma durante la pausa, riquadro radio che non copre i nomi, feedback da→a dopo la mossa; tratteggio e versione già in D-271 (S-27); foto prima/dopo al PO prima del merge» non ammesso"
+          ],
+          "precedenti": [
+            [
+              "PO-159: tipo «grafica/usabilità» non ammesso",
+              "PO-160: tipo «grafica/usabilità» non ammesso",
+              "PO-160: stato «DA FARE (D-272) – lotto mappa dopo la 0.66.0 (S-11): pastiglie e nomi legati al proprio disco, disposizione ferma durante la pausa, riquadro radio che non copre i nomi, feedback da→a dopo la mossa; tratteggio e versione già in D-271 (S-27); foto prima/dopo al PO prima del merge» non ammesso"
+            ],
+            [
+              "PO-159: tipo «grafica/usabilità» non ammesso",
+              "PO-160: tipo «grafica/usabilità» non ammesso",
+              "PO-160: stato «DA FARE (D-272) – lotto mappa dopo la 0.66.0 (S-11): pastiglie e nomi legati al proprio disco, disposizione ferma durante la pausa, riquadro radio che non copre i nomi, feedback da→a dopo la mossa; tratteggio e versione già in D-271 (S-27); foto prima/dopo al PO prima del merge» non ammesso"
+            ]
+          ]
+        }
+      ],
+      "esito": "rosso"
+    },
+    {
+      "catena": "governo",
+      "data": "2026-11-05T04:08:36.443Z",
+      "commit": "c140917f",
+      "modifiche_non_committate": true,
+      "passi": [
+        {
+          "passo": "documenti",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "backlog",
+          "esito": "rosso",
+          "tentativi": 3,
+          "secondi": [
+            0,
+            0,
+            0
+          ],
+          "problemi": [
+            "PO-159: tipo «grafica/usabilità» non ammesso",
+            "PO-160: tipo «grafica/usabilità» non ammesso",
+            "PO-160: stato «DA FARE (D-272) – lotto mappa dopo la 0.66.0 (S-11): pastiglie e nomi legati al proprio disco, disposizione ferma durante la pausa, riquadro radio che non copre i nomi, feedback da→a dopo la mossa; tratteggio e versione già in D-271 (S-27); foto prima/dopo al PO prima del merge» non ammesso"
+          ],
+          "precedenti": [
+            [
+              "PO-159: tipo «grafica/usabilità» non ammesso",
+              "PO-160: tipo «grafica/usabilità» non ammesso",
+              "PO-160: stato «DA FARE (D-272) – lotto mappa dopo la 0.66.0 (S-11): pastiglie e nomi legati al proprio disco, disposizione ferma durante la pausa, riquadro radio che non copre i nomi, feedback da→a dopo la mossa; tratteggio e versione già in D-271 (S-27); foto prima/dopo al PO prima del merge» non ammesso"
+            ],
+            [
+              "PO-159: tipo «grafica/usabilità» non ammesso",
+              "PO-160: tipo «grafica/usabilità» non ammesso",
+              "PO-160: stato «DA FARE (D-272) – lotto mappa dopo la 0.66.0 (S-11): pastiglie e nomi legati al proprio disco, disposizione ferma durante la pausa, riquadro radio che non copre i nomi, feedback da→a dopo la mossa; tratteggio e versione già in D-271 (S-27); foto prima/dopo al PO prima del merge» non ammesso"
+            ]
+          ]
+        }
+      ],
+      "esito": "rosso"
+    },
+    {
+      "catena": "governo",
+      "data": "2026-11-05T04:08:42.744Z",
+      "commit": "c140917f",
+      "modifiche_non_committate": true,
+      "passi": [
+        {
+          "passo": "documenti",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "backlog",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "segreti",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "versione",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "store",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0.3
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "modello",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            25.3
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "bracci-rossi",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "governo.html",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        }
+      ],
+      "esito": "verde"
     }
   ]
 }
