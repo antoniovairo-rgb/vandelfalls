@@ -273,7 +273,8 @@ async function controllaPrevisione(browser, url, larghezza, h, rossi, dati, dich
     const altezza = (p) => p.evaluate(() => Math.round(document.querySelector('.mappa').getBoundingClientRect().height));
     const p0 = await apri(); if (!p0) { male.push(`${vp} ${ep} ${id}: il «puoi spostare» non compare (C57-02)`); continue; }
     const unita = await p0.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza)); await p0.close();
-    for (const u of unita) for (let j = 0, n = 1; j < n; j++) {
+    // lotto «altezze» (S-11): un'unità per pagina, PAGINE_RADIO insieme; le mosse di ogni unità restano in fila
+    await insieme(unita.map((u) => async () => { for (let j = 0, n = 1; j < n; j++) {
       const p = await apri(); if (!p) { male.push(`${vp} ${ep} ${id} ${u}: il «puoi spostare» non compare (C57-02)`); break; }
       const h0 = await altezza(p);
       await p.locator(`.mappa [data-presenza="${u}"]`).click({ force: true }); await p.waitForTimeout(80);
@@ -287,7 +288,7 @@ async function controllaPrevisione(browser, url, larghezza, h, rossi, dati, dich
       if (h1 !== h0) male.push(`${dove}: dopo la mossa la mappa passa da ${h0} a ${h1} px (C57-01)`);
       if (x.ecc > soglia) male.push(`${dove}: la risposta scorre di ${x.ecc} px (soglia ${soglia})`);
       await p.close();
-    }
+    } }), PAGINE_RADIO);
   }
   console.log(`previsione dopo la mossa ${vp}: ${conto.mosse} mosse, previsione sotto la mappa in ${conto.sotto}`);
   if (!conto.mosse) male.push(`${vp}: nessuna mossa provata (C57-02)`);
