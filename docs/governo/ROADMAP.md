@@ -72,6 +72,7 @@ La più recente in alto. Hash = commit di main dopo la promozione (catena comple
 
 | Versione | Data (UTC) | Hash main | Contenuto | Misura principale | Stato |
 |---|---|---|---|---|---|
+| 0.65.0 | 2026-11-05 | 728ae4eb | Mappa della risposta ferma, istruzione e previsione sempre visibili (D-269, C57-01/C57-02) | 1 discesa e 0 cali al tocco (48+18 episodi, verifica indipendente); scorrimento max 58/68 e 17/56; governo+logica 3/3 su 728ae4eb (S-11), CI 10/10 completa (run 1257) | sul ramo, rituali in corsa |
 | 0.64.0 | 2026-11-04 | 60158269 | Pulizie L2b (D-268): privacy con icona, game_version nel salvataggio, testo e nome accessibile della mossa, fuoco su «Avanti», store senza bollo, 9 risposte accorciate | sonda risposte 12 casi oltre soglia → 0; governo+logica 3/3 su 02e2d458 (S-27), CI 10/10 (run 1239); passo email verde | pubblicato |
 | 0.63.0 | 2026-11-04 | b497d626 | Mossa leggibile e affidabile (D-255, D-258/259/261, D-262): scheda che non copre il settore, costo visibile, previsione dell'effetto della mossa, pausa che sopravvive alla ricarica, bersagli toccabili; include la 0.62.0 prevista (D-267) | previsione 88,7% d'accordo (min 85,7%), 0 opposte; governo+logica 3/3 su 3493dd33 (S-11), CI 10/10 (run 1225); passo email verde | pubblicato |
 | 0.61.0 | 2026-11-03 | 4e62212f | Numeri dei morsi coerenti coi testi (C56-01) | 5 testi corretti, valori invariati; guardiano numeri-morsi 3/3; passo email verde; governo+logica 3/3 su 4e62212f eseguiti da S-27 (D-264), CI 10/10 | pubblicato |

@@ -346,4 +346,13 @@
 //   e 412 (rossi C268M01 54 problemi, C268F01 1); pagina privacy 0 errori; test 489/489. C55-02 non riprodotto (568 tocchi, 0).
 //   guardiano: tests/privacy, versione-salvataggio-d268, foto-po152-b, tools/store/immagini.mjs, sonda-altezze; rossi C268P01,
 //   C268G01, C268M01, C268F01, C268S01, C268R01.
-export const GAME_VERSION = '0.64.0';
+// 0.65.0 – mappa della risposta ferma e istruzioni sempre visibili (D-269, collaudo C-057).
+//   causa: la mappa scendeva a gradini dopo «Conferma» e al tocco dell'unità (riquadro compatto e costo sotto la mappa facevano
+//   crescere la pagina, adatta abbassava, la tenuta non risaliva); col riquadro «muto» previsione e istruzione non si vedevano;
+//   a 412×915 il riquadro cambiava classe da fermo (segniVisti agganciato a un messaggio non ancora disegnato).
+//   misura: 1 discesa dopo «Conferma», 0 al tocco e dopo la mossa (verifica indipendente, 48 episodi a 360/375, 18 a 412); istruzione
+//   e previsione visibili in tutti i casi misurati; scorrimento max 58/68 a 360, 17/56 a 375; copia breve «mossa.puoi_breve» (solo
+//   aria-hidden) per stare in una riga; riquadro fermo a 412×915 su 36 episodi.
+//   guardiano: tools/foto-po152-b.mjs (fermo a 360/375/412, istruzione visibile, nessuna riga sotto «Avanti»), sonda-altezze; rossi
+//   C269M01, C269P01, C269I01, C269A01, C269C01, C269B01.
+export const GAME_VERSION = '0.65.0';
