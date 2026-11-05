@@ -2,7 +2,7 @@
 // Colori solo da token: le forme usano classi «v-*» definite in stile-schermate.css. Riquadro nero spesso, retino giallo
 // di fondo. La vignetta si rimpicciolisce (altezza dal CSS) prima di far scorrere la pagina.
 // Rosso C26V01: nessuna vignetta.
-import { useLayoutEffect, useRef, type ReactNode, type RefObject } from 'react';
+import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { spento } from '../interruttori.ts';
 import { persona, type PersonaDati } from './persona2.ts';
 
@@ -53,16 +53,36 @@ function useRiempi(el: RefObject<SVGSVGElement | null>, attivo: boolean, nascond
   }, [el, attivo, nascondibile]);
 }
 
-/** «vista»: il riquadro del disegno se non è quello solito 0 0 320 180 (PO-149: la striscia della città con più cielo sopra). */
-export function Vignetta(p: { nome: string; titolo: string; children: ReactNode; fissa?: boolean; evento?: string; ritaglio?: string; vista?: [number, number, number, number] }) {
+type Vista = [number, number, number, number];
+
+/** D-265: misura del riquadro a schermo (px), per le vignette che si inquadrano da sole («inquadra»). */
+function useRiquadro(el: RefObject<SVGSVGElement | null>, attivo: boolean) {
+  const [r, setR] = useState<[number, number] | null>(null);
+  useLayoutEffect(() => {
+    const svg = el.current;
+    if (!svg || !attivo) return;
+    const fai = () => { const w = svg.clientWidth, h = svg.clientHeight; setR((x) => (w && h && (!x || x[0] !== w || x[1] !== h) ? [w, h] : x)); };
+    fai();
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(fai);
+    ro?.observe(svg);
+    return () => ro?.disconnect();
+  }, [el, attivo]);
+  return r;
+}
+
+/** «vista»: il riquadro del disegno se non è quello solito 0 0 320 180 (PO-149: la striscia della città con più cielo sopra).
+ *  «inquadra» (D-265): la vista si calcola dalla misura del riquadro a schermo, con le stesse proporzioni (nessun ritaglio). */
+export function Vignetta(p: { nome: string; titolo: string; children: ReactNode; fissa?: boolean; evento?: string; ritaglio?: string; vista?: Vista; inquadra?: (w: number, h: number) => Vista }) {
   const el = useRef<SVGSVGElement>(null);
   // C41-06: il verbale fallito ha il suo minimo (--vignetta-min-fallita, classe .fallita in Verbale.tsx); rosso C41V06
   const nasconde = /^(apertura|esito|ondata)-/.test(p.nome);
   useRiempi(el, !p.fissa, nasconde); // «fissa»: la misura la decide chi la contiene (vignetta nel fumetto della chiamata)
+  const riquadro = useRiquadro(el, !!p.inquadra);
   if (spento('C26V01')) return null;
-  const [vx, vy, vw, vh] = p.vista ?? [0, 0, 320, 180];
+  const vista = (p.inquadra && riquadro ? p.inquadra(riquadro[0], riquadro[1]) : p.vista) ?? [0, 0, 320, 180];
+  const [vx, vy, vw, vh] = vista;
   return (
-    <svg ref={el} className="vignetta" viewBox={(p.vista ?? [0, 0, 320, 180]).join(' ')} preserveAspectRatio={p.ritaglio ?? 'xMidYMid meet'} role="img" aria-label={p.titolo} data-vignetta={p.nome} data-evento={p.evento}>
+    <svg ref={el} className="vignetta" viewBox={vista.map((x) => Math.round(x * 100) / 100).join(' ')} preserveAspectRatio={p.inquadra && riquadro ? 'xMidYMid meet' : p.ritaglio ?? 'xMidYMid meet'} role="img" aria-label={p.titolo} data-vignetta={p.nome} data-evento={p.evento}>
       <defs>
         <pattern id="v-retino" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.2" className="v-retino" /></pattern>
         {/* PO-092: ombra a retino (stile C): fondo grigio scuro a punti neri */}

@@ -24,8 +24,9 @@ const DESCRIZIONE: Record<StatoEpisodio, string> = {
   futuro: 'Non ancora disponibile.',
 };
 
-/** PO-149: unità di cielo sopra la finestra nella striscia; bastano per --home-vignetta-max (210 px) a 360 px di larghezza. */
-const CIELO_STRISCIA = 122;
+/** PO-149: unità di cielo sopra la finestra nella striscia; bastano per --home-vignetta-max (210 px) a 360 px di larghezza.
+ *  D-265 (PO-158): niente più cielo vuoto, la striscia si inquadra sui personaggi; resta un po' di notte dietro il bordo alto. */
+const CIELO_STRISCIA = 122, CIELO_RAVVICINATA = 24;
 
 export function Citta(p: { sal: Salvataggio; scelto: Missione | null; scegli: (id: string) => void; avvia: (m: Missione) => void; home?: () => void; epilogo?: () => void }) {
   const [rigioca, setRigioca] = useState<string | null>(null);
@@ -54,7 +55,9 @@ export function Citta(p: { sal: Salvataggio; scelto: Missione | null; scegli: (i
           {/* PO-149 (D-237): sugli schermi alti la striscia prende lo spazio libero (come la vignetta della home, PO-092) e cresce
               verso l'alto, con più cielo sopra le teste. Rosso C237S01: fissa a 96 px, inquadrata dall'alto, come prima */}
           {spento('C237S01') ? <VignettaHome genere={genereAttuale() === 'f' ? 'f' : 'm'} didascalia={t('citta.striscia')} fissa />
-            : <VignettaHome genere={genereAttuale() === 'f' ? 'f' : 'm'} didascalia={t('citta.striscia')} cielo={CIELO_STRISCIA} />}
+            : spento('C265S01') ? <VignettaHome genere={genereAttuale() === 'f' ? 'f' : 'm'} didascalia={t('citta.striscia')} cielo={CIELO_STRISCIA} />
+            /* D-265 (PO-158): personaggi più grandi e visibili fino al petto, 16-32 px sopra le teste. Rosso C265S01: il cielo di PO-149 */
+            : <VignettaHome genere={genereAttuale() === 'f' ? 'f' : 'm'} didascalia={t('citta.striscia')} cielo={CIELO_RAVVICINATA} ravvicinata />}
           <figcaption className="home-didascalia">{t('citta.striscia')}</figcaption>
         </figure></>}
       {stagioni.length > 1 && (

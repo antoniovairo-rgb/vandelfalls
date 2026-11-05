@@ -137,6 +137,8 @@
   /* Città degli episodi (D-061) */
   --citta-fiume: #1f6fa8;
   --citta-parco: #3d7a35;
+  --citta-bolla-bloccata: var(--mappa-capannone); /* D-265 (PO-158): bolla di un episodio bloccato, piena (prima era trasparente, --opaco) */
+  --citta-bolla-bloccata-testo: var(--nero); /* contrasto 5,85:1 sul fondo della bolla (WCAG 2.2 AA: 4,5:1) */
 
   --raggio-1: 4px;
   --raggio-2: 8px;
@@ -201,6 +203,8 @@
   --citta-proporzione: 4 / 5;
   --citta-scheda-altezza: 177px; /* D-243: altezza della scheda della città con la striscia, uguale in ogni stato: quella di «Da giocare» (181 a 360, 375 e 412) meno 4 px tolti sopra i pulsanti, così a 412×915 restano più di 100 px sopra le teste */
   --citta-riserva-striscia: 484px; /* PO-149: con la striscia (finestra ≥ 700 px) la mappa prende 16 px in più; il caso più pieno (36 episodi, stagione 3, 360×760) resta con 8 px liberi. D-243: la scheda sotto la mappa ha altezza fissa (--citta-scheda-altezza), così la mappa non si sposta fra gli stati */
+  --citta-sopra-teste-min: var(--spazio-4); /* D-265 (PO-158): nella striscia della città, dal bordo alto alle teste; il resto dello spazio ai personaggi, fino al petto e oltre */
+  --citta-sopra-teste-max: var(--spazio-6);
   --citta-riserva: 500px;   /* PO-052: spazio per testata, pulsanti e scheda sotto la mappa della città (misurato: 486 px + margine) */
   --citta-larghezza-min: 208px;
   --citta-altezza-min: 260px; /* C17-12: altezza minima della mappa della città (quella di oggi a 760 px); D-187 l'aveva portata a 244: dischi sovrapposti per 587 px² a 360×760 (CI), tornata a 260 */
