@@ -195,8 +195,11 @@ export function disponiEtichette(contenitore: HTMLElement) {
     // Rosso C271U01: niente.
     const nn = nomeDi(s);
     if (conUnita && gruppo && nn && !spento('C271U01')) {
-      const prova = () => { const u = unitaDi(s); return u ? costoUnita(nn, u) : Infinity; };
-      let meglio = { c: prova(), dx: 0, dy: 0 };
+      // spostate, le unità non devono coprire il centro del PROPRIO disco (C56-03: e06 palco a 360 e 375, piazza_concerto):
+      // il costo conta solo i dischi degli altri settori, perché nei posti fissi il proprio non si copre mai
+      const [px, py] = centro(punti[i]!), proprio = () => tocchiDi(s).some((q) => dentro([px, py], q));
+      const prova = () => { const u = unitaDi(s); return u && !proprio() ? costoUnita(nn, u) : Infinity; };
+      let meglio = { c: (() => { const u = unitaDi(s); return u ? costoUnita(nn, u) : Infinity; })(), dx: 0, dy: 0 };
       if (meglio.c >= VERA * 1e6 || ruba() > 0) for (let k = 1; k <= 4; k++) for (const [ax, ay] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]] as const) {
         muovi(ax * k * passo, ay * k * passo); const c = prova(); if (c < meglio.c) meglio = { c, dx: ax * k * passo, dy: ay * k * passo }; }
       if (meglio.dx || meglio.dy) muovi(meglio.dx, meglio.dy); else { gruppo.style.removeProperty('--unita-dx'); gruppo.style.removeProperty('--unita-dy'); }
