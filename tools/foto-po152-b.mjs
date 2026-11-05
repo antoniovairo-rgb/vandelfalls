@@ -81,11 +81,14 @@ const coperti = (p) => p.evaluate(() => {
       const e = y < innerHeight ? [1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => document.elementFromPoint(b.left + (b.width * i) / 10, y)).find((x) => !x || !copia.contains(x)) ?? copia : null;
       if (!e || !copia.contains(e)) righe.push(`riga a y ${Math.round(b.top)}-${Math.round(b.bottom)} sotto ${e ? (e.closest('[data-azione]')?.dataset.azione ?? e.className) : 'il bordo dello schermo'}`); } }
   scrollTo(0, y0);
-  if (q.classList.contains('muto')) return { xs: [], stretto: true, muto: true, costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, previsione, istruzione, righe, fuoriMappa, tagliato: false };
+  if (q.classList.contains('muto')) return { xs: [], stretto: true, muto: true, costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, previsione, istruzione, righe, fuoriMappa, tagliato: false, nomi: [] };
  // al solo lettore: non copre niente
   const sop = (x) => Math.max(0, Math.min(r.right, x.right) - Math.max(r.left, x.left)) * Math.max(0, Math.min(r.bottom, x.bottom) - Math.max(r.top, x.top));
   return { costo, ecc, sotto, mappa, case_, fuori, senzaBordo, coperto, previsione, istruzione, righe, fuoriMappa, tagliato: q.scrollHeight > q.clientHeight + 1, stretto: q.classList.contains('stretto'), xs: [...document.querySelectorAll('.mappa [data-presenza]:not(:disabled), .mappa [data-settore] .settore-punto:not(:disabled)')]
-    .map((e) => [e.dataset.presenza ?? e.closest('[data-settore]').dataset.settore, sop(e.getBoundingClientRect())]).filter(([, a]) => a > 0.5).map(([k, a]) => `${k} ${Math.round(a)} px²`) };
+    .map((e) => [e.dataset.presenza ?? e.closest('[data-settore]').dataset.settore, sop(e.getBoundingClientRect())]).filter(([, a]) => a > 0.5).map(([k, a]) => `${k} ${Math.round(a)} px²`),
+    // D-272 (1): il riquadro radio non copre i nomi dei settori (prima non erano fra i suoi ostacoli, radio-mappa.tsx)
+    nomi: [...document.querySelectorAll('.mappa [data-settore] .settore-nome')].filter((e) => e.checkVisibility())
+      .map((e) => [e.closest('[data-settore]').dataset.settore, sop(e.getBoundingClientRect())]).filter(([, a]) => a > 0.5).map(([k, a]) => `${k} ${Math.round(a)} px²`) };
 });
 const stato = (p) => p.evaluate(() => {
   const px = (v) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(v)) || 0, r = (e) => e.getBoundingClientRect();
@@ -214,6 +217,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, epi
     const ferma = async () => { let prima = ''; for (let i = 0; i < 30; i++) { const ora = await p.evaluate(() => `${document.scrollingElement.scrollHeight}|${document.querySelector('.mappa')?.getBoundingClientRect().height}|${document.querySelector('.radio-mappa')?.className}`); if (ora === prima) return; prima = ora; await p.waitForTimeout(100); } };
     const giu = async (dove, conRighe = true) => { await ferma(); const x = await coperti(p); conto.stati++; if (x.muto) conto.muti++; else if (x.stretto) conto.stretti++;
       if (x.xs.length) male.push(`${vp} ${ep} ${c.id} ${dove}: il riquadro radio copre ${x.xs.join(', ')} (D-255)`);
+      if (x.nomi?.length) male.push(`${vp} ${ep} ${c.id} ${dove}: il riquadro radio copre i nomi ${x.nomi.join(', ')} (D-272)`);
       conto.scorreMax = Math.max(conto.scorreMax, x.ecc);
       if (x.fuori) conto.casaFuori++;
       if (x.case_ !== 1) male.push(`${vp} ${ep} ${c.id} ${dove}: ${x.case_} pulsanti «Home» visibili, ne serve uno (D-261)`);
