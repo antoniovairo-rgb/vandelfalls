@@ -170,7 +170,7 @@ export async function controllaPo152b(browser, url, larghezza, rossi = [], carte
 
 /** D-255 punto 2: prima chiamata con mossa di ogni episodio; stati «puoi», «dove» (ogni unità in mano) e «mossa fatta». */
 async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, episodi) {
-  const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'radio', episodi: 0, stati: 0, stretti: 0, muti: 0, conCosto: 0, senzaCosto: 0, scorreMax: 0, sotto: 0, mappaMin: Infinity, mappaMax: 0, casaFuori: 0 }, soglia = SOGLIE[vp]?.risposta ?? 0;
+  const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'radio', episodi: 0, conSegni: 0, stati: 0, stretti: 0, muti: 0, conCosto: 0, senzaCosto: 0, scorreMax: 0, sotto: 0, mappaMin: Infinity, mappaMax: 0, casaFuori: 0 }, soglia = SOGLIE[vp]?.risposta ?? 0;
   // al più 4 chiamate per episodio: col rosso C241M02 (mappa che non si tocca) nessuna ha la mossa e si giravano tutte le chiamate
   // dei 36 episodi (4 ore e 20 nel giro dei bracci), fino a un'opzione esaurita (e28 blocca_corteo) che faceva saltare il passo
   for (const ep of [...new Set(tutte.map((c) => c.ep))].filter((e) => !episodi || episodi.includes(e))) for (const c of tutte.filter((x) => x.ep === ep).slice(0, 4)) {
@@ -207,10 +207,14 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, epi
       if (x.sotto) { conto.sotto++; conto.mappaMin = Math.min(conto.mappaMin, x.mappa); conto.mappaMax = Math.max(conto.mappaMax, x.mappa); }
       if (x.ecc > soglia) male.push(`${vp} ${ep} ${c.id} ${dove}: la risposta scorre di ${x.ecc} px (soglia ${soglia}, D-258)`);
       if (ch.opzioni[0].costo) { conto.conCosto++; if (!x.costo) { conto.senzaCosto++; male.push(`${vp} ${ep} ${c.id} ${dove}: dopo «Conferma» il costo non si vede (D-258)`); } } };
-    await giu('«puoi spostare»');
-    // D-269 c: dopo l'assestamento il riquadro resta com'è senza input (i segni spariscono in 1,8 s di gioco)
+    // D-269 c: dopo l'assestamento il riquadro resta com'è senza input, anche quando spariscono i segni ▲/▼ (1,8 s veri, App.tsx:85).
+    // D-270: prima la prima lettura veniva dopo tutti i controlli dello stato e spesso i segni erano già spariti (rosso C269C01 visto
+    // a caso, 0-6 episodi su 36 secondo il carico): ora si legge appena la pagina è ferma, poi si aspetta che i segni spariscano
     const posto = () => p.evaluate(() => { const r = document.querySelector('.radio-mappa'); return `${r?.className} ${r?.style.getPropertyValue('--radio-y')}`; });
-    const posto0 = await posto(); await p.waitForTimeout(2500); const posto1 = await posto();
+    await ferma(); const t0 = Date.now(), conSegni = !!(await p.$('.mappa [data-segno]')), posto0 = await posto(); if (conSegni) conto.conSegni++;
+    await giu('«puoi spostare»');
+    await p.waitForFunction(() => !document.querySelector('.mappa [data-segno]'), null, { timeout: 5000 }).catch(() => {});
+    await p.waitForTimeout(Math.max(500, 2500 - (Date.now() - t0))); const posto1 = await posto();
     if (posto1 !== posto0) male.push(`${vp} ${ep} ${c.id}: senza input il riquadro passa da «${posto0}» a «${posto1}» (D-269 c)`);
     const altezze = await p.evaluate(() => globalThis.__altezze), ferma0 = altezze.at(-1);
     if (altezze.length > 2) male.push(`${vp} ${ep} ${c.id}: dopo «Conferma» la mappa scende a gradini, ${altezze.join(' → ')} px (C57-01)`);
@@ -233,7 +237,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, epi
     if (process.env.VALMORA_DETTAGLIO) console.log(`  ${vp} ${ep} ${c.id}: ${conto.stati - n0} stati`);
     conto.episodi++; await p.close(); break;
   }
-  console.log(`radio della mossa ${vp}: ${conto.episodi} episodi, ${conto.stati} stati, rapporto al solo lettore in ${conto.stretti}, riquadro al solo lettore in ${conto.muti}; con costo ${conto.conCosto}, costo non visibile in ${conto.senzaCosto}; scorrimento massimo ${conto.scorreMax} px (soglia ${soglia}); costo sotto la mappa in ${conto.sotto}, mappa alta da ${conto.mappaMin} a ${conto.mappaMax} px; «Home» nella testata in ${conto.casaFuori}`);
+  console.log(`radio della mossa ${vp}: ${conto.episodi} episodi (segni ▲/▼ ancora presenti alla prima lettura in ${conto.conSegni}), ${conto.stati} stati, rapporto al solo lettore in ${conto.stretti}, riquadro al solo lettore in ${conto.muti}; con costo ${conto.conCosto}, costo non visibile in ${conto.senzaCosto}; scorrimento massimo ${conto.scorreMax} px (soglia ${soglia}); costo sotto la mappa in ${conto.sotto}, mappa alta da ${conto.mappaMin} a ${conto.mappaMax} px; «Home» nella testata in ${conto.casaFuori}`);
   if (conto.episodi < (episodi ? episodi.length : 30)) male.push(`${vp}: radio della mossa provata solo in ${conto.episodi} episodi${episodi ? ` su ${episodi.length} del braccio` : ''} (D-255)`);
   return { ris: conto, male };
 }
