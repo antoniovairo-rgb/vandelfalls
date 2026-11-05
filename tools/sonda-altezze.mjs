@@ -178,7 +178,7 @@ export function chiusureCostruite(dati, dich) {
 export const PARTI = ['e01', 'citta36', 'chiamate', 'rapporti', 'riepilogo', 'verbali', 'po149', 'po152a', 'c52nomi', 'po152b', 'risposte', 'chiusure'];
 // C53-02 (D-252): la risposta di ogni opzione di ogni carta d'imprevisto e di ogni variante, a queste finestre (soglie di SOGLIE)
 export const RISPOSTE_VP = ['360x640', '375x667', '412x760'];
-export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi = [], cartella = '', parti = PARTI, limiteRisposte = Infinity, chiusureMax = Infinity, po152b = {} }) {
+export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi = [], cartella = '', parti = PARTI, limiteRisposte = Infinity, chiusureMax = Infinity, po152b = {}, chiamateDi = null }) {
   const dati = leggiDati(dirDati), dich = new Map(dati['stato.json'].variabili.map((d) => [d.id, d])), e01 = dati['missioni/e01.json'];
   const srv = await servi(build), url = `http://127.0.0.1:${srv.address().port}/`;
   const percorso = process.env.VALMORA_CHROME ?? (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
@@ -248,7 +248,7 @@ export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi
         }
         await q.close();
       }
-      if (vp === '360x760' && parti.includes('chiamate')) { const coda = chiamateCostruite(dati, dich); // D-206: 4 pagine insieme
+      if (vp === '360x760' && parti.includes('chiamate')) { const coda = chiamateCostruite(dati, dich).filter((c) => !chiamateDi || chiamateDi(c)); // D-206: 4 pagine insieme; D-274b: i bracci solo le loro
         await Promise.all(Array.from({ length: 4 }, async () => { const q = await b.newPage({ viewport: { width: w, height: h }, hasTouch: true, reducedMotion: 'reduce' });
           if (rossi.length) await q.addInitScript((xs) => { for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi);
           await q.goto(url);

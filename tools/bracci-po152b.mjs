@@ -23,8 +23,15 @@ export const BRACCI_PO152B = {
   C269C01: { giri: ['radio'], episodi: ['e02', 'e25', 'e26'], segno: 'allo sparire dei segni ▲/▼', almeno: 3 }, // 1 + 1 + 1: il controllo nei fotogrammi (D-270), 3 su 3 in 9 prove a 5 processi; 8 episodi su 36
 };
 
+// D-274b: i bracci della parte «chiamate» (D-207) misurano solo gli imprevisti: le chiamate normali (498 su 782) non servono.
+// C215L01 (D-215) è la mediana degli imprevisti, che ha senso solo su tutti i 284; C206I01 solo gli imprevisti dei suoi episodi.
+export const BRACCI_CHIAMATE = {
+  'C215L01,C241A01': { chiamateDi: (c) => c.imprevisto, segno: 'mediana degli imprevisti', almeno: 1 },
+  C206I01: { chiamateDi: (c) => c.imprevisto && ['e04', 'e06', 'e09', 'e13'].includes(c.ep), segno: '(soglia 339, D-207)', almeno: 5 }, // e04 ×2, e06, e09, e13
+};
+
 /** Il braccio è cieco se i problemi col suo segno sono meno del conteggio dichiarato; ritorna il messaggio o ''. */
 export function braccioCieco(r, problemi) {
-  const b = BRACCI_PO152B[r], n = problemi.filter((x) => x.includes(b.segno)).length;
+  const b = BRACCI_PO152B[r] ?? BRACCI_CHIAMATE[r], n = problemi.filter((x) => x.includes(b.segno)).length;
   return n >= b.almeno ? '' : `altezze/${r} è cieco: ${n} problemi «${b.segno}», ne servono ${b.almeno} (D-270)`;
 }
