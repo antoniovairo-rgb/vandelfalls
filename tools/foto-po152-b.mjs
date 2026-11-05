@@ -298,7 +298,8 @@ async function controllaPrevisione(browser, url, larghezza, h, rossi, dati, dich
 /** D-269 c: prima chiamata con la mossa di ogni episodio; nello stato «puoi», 2,5 s senza input: riquadro (classe, posto) e unità fermi. */
 export async function controllaFermo(browser, url, larghezza, h, rossi, dati, dich) {
   const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'fermo', episodi: 0 };
-  for (const ep of [...new Set(tutte.map((c) => c.ep))]) for (const c of tutte.filter((x) => x.ep === ep).slice(0, 4)) {
+  // lotto «altezze» (S-11): episodi su PAGINE_RADIO pagine insieme, come il giro radio
+  const uno = async (ep) => { for (const c of tutte.filter((x) => x.ep === ep).slice(0, 4)) {
     const ch = dati[`missioni/${ep}.json`].ondate.flatMap((o) => o.chiamate ?? []).find((x) => x.id === c.id);
     const p = await browser.newPage({ viewport: { width: larghezza, height: h }, hasTouch: true, reducedMotion: 'reduce' });
     await p.addInitScript(() => { globalThis.__VALMORA_SECONDO_MS = 1; });
@@ -315,7 +316,8 @@ export async function controllaFermo(browser, url, larghezza, h, rossi, dati, di
     const posto0 = await posto(); await p.waitForTimeout(2500); const posto1 = await posto();
     if (posto1 !== posto0) male.push(`${vp} ${ep} ${c.id}: senza input riquadro o unità cambiano, da «${posto0}» a «${posto1}» (D-269 c)`);
     conto.episodi++; await p.close(); break;
-  }
+  } };
+  await insieme([...new Set(tutte.map((c) => c.ep))].map((ep) => () => uno(ep)), PAGINE_RADIO);
   console.log(`fermo della mossa ${vp}: ${conto.episodi} episodi`);
   return { male, ris: conto };
 }
