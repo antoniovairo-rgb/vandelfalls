@@ -40,10 +40,13 @@ const leggiPagina = (p) => p.evaluate(() => {
   const unita = [...document.querySelectorAll('.mappa.mossa [data-presenza]:not(:disabled) .pastiglia')].map((e) => ({ id: e.closest('[data-presenza]').dataset.presenza, ...box(e.getBoundingClientRect()) }));
   const settori = [...document.querySelectorAll('.mappa.mossa .settore-punto:not(:disabled)')].map((e) => { const r = e.getBoundingClientRect(), s = getComputedStyle(e, '::after');
     const l = r.left + parseFloat(s.left), t = r.top + parseFloat(s.top), w = parseFloat(s.width), h = parseFloat(s.height);
-    const fascia = Math.max(0, ...(s.boxShadow.match(/-?[\d.]+px/g) ?? []).map(parseFloat)); // la fascia bianca più larga (spread)
-    return { id: e.closest('[data-settore]').dataset.settore, l, t, r: l + w, b: t + h, raggio: w / 2 + Math.max(fascia, parseFloat(s.outlineWidth) || 0) }; });
+    // quanto sporge l'anello dal punto: l'ombra esterna più larga (spread; le «inset» stanno dentro) o il contorno col suo scarto
+    const fascia = Math.max(0, ...(s.boxShadow === 'none' ? [] : s.boxShadow.split(/,(?![^(]*\))/)).filter((x) => !x.includes('inset')).map((x) => parseFloat(x.match(/-?[\d.]+px/g)?.at(-1) ?? '0')));
+    const contorno = s.outlineStyle === 'none' ? 0 : (parseFloat(s.outlineWidth) || 0) + (parseFloat(s.outlineOffset) || 0);
+    return { id: e.closest('[data-settore]').dataset.settore, l, t, r: l + w, b: t + h, raggio: w / 2 + Math.max(fascia, contorno) }; });
   const copia = !!document.querySelector('.istruzione-sotto[data-istruzione-sotto="vera"]')?.checkVisibility();
-  return { copia, tratteggi: [...new Set(tratteggi)], bersagli: [...unita.map((x) => ({ ...x, tipo: 'unità' })), ...settori.map((x) => ({ ...x, tipo: 'settore' }))], settori };
+  const m = document.querySelector('.mappa')?.getBoundingClientRect(), mappa = m ? { l: m.left, t: m.top, r: m.right, b: m.bottom } : null;
+  return { mappa, copia, tratteggi: [...new Set(tratteggi)], bersagli: [...unita.map((x) => ({ ...x, tipo: 'unità' })), ...settori.map((x) => ({ ...x, tipo: 'settore' }))], settori };
 });
 
 /** Misura in uno stato: { copia (la copia sotto la mappa si vede), tratteggi, sotto (bersagli con un lato sotto 3:1, o senza anello su nessun lato), minimo (contrasto
@@ -53,22 +56,27 @@ export async function misuraAnelli(p) {
   const g = await leggiPagina(p), img = leggiPng(await p.screenshot()), sotto = [], sovrapposti = [], lati = [0, 0];
   let minimo = Infinity;
   for (const x of g.bersagli) {
-    const cx = Math.round((x.l + x.r) / 2), cy = Math.round((x.t + x.b) / 2);
-    // dal bordo verso fuori, sui quattro lati: si parte 4 px dentro il bordo; la fascia magenta è la prima che COMINCIA dopo
+    // una pastiglia sul bordo della mappa è tagliata: centro della parte che si vede, e i lati fuori dalla mappa non si misurano
+    const M = g.mappa ?? { l: -Infinity, t: -Infinity, r: Infinity, b: Infinity };
+    // tutta fuori dalla mappa (che la ritaglia): non si vede né si tocca; il guardiano D-259 non lo vede (l'elemento ha misure)
+    if (x.r <= M.l || x.l >= M.r || x.b <= M.t || x.t >= M.b) { sotto.push(`${x.tipo} ${x.id} fuori dalla mappa (x ${Math.round(x.l)}-${Math.round(x.r)}, mappa ${Math.round(M.l)}-${Math.round(M.r)})`); minimo = 0; continue; }
+    const cx = Math.round((Math.max(x.l, M.l) + Math.min(x.r, M.r)) / 2), cy = Math.round((Math.max(x.t, M.t) + Math.min(x.b, M.b)) / 2);
+    const dentroMappa = [x.l - 8 > M.l, x.r + 8 < M.r, x.t - 8 > M.t, x.b + 8 < M.b];
+    // dal bordo verso fuori, sui quattro lati: si parte 6 px dentro il bordo; la fascia magenta è la prima che COMINCIA dopo
     // la partenza (la tensione più alta del punto, #ff1f6b, è vicina al magenta: quella fascia parte da 0 e si salta) entro
-    // 8 px; i colori accanto sono il più contrastato fra i 3 pixel prima e fra i 3 dopo (salta la sfumatura dei bordi)
-    const partenze = [[Math.floor(x.l) + 4, cy, -1, 0], [Math.ceil(x.r) - 5, cy, 1, 0], [cx, Math.floor(x.t) + 4, 0, -1], [cx, Math.ceil(x.b) - 5, 0, 1]];
+    // 10 px; i colori accanto sono il più contrastato fra i 3 pixel prima e fra i 3 dopo (salta la sfumatura dei bordi)
+    const partenze = [[Math.floor(x.l) + 6, cy, -1, 0], [Math.ceil(x.r) - 7, cy, 1, 0], [cx, Math.floor(x.t) + 6, 0, -1], [cx, Math.ceil(x.b) - 7, 0, 1]];
     let peggio = Infinity, visti = 0;
-    for (const [x0, y0, dx, dy] of partenze) {
+    for (const [i, [x0, y0, dx, dy]] of partenze.entries()) { if (!dentroMappa[i]) continue;
       const fila = []; for (let k = 0; k < 20; k++) { const X = x0 + dx * k, Y = y0 + dy * k; fila.push(X >= 0 && Y >= 0 && X < img.w && Y < img.h ? img.px(X, Y) : null); }
       const mg = (k) => !!fila[k] && vicino(fila[k], MAGENTA);
-      const a = fila.findIndex((c, k) => k >= 1 && k <= 8 && mg(k) && !mg(k - 1)); if (a < 0) continue;
+      const a = fila.findIndex((c, k) => k >= 1 && k <= 10 && mg(k) && !mg(k - 1)); if (a < 0) continue;
       let z = a; while (z + 1 < fila.length && mg(z + 1)) z++;
       const m = fila[(a + z) >> 1], dentro = [1, 2, 3].map((d) => fila[a - d]).filter(Boolean), fuori = [1, 2, 3].map((d) => fila[z + d]).filter(Boolean);
       if (!dentro.length || !fuori.length) continue;
       visti++; peggio = Math.min(peggio, Math.max(...dentro.map((c) => contrasto(m, c))), Math.max(...fuori.map((c) => contrasto(m, c))));
     }
-    lati[0] += visti; lati[1] += partenze.length;
+    lati[0] += visti; lati[1] += dentroMappa.filter(Boolean).length;
     if (!visti) { sotto.push(`${x.tipo} ${x.id} senza anello pieno`); minimo = 0; continue; }
     minimo = Math.min(minimo, peggio);
     if (peggio < 3) sotto.push(`${x.tipo} ${x.id} ${peggio.toFixed(2)}:1`);

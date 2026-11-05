@@ -68,12 +68,19 @@ main:has(.mappa[data-casa-fuori]) .casa-riserva { display: flex; }
 main.rosso-c271t01:not(.rosso-c261e01) .mappa.mossa .tocco-pastiglia:not(:disabled) .pastiglia { outline: var(--bordo) dashed var(--magenta); outline-offset: var(--spazio-px); }
 main.rosso-c271t01:not(.rosso-c261e01) .mappa.mossa .tocco-pastiglia:is(.mossa-in-mano, .in-mano) .pastiglia { outline-style: solid; }
 main.rosso-c271t01:not(.rosso-c261e01) .mappa.mossa .settore-punto:not(:disabled) { outline: var(--bordo) dashed var(--magenta); outline-offset: var(--spazio-1); }
-main:not(.rosso-c261e01):not(.rosso-c271t01) .mappa.mossa .tocco-pastiglia:not(:disabled) .pastiglia,
-main:not(.rosso-c261e01):not(.rosso-c271t01) .mappa.mossa .settore-punto:not(:disabled)::after { outline: var(--bordo) solid var(--magenta); outline-offset: 0; box-shadow: 0 0 0 var(--anello) var(--bianco); animation: anello-pulsa var(--anello-pulsa) ease-out infinite; }
+main:not(.rosso-c261e01):not(.rosso-c271t01) .mappa.mossa .tocco-pastiglia:not(:disabled) .pastiglia { outline: var(--bordo) solid var(--magenta); outline-offset: 0; box-shadow: 0 0 0 var(--anello) var(--bianco); animation: anello-pulsa var(--anello-pulsa) ease-out infinite; }
+/* Settori d'arrivo: l'anello sta DENTRO il punto (sul suo bordo, fascia bianca dentro, filo nero fuori): sporge solo
+   --bordo-fine. Fuori sporgeva 5 px e a 360 e 375 in e02 «ritardo» i punti di curva ospiti e viale della stazione distano
+   5 px: gli anelli si sovrapponevano (5 px; e05 «sindacato» 1 px), misura po152b sul merge della 0.65.0. */
+main:not(.rosso-c261e01):not(.rosso-c271t01) .mappa.mossa .settore-punto:not(:disabled)::after { outline: var(--bordo) solid var(--magenta); outline-offset: calc(-1 * var(--bordo)); box-shadow: inset 0 0 0 var(--bordo-fine) var(--bianco), 0 0 0 var(--bordo-fine) var(--nero); animation: anello-pulsa-punto var(--anello-pulsa) ease-out infinite; }
 /* con un'unità in mano pulsano solo i settori: le altre unità restano col loro anello, ferme */
 main:not(.rosso-c261e01):not(.rosso-c271t01) .mappa.mossa:has(.mossa-in-mano, .in-mano) .tocco-pastiglia:not(:disabled) .pastiglia { animation: none; }
 main:not(.rosso-c261e01):not(.rosso-c271t01) .mappa.mossa .tocco-pastiglia:is(.mossa-in-mano, .in-mano) .pastiglia { outline-width: calc(2 * var(--bordo)); animation: none; transform: translate(calc(-1 * var(--bordo-fine)), calc(-1 * var(--bordo-fine)));
   box-shadow: 0 0 0 var(--anello-in-mano) var(--bianco), var(--ombra-1-scarto) var(--ombra-1-scarto) 0 var(--anello-in-mano) var(--nero); }
+@keyframes anello-pulsa-punto {
+  0% { box-shadow: inset 0 0 0 var(--bordo-fine) var(--bianco), 0 0 0 var(--bordo-fine) var(--nero), 0 0 0 var(--bordo-fine) var(--magenta-alone); }
+  70%, 100% { box-shadow: inset 0 0 0 var(--bordo-fine) var(--bianco), 0 0 0 var(--bordo-fine) var(--nero), 0 0 0 calc(var(--bordo-fine) + var(--spazio-2)) var(--magenta-alone-via); }
+}
 @keyframes anello-pulsa {
   0% { box-shadow: 0 0 0 var(--anello) var(--bianco), 0 0 0 var(--anello) var(--magenta-alone); }
   70%, 100% { box-shadow: 0 0 0 var(--anello) var(--bianco), 0 0 0 calc(var(--anello) + var(--spazio-2)) var(--magenta-alone-via); }
