@@ -178,7 +178,7 @@ export function chiusureCostruite(dati, dich) {
 export const PARTI = ['e01', 'citta36', 'chiamate', 'rapporti', 'riepilogo', 'verbali', 'po149', 'po152a', 'c52nomi', 'po152b', 'risposte', 'chiusure'];
 // C53-02 (D-252): la risposta di ogni opzione di ogni carta d'imprevisto e di ogni variante, a queste finestre (soglie di SOGLIE)
 export const RISPOSTE_VP = ['360x640', '375x667', '412x760'];
-export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi = [], cartella = '', parti = PARTI, limiteRisposte = Infinity, chiusureMax = Infinity }) {
+export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi = [], cartella = '', parti = PARTI, limiteRisposte = Infinity, chiusureMax = Infinity, po152b = {} }) {
   const dati = leggiDati(dirDati), dich = new Map(dati['stato.json'].variabili.map((d) => [d.id, d])), e01 = dati['missioni/e01.json'];
   const srv = await servi(build), url = `http://127.0.0.1:${srv.address().port}/`;
   const percorso = process.env.VALMORA_CHROME ?? (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
@@ -308,7 +308,7 @@ export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi
       if (h === 760 && parti.includes('po152a')) { const { controllaPo152a } = await import('./foto-po152-a.mjs'); // PO-152 A (D-241): 640 e 760
         const g = await controllaPo152a(b, url, w, rossi, cartella, dati, dich); errori.push(...g.male); }
       if (h === 760 && parti.includes('po152b')) { const { controllaPo152b } = await import('./foto-po152-b.mjs'); // D-241 idea B: 640/667/760
-        const g = await controllaPo152b(b, url, w, rossi, cartella, dati, dich); errori.push(...g.male); }
+        const g = await controllaPo152b(b, url, w, rossi, cartella, dati, dich, po152b); errori.push(...g.male); } // D-270: po152b = { giri, episodi } dei bracci
       if (h === 760 && w >= 412 && parti.includes('c52nomi')) { const { controllaNomiCitta } = await import('./foto-c52-nomi.mjs'); // C52-03: dove il nome si vede (D-123)
         const g = await controllaNomiCitta(b, url, w, rossi, cartella); errori.push(...g.male); }
       if (parti.includes('verbali')) for (const c of verbaliCostruiti(dati, dich)) { // D-234: a ogni altezza
