@@ -2,7 +2,7 @@
 // alla scelta, poi la chiusura col rapporto. Ogni scelta si salva subito: una ricarica riporta alla
 // chiamata successiva (la risposta già letta non torna).
 import { Check, ChevronDown, ChevronRight, Coffee, FileText, Radio, Undo2 } from 'lucide-react';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { spento } from '../../interruttori.ts';
 import { opzioniEsaurite, opzioniValide, unitaFinita, type InCorso } from '../../logica/missione.ts';
 import { morsiDellOndata } from '../../logica/dopo.ts';
@@ -148,15 +148,20 @@ export function Chiamata(p: { m: Missione; ic: InCorso; c: TChiamata; numero: nu
   );
 }
 
-export function Risposta(p: { m: Missione; ic: InCorso; o: Opzione; avanti: () => void }) {
+export function Risposta(p: { m: Missione; ic: InCorso; o: Opzione; avanti: () => void; istruzione?: ReactNode }) {
+  // D-269 punto b: istruzione e previsione della mossa (mossa-ui.tsx) subito sotto la mappa, prima della risposta: in fondo
+  // finivano sotto «Avanti» a pagina ferma (e16 imp_nebbia a 360×640). Rosso C269A01: in fondo alla risposta, come prima.
+  const inFondo = spento('C269A01');
   // D-193 (PO-052): esito e conseguenza in un solo blocco, così a 360×640 e 375×667 la pagina non scorre. Rosso C193R01: due
   // messaggi, come prima.
   if (!spento('C193R01')) return (
     <>
+      {!inFondo && p.istruzione}
       <Messaggio classe="vice risposta-unica" dati="risposta">
         <p className="testo-radio scelta-riga" data-scelta>{t(p.o.testo)}</p>
         {p.o.risposta && <p className="intanto"><strong><Icona di={Coffee} />Intanto…</strong> {t(p.o.risposta)}</p>}
         <RapportoCosto m={p.m} ic={p.ic} o={p.o} sotto />
+        {inFondo && p.istruzione}
       </Messaggio>
       <button className="pulsante" data-azione="continua" onClick={p.avanti}>Avanti<Icona di={ChevronRight} /></button>
     </>

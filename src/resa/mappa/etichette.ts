@@ -4,6 +4,7 @@
 // Nessun numero di pixel scritto qui: le posizioni stanno in stile.css ([data-nome], [data-unita]).
 
 import { spento } from '../../interruttori.ts';
+import { segniVisti } from './segni-visti.ts';
 
 type Rett = { left: number; top: number; right: number; bottom: number };
 const MARGINE = 5; // distanza minima dal bordo della mappa (controllo R06 di tools/foto.mjs)
@@ -77,7 +78,8 @@ export function disponiEtichette(contenitore: HTMLElement) {
   if (!contenitore.querySelector('.settore-unita') && !spento('C34N01')) return;
   // D-187 (S-12): nella chiamata i segni dell'ultima risposta (▲/▼, +⚑) finivano sotto i nomi (fino a 506 px² a 360):
   // per i nomi sono ostacoli. Rosso C187S01: no, come prima.
-  const segni = spento('C187S01') ? [] : [...contenitore.querySelectorAll('.settore .segni-effetto')].map((e) => e.getBoundingClientRect() as Rett);
+  // D-269 c: nella risposta con la mossa anche quelli già spariti (segni-visti.ts), così i nomi non si ridispongono senza input
+  const segni = spento('C187S01') ? [] : segniVisti(contenitore, 'nomi', [...contenitore.querySelectorAll('.settore .segni-effetto')].map((e) => e.getBoundingClientRect() as Rett));
   // 2) nome e unità insieme (6 × 6 combinazioni; solo il nome per i settori senza unità), si tiene quella che costa meno
   //    (due passate, così anche i primi settori vedono dove sono finiti gli ultimi).
   //    Nome contro: punti, nomi e unità degli altri settori. Unità contro: tutti i punti (anche il proprio),

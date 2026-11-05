@@ -2,7 +2,7 @@
 // spostare UNA unità: tocco sull'unità (badge), poi sul settore dove portarla (anche da tastiera: Invio sui due pulsanti; Esc
 // lascia l'unità). Facoltativa: «Avanti» senza mossa resta il default. L'indicazione sta nel riquadro radio sopra la mappa
 // (radio-mappa.tsx), quindi la pagina non si allunga. Rosso C241M02: la mappa non si tocca fra le chiamate.
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { spento } from '../interruttori.ts';
 import { settoriAmmessi, type InCorso } from '../logica/missione.ts';
 import { mossaPossibile, sposta, spostabili, turnoMossa } from '../logica/mossa.ts';
@@ -55,7 +55,33 @@ export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: bo
   const riga = stato !== 'fatta' || !effetto?.length ? null : cambi.length
     ? `${t('mossa.previsione')} ${cambi.map((e) => `${t(`settore.${e.settore}`)} ${t(e.verso === 'su' ? 'mossa.si_scalda' : 'mossa.si_calma')}`).join(', ')}.`
     : t('mossa.non_cambia');
-  const indicazione = <p className="mossa-indicazione" data-mossa={stato}>{t(stato === 'puoi' && spento('C268M01') ? 'mossa.puoi_c56' : `mossa.${stato}`) /* C56-04: «un'unità», non «una squadra»; rosso C268M01: come prima */}{riga && <> <span data-previsione={cambi.map((e) => `${e.settore}:${e.verso}`).join(' ')}>{riga}</span></>}</p>;
+  const testo = t(stato === 'puoi' && spento('C268M01') ? 'mossa.puoi_c56' : `mossa.${stato}`); // C56-04: «un'unità», non «una squadra»; rosso C268M01: come prima
+  const indicazione = <p className="mossa-indicazione" data-mossa={stato}>{testo}{riga && <> <span data-previsione={cambi.map((e) => `${e.settore}:${e.verso}`).join(' ')}>{riga}</span></>}</p>;
   const segni: Segno[] = cambi.map((e) => ({ settore: e.settore, tipo: 'tensione', verso: e.verso as 'su' | 'giu' }));
-  return { mappa, indicazione, segni };
+  // C57-02 e D-269 punto a: se il riquadro non trova posto («muto»), istruzione e previsione si leggono sotto la mappa (come il
+  // costo, D-258), mai solo al lettore di schermo: nessuno stato lascia il giocatore senza istruzione. Nella misura di adatta.ts
+  // (C57-01) la copia porta il testo più lungo fra gli stati possibili («riserva»), così la mappa non cambia altezza.
+  // Rossi: C269P01 niente previsione nella copia; C269I01 niente istruzione (solo la previsione, come in 614c5103).
+  // D-269 (CI 1249): a 360×640 con la mappa al suo minimo (240 px, D-262) le due righe di «mossa.puoi» nella copia portavano la
+  // risposta oltre soglia (e02 tornelli_falsi 75 px, soglia 68; peggiore 81): nella copia la versione breve, di una riga (riquadro e
+  // lettore di schermo restano col testo intero). Rosso C269B01: il testo intero anche nella copia.
+  const breve = (s: string) => (s === 'puoi' && !spento('C269B01') && !spento('C268M01') ? t('mossa.puoi_breve') : null);
+  const testoSotto = breve(stato) ?? testo;
+  let sotto: ReactNode = null;
+  const conPrev = !spento('C269P01') && !spento('C262E01'), conIstr = !spento('C269I01');
+  if ((conPrev || conIstr) && (possibile || riga)) {
+    const unisci = (...xs: string[]) => xs.filter(Boolean).join(' ');
+    const verbo = t('mossa.si_scalda').length >= t('mossa.si_calma').length ? t('mossa.si_scalda') : t('mossa.si_calma');
+    const prevLunga = !conPrev ? '' : spostabili(m, ic).flatMap((x) => settoriAmmessi(m, x.risorsa).filter((k) => k !== x.settore)
+      .map((a) => `${t('mossa.previsione')} ${t(`settore.${x.settore}`)} ${verbo}, ${t(`settore.${a}`)} ${verbo}.`)).reduce((a, b) => (b.length > a.length ? b : a), t('mossa.non_cambia'));
+    const ora = unisci(conIstr ? testoSotto : '', conPrev && riga ? riga : '');
+    const riserva = !possibile ? ora : [conIstr ? breve('puoi') ?? t('mossa.puoi') : '', conIstr ? t('mossa.dove') : '', unisci(conIstr ? t('mossa.fatta') : '', prevLunga)].reduce((a, b) => (b.length > a.length ? b : a), ora);
+    sotto = (
+      <p className="istruzione-sotto" data-istruzione-sotto={ora ? 'vera' : 'vuota'} aria-hidden="true">
+        <span className="vera" data-mossa-sotto={stato}>{conIstr && testoSotto}{conIstr && conPrev && riga ? ' ' : ''}{conPrev && riga && <span data-previsione-sotto>{riga}</span>}</span>
+        <span className="riserva">{riserva}</span>
+      </p>
+    );
+  }
+  return { mappa, indicazione, segni, sotto };
 }
