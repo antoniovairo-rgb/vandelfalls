@@ -126,7 +126,7 @@ const piano = (m, v, dich) => { const g = attenta(creaCaso(1), dich); let s = M.
   while (!M.missioneFinita(m, s)) { const d = g.schiera(m, s); s = M.schiera(m, s, d); for (let c = M.chiamateAperte(m, s)[0]; c; c = M.chiamateAperte(m, s)[0]) s = M.rispondi(m, s, c.id, g.scegli(m, s, c), dich); ond.push({ d }); s = M.chiudiOndata(m, s, dich); }
   return ond; };
 async function schiera(p, d) { for (const [r, ps] of Object.entries(d)) for (const [s, q] of Object.entries(ps)) for (let x = 0; x < q; x++) { if ((await p.getAttribute(`[data-risorsa="${r}"]`, 'aria-pressed')) !== 'true') await p.click(`[data-risorsa="${r}"]`); await p.click(`[data-settore="${s}"] .settore-punto`); } }
-const lento = (p) => p.waitForFunction(() => { const s = document.querySelectorAll('.scena'); return s.length === 1 && getComputedStyle(s[0]).opacity === '1'; }, null, { timeout: 8000 }).catch(() => {});
+const lento = (p) => p.waitForFunction(() => { const s = document.querySelectorAll('.scena'); return s.length === 1 && getComputedStyle(s[0]).opacity === '1'; }, null, { timeout: 8000 }).catch(() => {}), vista = (p) => p.evaluate(() => `(schermata «${document.querySelector('main')?.dataset.schermata ?? '?'}», ${[...document.querySelectorAll('button')].some((b) => /Riprendi/.test(b.textContent)) ? 'con' : 'senza'} «Riprendi», messaggi ${[...document.querySelectorAll('[data-messaggio]')].map((e) => e.dataset.messaggio).slice(-3).join(',') || 'nessuno'})`).catch((e) => `(pagina illeggibile: ${String(e).slice(0, 60)})`); // lotto «altezze»: cosa mostra la pagina quando qualcosa «non si apre» (intermittente, visto 2 volte: e19 imp_camion_rifiuti fra le chiamate, e01 imp_api fra le risposte)
 const misura = (p) => p.evaluate(() => { const s = document.scrollingElement, sc = document.querySelector('.scena');
   return { pagina: s.scrollHeight, ecc: s.scrollHeight - innerHeight, scena: sc?.dataset.scena ?? '?', mappa: Math.round(document.querySelector('.mappa')?.getBoundingClientRect().height ?? 0), mossa: !!document.querySelector('.mappa .radio-mappa [data-mossa]'), testo: sc?.innerText.length ?? 0, titolo: (sc?.querySelector('h1,h2,h3,p')?.textContent ?? '').trim().slice(0, 40),
     // S-21: il pulsante «Home» della mappa abbassata non copre punti o nomi dei settori
@@ -254,7 +254,7 @@ export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi
           await q.goto(url);
           while (coda.length) { const c = coda.shift(); await q.evaluate((x) => localStorage.setItem('vandelfalls-salvataggio', x), c.sal); await q.reload();
             // D-241: una chiamata che non si apre non entra nella misura (prima si misurava la pagina sbagliata e la mediana si spostava)
-            await q.getByRole('button', { name: 'Riprendi' }).click(); if (!(await q.waitForSelector(`[data-messaggio="chiamata-${c.id}"]`, { timeout: 8000 }).then(() => true).catch(() => false))) { errori.push(`${vp}: chiamata ${c.ep} ${c.id} non si apre`); continue; } await lento(q);
+            await q.getByRole('button', { name: 'Riprendi' }).click(); if (!(await q.waitForSelector(`[data-messaggio="chiamata-${c.id}"]`, { timeout: 8000 }).then(() => true).catch(() => false))) { errori.push(`${vp}: chiamata ${c.ep} ${c.id} non si apre ${await vista(q)}`); continue; } await lento(q);
             chiamate.push({ vp, ep: c.ep, id: c.id, imprevisto: c.imprevisto, ecc: await q.evaluate(() => document.scrollingElement.scrollHeight - innerHeight) });
             if (cartella && c.imprevisto) await q.screenshot({ path: join(cartella, `${vp}-chiamata-${c.ep}-${c.id}.png`), fullPage: true }); }
           await q.close(); })); }
@@ -278,7 +278,7 @@ export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi
             const ok = await q.waitForSelector(`[data-opzione="${c.op}"]`, { timeout: 8000 }).then(() => true, () => false); await lento(q);
             if (ok) { await q.click(`[data-opzione="${c.op}"]`); await q.click('[data-conferma]'); }
             const visto = ok && await q.waitForSelector('.scena[data-scena="risposta"]', { timeout: 8000 }).then(() => true, () => false); await lento(q);
-            if (!visto) { errori.push(`${vp}: risposta ${c.ep} ${c.id}/${c.op} non si apre`); continue; }
+            if (!visto) { errori.push(`${vp}: risposta ${c.ep} ${c.id}/${c.op} non si apre ${await vista(q)}`); continue; }
             // D-259: con la mossa la mappa della risposta si abbassa secondo il testo della sua opzione, quindi la scena non è
             // più la stessa per tutto il gruppo (misura veloce 75 px, vera 0 su e02 imp_acquazzone/settore_coperto): ognuna
             // nella sua scena vera
@@ -299,7 +299,7 @@ export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi
             const ok = await q.waitForSelector(`[data-opzione="${c.op}"]`, { timeout: 8000 }).then(() => true, () => false); await lento(q);
             if (ok) { await q.click(`[data-opzione="${c.op}"]`); await q.click('[data-conferma]'); }
             const visto = ok && await q.waitForSelector('.scena[data-scena="risposta"]', { timeout: 8000 }).then(() => true, () => false); await lento(q);
-            if (!visto) { errori.push(`${vp}: risposta ${c.ep} ${c.id}/${c.op} non si apre`); continue; }
+            if (!visto) { errori.push(`${vp}: risposta ${c.ep} ${c.id}/${c.op} non si apre ${await vista(q)}`); continue; }
             risposte.push({ vp, ep: c.ep, id: c.id, op: c.op, ecc: await q.evaluate(() => document.scrollingElement.scrollHeight - innerHeight) });
             if (process.env.AVANZAMENTO && risposte.length % 50 === 0) console.log(`${vp} risposte: ${risposte.length}, ne restano ${coda.length}`); }
           await q.close(); })); }
