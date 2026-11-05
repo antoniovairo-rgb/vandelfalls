@@ -100,6 +100,9 @@ const stato = (p) => p.evaluate(() => {
 // D-270: `solo` restringe un braccio rosso ai giri (e01, radio, previsione, fermo, versione) e agli episodi del giro radio dove il suo rosso si vede
 export async function controllaPo152b(browser, url, larghezza, rossi = [], cartella = '', dati, dich, solo = {}) {
   const giri = solo.giri ?? ['e01', 'radio', 'previsione', 'fermo', 'versione']; // D-271: «versione» (versione-svanisce.mjs)
+  // lotto «altezze» (S-11): il verde gira radio, previsione e fermo su PAGINE_RADIO pagine insieme; i bracci (5 processi insieme,
+  // pochi episodi) su una: con 4 anche lì, in 1 giro su 3, C269A01 ha dato 0 problemi e C269P01 un'attesa scaduta di 15 s
+  const pagine = solo.giri ? 1 : PAGINE_RADIO;
   const male = [], ris = [], c = chiamateCostruite(dati, dich).find((x) => x.ep === 'e01');
   if (!c) return { ris, male: ['PO-152 B: nessuna chiamata di e01 costruita'] };
   const m = dati['missioni/e01.json'], ch = m.ondate.flatMap((o) => o.chiamate).find((x) => x.id === c.id), opzione = ch.opzioni[0].id;
@@ -170,19 +173,22 @@ export async function controllaPo152b(browser, url, larghezza, rossi = [], carte
     await p.close();
   }
   const hr = RADIO_VP[larghezza];
-  if (hr && giri.includes('radio')) { const r = await controllaRadio(browser, url, larghezza, hr, rossi, dati, dich, solo.episodi); male.push(...r.male); ris.push(r.ris); }
-  if (hr && giri.includes('previsione')) { const r = await controllaPrevisione(browser, url, larghezza, hr, rossi, dati, dich); male.push(...r.male); ris.push(r.ris); }
+  if (hr && giri.includes('radio')) { const r = await controllaRadio(browser, url, larghezza, hr, rossi, dati, dich, solo.episodi, pagine); male.push(...r.male); ris.push(r.ris); }
+  if (hr && giri.includes('previsione')) { const r = await controllaPrevisione(browser, url, larghezza, hr, rossi, dati, dich, pagine); male.push(...r.male); ris.push(r.ris); }
   if (giri.includes('versione')) male.push(...await (await import('./versione-svanisce.mjs')).controllaVersioneSvanisce(browser, url, larghezza, rossi, chiamateCostruite(dati, dich)[0].sal)); // D-271
-  if (FERMO_VP[larghezza] && giri.includes('fermo')) { const r = await controllaFermo(browser, url, larghezza, FERMO_VP[larghezza], rossi, dati, dich); male.push(...r.male); ris.push(r.ris); }
+  if (FERMO_VP[larghezza] && giri.includes('fermo')) { const r = await controllaFermo(browser, url, larghezza, FERMO_VP[larghezza], rossi, dati, dich, pagine); male.push(...r.male); ris.push(r.ris); }
   return { ris, male };
 }
 
+const PAGINE_RADIO = Number(process.env.PAGINE_RADIO ?? 4);
+const insieme = async (compiti, n) => { const coda = [...compiti]; await Promise.all(Array.from({ length: Math.min(n, coda.length) }, async () => { while (coda.length) await coda.shift()(); })); };
 /** D-255 punto 2: prima chiamata con mossa di ogni episodio; stati «puoi», «dove» (ogni unità in mano) e «mossa fatta». */
-async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, episodi) {
+async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, episodi, pagine = 1) {
   const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'radio', episodi: 0, conSegni: 0, senzaSegni: 0, stati: 0, stretti: 0, muti: 0, conCosto: 0, senzaCosto: 0, scorreMax: 0, sotto: 0, mappaMin: Infinity, mappaMax: 0, casaFuori: 0, contrastoMin: Infinity, latiVisti: 0, latiProvati: 0, anelliCopia: 0, anelliDove: 0 }, soglia = SOGLIE[vp]?.risposta ?? 0;
   // al più 4 chiamate per episodio: col rosso C241M02 (mappa che non si tocca) nessuna ha la mossa e si giravano tutte le chiamate
   // dei 36 episodi (4 ore e 20 nel giro dei bracci), fino a un'opzione esaurita (e28 blocca_corteo) che faceva saltare il passo
-  for (const ep of [...new Set(tutte.map((c) => c.ep))].filter((e) => !episodi || episodi.includes(e))) for (const c of tutte.filter((x) => x.ep === ep).slice(0, 4)) {
+  // lotto «altezze» (S-11): gli episodi vanno su più pagine insieme (prima uno alla volta: 390 s su 540 di po152b a 360, quasi tutti attese)
+  const uno = async (ep) => { for (const c of tutte.filter((x) => x.ep === ep).slice(0, 4)) {
     const ch = dati[`missioni/${ep}.json`].ondate.flatMap((o) => o.chiamate ?? []).find((x) => x.id === c.id);
     const p = await browser.newPage({ viewport: { width: larghezza, height: h }, hasTouch: true, reducedMotion: 'reduce' });
     await p.addInitScript(() => { globalThis.__VALMORA_SECONDO_MS = 1; });
@@ -206,7 +212,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, epi
     // la pagina ferma: la mappa che si abbassa (D-259) e i nomi si ridispongono dopo il tocco; due letture uguali a 100 ms, al più 3 s
     // (e30 raduno_silenzio a 375: 79 px a 80 ms, 0 a 250 ms)
     const ferma = async () => { let prima = ''; for (let i = 0; i < 30; i++) { const ora = await p.evaluate(() => `${document.scrollingElement.scrollHeight}|${document.querySelector('.mappa')?.getBoundingClientRect().height}|${document.querySelector('.radio-mappa')?.className}`); if (ora === prima) return; prima = ora; await p.waitForTimeout(100); } };
-    const giu = async (dove) => { await ferma(); const x = await coperti(p); conto.stati++; if (x.muto) conto.muti++; else if (x.stretto) conto.stretti++;
+    const giu = async (dove, conRighe = true) => { await ferma(); const x = await coperti(p); conto.stati++; if (x.muto) conto.muti++; else if (x.stretto) conto.stretti++;
       if (x.xs.length) male.push(`${vp} ${ep} ${c.id} ${dove}: il riquadro radio copre ${x.xs.join(', ')} (D-255)`);
       conto.scorreMax = Math.max(conto.scorreMax, x.ecc);
       if (x.fuori) conto.casaFuori++;
@@ -214,7 +220,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, epi
       if (x.tagliato) male.push(`${vp} ${ep} ${c.id} ${dove}: il riquadro radio è tagliato (D-262)`);
       if (!x.previsione) male.push(`${vp} ${ep} ${c.id} ${dove}: la previsione non si vede (C57-02)`);
       if (!x.istruzione) male.push(`${vp} ${ep} ${c.id} ${dove}: l'istruzione della mossa non si vede (D-269 a)`);
-      if (x.righe.length) male.push(`${vp} ${ep} ${c.id} ${dove}: copia sotto la mappa coperta a pagina ferma: ${x.righe.join(', ')} (D-269 b)`);
+      if (conRighe && x.righe.length) male.push(`${vp} ${ep} ${c.id} ${dove}: copia sotto la mappa coperta a pagina ferma: ${x.righe.join(', ')} (D-269 b)`);
       if (x.coperto.length) male.push(`${vp} ${ep} ${c.id} ${dove}: il centro non si tocca: ${x.coperto.join(', ')} (C56-03)`);
       if (x.senzaBordo.length) male.push(`${vp} ${ep} ${c.id} ${dove}: senza evidenziazione ${x.senzaBordo.join(', ')} (D-261)`);
       if (x.fuoriMappa.length) male.push(`${vp} ${ep} ${c.id} ${dove}: unità fuori dalla mappa, non si vede né si tocca: ${x.fuoriMappa.join(', ')} (D-271, C271U01)`);
@@ -230,9 +236,14 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, epi
     // D-270: la sola lettura da fuori veniva spesso a segni già spariti (rosso C269C01 visto a caso, 0-8 episodi su 36 secondo il
     // carico): ora si confronta anche il posto dell'ultimo fotogramma coi segni (fermo da ≥ 300 ms) con quello a segni spariti
     const posto = () => p.evaluate(() => { const r = document.querySelector('.radio-mappa'); return `${r?.className} ${r?.style.getPropertyValue('--radio-y')}`; });
-    await giu('«puoi spostare»'); const t0 = Date.now(), posto0 = await posto();
+    // lotto «altezze» (S-11): D-269 b del «puoi spostare» si guarda a segni spariti. Prima si guardava subito, ma i segni della
+    // risposta (fiducia, tensione: 1,8 s veri) alzano la testata di 2 px e, sotto carico, la lettura veniva a volte dopo: il rosso
+    // C269A01 su e21 si vedeva o no secondo il carico (CI 1295 su main: cieco in 2 tentativi su 3; qui 1 giro su 8 a 8 processi)
+    await giu('«puoi spostare»', false); const t0 = Date.now(), posto0 = await posto();
     await p.waitForFunction(() => !document.querySelector('.mappa [data-segno]'), null, { timeout: 5000 }).catch(() => {});
     await p.waitForTimeout(Math.max(500, 2500 - (Date.now() - t0))); const posto1 = await posto();
+    await p.waitForFunction(() => !document.querySelector('.segni-effetto, .mappa [data-segno]'), null, { timeout: 5000 }).catch(() => {});
+    const r1 = await coperti(p); if (r1.righe.length) male.push(`${vp} ${ep} ${c.id} «puoi spostare», a segni spariti: copia sotto la mappa coperta a pagina ferma: ${r1.righe.join(', ')} (D-269 b)`);
     if (posto1 !== posto0) male.push(`${vp} ${ep} ${c.id}: senza input il riquadro passa da «${posto0}» a «${posto1}» (D-269 c)`);
     const st = await p.evaluate(() => globalThis.__posti), iv = st.findIndex((x, i) => i > 0 && !x.s && st[i - 1].s);
     if (iv > 0 && st[iv].t - st[iv - 1].t >= 300) { conto.conSegni++;
@@ -258,7 +269,8 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, epi
       const a = await p.$('.mappa .settore-punto:not(:disabled)'); if (a) { await a.click({ force: true }); await p.waitForTimeout(150); await giu('«mossa fatta»'); await stessa('dopo la mossa'); } }
     if (process.env.VALMORA_DETTAGLIO) console.log(`  ${vp} ${ep} ${c.id}: ${conto.stati - n0} stati`);
     conto.episodi++; await p.close(); break;
-  }
+  } };
+  await insieme([...new Set(tutte.map((c) => c.ep))].filter((e) => !episodi || episodi.includes(e)).map((ep) => () => uno(ep)), pagine);
   console.log(`radio della mossa ${vp}: ${conto.episodi} episodi (D-269 c: segni ▲/▼ visti a riquadro fermo in ${conto.conSegni}, no in ${conto.senzaSegni}), ${conto.stati} stati, rapporto al solo lettore in ${conto.stretti}, riquadro al solo lettore in ${conto.muti}; con costo ${conto.conCosto}, costo non visibile in ${conto.senzaCosto}; scorrimento massimo ${conto.scorreMax} px (soglia ${soglia}); costo sotto la mappa in ${conto.sotto}, mappa alta da ${conto.mappaMin} a ${conto.mappaMax} px; «Home» nella testata in ${conto.casaFuori}; anelli: contrasto minimo ${conto.contrastoMin.toFixed(2)}:1, lati visti ${conto.latiVisti} su ${conto.latiProvati}, stati con la copia sotto la mappa ${conto.anelliCopia}, con un'unità in mano ${conto.anelliDove}`);
   if (conto.episodi < (episodi ? episodi.length : 30)) male.push(`${vp}: radio della mossa provata solo in ${conto.episodi} episodi${episodi ? ` su ${episodi.length} del braccio` : ''} (D-255)`);
   return { ris: conto, male };
@@ -267,7 +279,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, epi
 /** C57-02 (D-269): ogni combinazione unità → settore delle chiamate di CASI_PREVISIONE; dopo la mossa la previsione si vede, la
  *  mappa non ha cambiato altezza dal «puoi spostare» (C57-01) e la risposta scorre entro soglia. */
 const CASI_PREVISIONE = [['e16', 'imp_nebbia']];
-async function controllaPrevisione(browser, url, larghezza, h, rossi, dati, dich) {
+async function controllaPrevisione(browser, url, larghezza, h, rossi, dati, dich, pagine = 1) {
   const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'previsione', mosse: 0, sotto: 0 }, soglia = SOGLIE[vp]?.risposta ?? 0;
   for (const [ep, id] of CASI_PREVISIONE) {
     const c = tutte.find((x) => x.ep === ep && x.id === id), ch = dati[`missioni/${ep}.json`].ondate.flatMap((o) => o.chiamate ?? []).find((x) => x.id === id);
@@ -284,7 +296,8 @@ async function controllaPrevisione(browser, url, larghezza, h, rossi, dati, dich
     const altezza = (p) => p.evaluate(() => Math.round(document.querySelector('.mappa').getBoundingClientRect().height));
     const p0 = await apri(); if (!p0) { male.push(`${vp} ${ep} ${id}: il «puoi spostare» non compare (C57-02)`); continue; }
     const unita = await p0.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza)); await p0.close();
-    for (const u of unita) for (let j = 0, n = 1; j < n; j++) {
+    // lotto «altezze» (S-11): un'unità per pagina, più pagine insieme; le mosse di ogni unità restano in fila
+    await insieme(unita.map((u) => async () => { for (let j = 0, n = 1; j < n; j++) {
       const p = await apri(); if (!p) { male.push(`${vp} ${ep} ${id} ${u}: il «puoi spostare» non compare (C57-02)`); break; }
       const h0 = await altezza(p);
       await p.locator(`.mappa [data-presenza="${u}"]`).click({ force: true }); await p.waitForTimeout(80);
@@ -298,7 +311,7 @@ async function controllaPrevisione(browser, url, larghezza, h, rossi, dati, dich
       if (h1 !== h0) male.push(`${dove}: dopo la mossa la mappa passa da ${h0} a ${h1} px (C57-01)`);
       if (x.ecc > soglia) male.push(`${dove}: la risposta scorre di ${x.ecc} px (soglia ${soglia})`);
       await p.close();
-    }
+    } }), pagine);
   }
   console.log(`previsione dopo la mossa ${vp}: ${conto.mosse} mosse, previsione sotto la mappa in ${conto.sotto}`);
   if (!conto.mosse) male.push(`${vp}: nessuna mossa provata (C57-02)`);
@@ -306,9 +319,10 @@ async function controllaPrevisione(browser, url, larghezza, h, rossi, dati, dich
 }
 
 /** D-269 c: prima chiamata con la mossa di ogni episodio; nello stato «puoi», 2,5 s senza input: riquadro (classe, posto) e unità fermi. */
-export async function controllaFermo(browser, url, larghezza, h, rossi, dati, dich) {
+export async function controllaFermo(browser, url, larghezza, h, rossi, dati, dich, pagine = 1) {
   const male = [], vp = `${larghezza}x${h}`, tutte = chiamateCostruite(dati, dich), conto = { vp, giro: 'fermo', episodi: 0 };
-  for (const ep of [...new Set(tutte.map((c) => c.ep))]) for (const c of tutte.filter((x) => x.ep === ep).slice(0, 4)) {
+  // lotto «altezze» (S-11): episodi su più pagine insieme, come il giro radio
+  const uno = async (ep) => { for (const c of tutte.filter((x) => x.ep === ep).slice(0, 4)) {
     const ch = dati[`missioni/${ep}.json`].ondate.flatMap((o) => o.chiamate ?? []).find((x) => x.id === c.id);
     const p = await browser.newPage({ viewport: { width: larghezza, height: h }, hasTouch: true, reducedMotion: 'reduce' });
     await p.addInitScript(() => { globalThis.__VALMORA_SECONDO_MS = 1; });
@@ -325,7 +339,8 @@ export async function controllaFermo(browser, url, larghezza, h, rossi, dati, di
     const posto0 = await posto(); await p.waitForTimeout(2500); const posto1 = await posto();
     if (posto1 !== posto0) male.push(`${vp} ${ep} ${c.id}: senza input riquadro o unità cambiano, da «${posto0}» a «${posto1}» (D-269 c)`);
     conto.episodi++; await p.close(); break;
-  }
+  } };
+  await insieme([...new Set(tutte.map((c) => c.ep))].map((ep) => () => uno(ep)), pagine);
   console.log(`fermo della mossa ${vp}: ${conto.episodi} episodi`);
   return { male, ris: conto };
 }
