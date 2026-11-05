@@ -1413,3 +1413,49 @@ Ora il passo è vicino alla somma diviso 5: nessun braccio da solo lo allunga.
 **Instabilità vista una volta, non riprodotta.** Nella misura su 28cdaab1 i due bracci «chiamate» hanno scritto «chiamata e19 imp_camion_rifiuti non si apre» (attesa di 8 s). C206I01 ha scritto anche «e19 consiglio». È successo sotto il carico del passo e non ha reso ciechi i bracci. Non è comparsa nel «prima» su 7e753289, nelle tre prove qui sopra né nella misura «dopo». Nel giro verde farebbe rosso il passo: la tengo come candidata del lotto «altezze», non corretta qui.
 
 **CI 1283 su 61f1fe60** (codice di D-274b): 10 job verdi al primo tentativo. In «grafica (360 bracci)» bracci-rossi-grafica dura 1361 s, nessun cieco; con D-274, nella 1277, era 1950 s.
+
+## Lotto «altezze» (S-11): passo «altezze» più corto, solo strumenti
+
+**Base.** Ramo claude/valmora-altezze da main bf5db600 (0.66.0). Nessun controllo tolto, nessuna soglia cambiata, verde intero: 1989 risposte per altezza, 782 chiamate, giro radio su 36 episodi, previsione su 24 mosse, fermo su 36 episodi. Le misure sono di questo container (4 core), una parte alla volta e un viewport alla volta, in sequenza come il passo.
+
+**Dove va il tempo, prima** (main 09ea6727, 0 problemi in 72 righe; FATTO MISURATO):
+
+| parte | somma su 6 viewport | quota |
+|---|---|---|
+| risposte | 5450 s | 63% |
+| po152b | 1758 s | 20% |
+| chiusure, chiamate, e01, po149, verbali, po152a, c52nomi, rapporti, riepilogo, citta36 | 1492 s | 17% |
+| totale | 8700 s (360: 3222, 375: 2725, 412: 2753) | |
+
+**«risposte»: nessuna modifica.**
+- Le scene sono 1989 per altezza, non 406: con la mossa (D-259) ogni risposta ha la sua scena vera. La scena mediana dura 3742 ms con 4 pagine.
+- Il lavoro è legato alla CPU. Campione di 300 risposte: 1 pagina 614 s, 4 pagine 298 s, 8 pagine 282 s. Più pagine non servono (ipotesi b di S-26, respinta).
+- Profilo CPU (1 pagina, build non minificata): il costo maggiore per scena è nel gioco, nella disposizione dei nomi dei settori (`getBoundingClientRect` ← `nomeDi` ← `sposta` 208 ms, più circa 150 ms fra `nomiSopra`, `suNomi`, `disponiEtichette`). Va in D-272, che rifà la disposizione: lì è il primo numero da misurare.
+- Raggruppare le scene con la mossa (ipotesi a) non è corretto: la mappa abbassata resta tale nella stessa risposta (`tenuta`, src/resa/mappa/adatta.ts:35-40) e il riquadro radio mostra il costo dell'opzione.
+- Clic dentro la pagina invece del clic di Playwright: 302 → 285 s su 300 risposte, altezze identiche. Scartato: guadagno piccolo e toglie la verifica che opzione e «Conferma» si tocchino.
+- CI: le 3 altezze di «risposte» sono già su 3 job (catene.yml, una larghezza per job). Il PO ha scelto «nessun cambio alla CI» (D-275 senza seguito).
+
+**po152b: radio, previsione e fermo su 4 pagine insieme nel verde** (`tools/foto-po152-b.mjs`).
+- Prima giravano un episodio o una mossa alla volta, quasi tutto in attesa (2,5 s di D-269 c, «ferma», 300/600 ms).
+- Radio: episodi in parallelo. Previsione: un'unità per pagina, le mosse di ogni unità in fila. Fermo: episodi in parallelo.
+- I bracci rossi (5 processi insieme, pochi episodi) restano su 1 pagina: con 4 anche lì, in 1 giro su 3, C269P01 ha avuto un'attesa scaduta di 15 s.
+
+| giro (stessa build) | prima | dopo |
+|---|---|---|
+| radio a 360 | 390 s | 166 s (4 pagine; 122 s con 8) |
+| previsione a 360 | 115 s | 63 s |
+| fermo a 412×915 | 157 s | 63, 65, 62 s (verde 0 problemi; rosso C269C01 12 = 12) |
+
+Conteggi verdi identici: 36 episodi, 276 stati a 360 e 277 a 375 e 412, D-269 c misurato in 36 su 36, 24 mosse.
+
+**D-269 b del «puoi spostare» a segni spariti; braccio C269A01 sul giro previsione.**
+- CI 1295 su main bf5db600: «360 bracci» INSTABILE, C269A01 cieco nei tentativi 1 e 2.
+- Causa misurata: dopo «Conferma» i segni di fiducia e tensione restano 1,8 s veri e alzano la testata di 2 px (`DIV.fiducia` 20 → 18 px). La riga della copia sotto la mappa era coperta da «Avanti» solo in quei 1,8 s. Da solo il braccio leggeva prima (6 su 6); sotto carico a volte dopo (cieco 1 volta su 8 a 8 processi, 2 su 10 a 10).
+- Ora il controllo D-269 b del «puoi spostare» si fa a segni spariti; gli altri controlli dello stato restano dove sono. Il verde resta a 0 problemi.
+- A segni spariti il rosso C269A01 non si vede in nessuno dei 36 episodi del giro radio; si vede nel giro previsione (e16 imp_nebbia, 5 mosse su 24): 5 su 5 in 9 prove, 8 delle quali insieme a 8 processi. Il braccio ora è `giri: ['previsione'], almeno: 5`.
+
+**«non si apre» intermittente.** Visto 2 volte (e19 imp_camion_rifiuti fra le chiamate in D-274; e01 imp_api fra le risposte, una volta su 1989). Non riprodotto in 6 giri successivi, due dei quali con 8 pagine su 1989 risposte. Ora il messaggio dice cosa mostra la pagina (schermata, «Riprendi», ultimi messaggi), per trovare la causa alla prossima volta. Nessun nuovo tentativo.
+
+**Bracci rossi a 360** (stesso cronometro, 5 in parallelo): 5 giri dopo le modifiche, nessun cieco, conteggi uguali fra i giri (C241M02 21, C255R01 16, C261E01 11, C262D01 3, C268M01 54, C269A01 5, C269C01 5-6, C269P01 10). Durata 960-1135 s.
+
+**Dopo** (stesso script del «prima», 0 problemi in 72 righe): 6835 s (360: 2510, 375: 2179, 412: 2146). po152b 1758 → 707 s. Il resto del calo (soprattutto «risposte») non è attribuibile a questo lotto: il «prima» è su un'altra build (09ea6727 contro 0.66.0); non posso confermarlo.
