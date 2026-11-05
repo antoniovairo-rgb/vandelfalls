@@ -180,6 +180,17 @@
   --spaziatura-etichetta: 0.04em;
   --spazio-px: 1px;
   --opaco: 0.4;
+  /* D-271 (PO-159): segno di «toccabile» nella mossa, a tinta piena (niente tratteggio). L'anello magenta sta fra il bordo nero
+     della pastiglia (o del punto del settore) e una fascia bianca: confina solo con nero (3,97:1) e bianco (4,76:1, misure sui pixel, anelli-mossa.mjs), su qualunque
+     mappa (WCAG 1.4.11). L'alone che pulsa è solo un richiamo in più, fermo con la riduzione del movimento. */
+  --anello: calc(var(--bordo) + var(--bordo-fine)); /* anello magenta più fascia bianca */
+  --anello-in-mano: calc(2 * var(--bordo) + var(--bordo-fine)); /* l'unità in mano: anello doppio, «sollevata» */
+  --magenta-alone: rgba(224, 17, 95, 0.5);
+  --magenta-alone-via: rgba(224, 17, 95, 0);
+  --anello-pulsa: 1.8s;
+  /* D-271: la versione si vede all'avvio del gioco e poi svanisce (Titolo e Crediti la tengono) */
+  --versione-attesa: 4s;
+  --versione-svanire: 0.8s;
   --opaco-tenue: 0.55;
 
   --larghezza-max: 480px;

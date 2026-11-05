@@ -362,4 +362,12 @@
 //   misura: cielo 16 px col busto visibile, distanza fra bolle 26,8 px, bloccate a opacità 1 (contrasto 5,85:1), nomi tagliati 0/36,
 //   C20-03 0 a ogni altezza di 412; mappa ferma e 640/667 senza scorrimento; 48/48 stati identici dopo il merge della 0.65.0.
 //   guardiano: tools/sonda-altezze.mjs parte po158 e foto-c128; rossi C265S01, C265B01, C265C01, C265N01, C265D01.
-export const GAME_VERSION = '0.66.0';
+// 0.67.0 – la mossa senza tratteggio e la versione che svanisce (PO-159, D-271): anello pieno sulle unità spostabili, unità in mano
+//   «sollevata», anelli dei settori d'arrivo dentro il punto; la versione svanisce dopo 4 s fuori da Titolo e Crediti; le unità non
+//   finiscono più fuori dalla mappa.
+//   causa: il PO: «è principalmente il rettangolino tratteggiato che non mi piace»; e04 arance (nuovo con la 0.65.0) ed e16 magazzino
+//   (già 0.64.0) disegnavano unità fuori dalla mappa a 360/375 perché toccoFuori costava quanto sottoDisco (etichette.ts:117,99).
+//   misura: nessun tratteggio, contrasto minimo 3,52:1 (soglia 3:1); unità fuori mappa 0 a 360/375/412 (rosso C271U01 13); il nome
+//   «Parcheggi» resta toccabile (D-145) e il tocco non copre il proprio disco (C56-03); provini approvati dal PO.
+//   guardiano: tools/anelli-mossa.mjs e po152b (unità fuori mappa), tools/versione-svanisce.mjs; rossi C271T01, C271U01, C271V01.
+export const GAME_VERSION = '0.67.0';
