@@ -163,6 +163,9 @@ main[data-schermata="sala"] .mappa, main[data-schermata="briefing"] .mappa { asp
 .episodio.da_rigiocare .settore-punto { background: var(--magenta); color: var(--bianco); }
 .episodio.disponibile .settore-punto { background: var(--giallo); }
 .episodio.futuro { opacity: var(--opaco); }
+/* D-265 (PO-158): numeri delle bolle bloccate leggibili: bolla piena coi token, niente trasparenza. Rosso C265C01: trasparente, come prima */
+main:not(.rosso-c265c01) .episodio.futuro { opacity: 1; }
+main:not(.rosso-c265c01) .episodio.futuro .settore-punto { background: var(--citta-bolla-bloccata); color: var(--citta-bolla-bloccata-testo); }
 .episodio.acceso .settore-punto { outline: var(--bordo) solid var(--ciano); outline-offset: var(--spazio-1); }
 .stelle { display: inline-flex; gap: var(--spazio-1); }
 .stella { width: var(--stella); height: var(--stella); color: var(--nero); }

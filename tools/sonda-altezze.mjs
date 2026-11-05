@@ -175,10 +175,10 @@ export function chiusureCostruite(dati, dich) {
   return out;
 }
 
-export const PARTI = ['e01', 'citta36', 'chiamate', 'rapporti', 'riepilogo', 'verbali', 'po149', 'po152a', 'c52nomi', 'po152b', 'risposte', 'chiusure', 'versione'];
+export const PARTI = ['e01', 'citta36', 'chiamate', 'rapporti', 'riepilogo', 'verbali', 'po149', 'po152a', 'c52nomi', 'po152b', 'risposte', 'chiusure', 'po158'];
 // C53-02 (D-252): la risposta di ogni opzione di ogni carta d'imprevisto e di ogni variante, a queste finestre (soglie di SOGLIE)
 export const RISPOSTE_VP = ['360x640', '375x667', '412x760'];
-export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi = [], cartella = '', parti = PARTI, limiteRisposte = Infinity, chiusureMax = Infinity }) {
+export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi = [], cartella = '', parti = PARTI, limiteRisposte = Infinity, chiusureMax = Infinity, po152b = {}, chiamateDi = null }) {
   const dati = leggiDati(dirDati), dich = new Map(dati['stato.json'].variabili.map((d) => [d.id, d])), e01 = dati['missioni/e01.json'];
   const srv = await servi(build), url = `http://127.0.0.1:${srv.address().port}/`;
   const percorso = process.env.VALMORA_CHROME ?? (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
@@ -248,7 +248,7 @@ export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi
         }
         await q.close();
       }
-      if (vp === '360x760' && parti.includes('chiamate')) { const coda = chiamateCostruite(dati, dich); // D-206: 4 pagine insieme
+      if (vp === '360x760' && parti.includes('chiamate')) { const coda = chiamateCostruite(dati, dich).filter((c) => !chiamateDi || chiamateDi(c)); // D-206: 4 pagine insieme; D-274b: i bracci solo le loro
         await Promise.all(Array.from({ length: 4 }, async () => { const q = await b.newPage({ viewport: { width: w, height: h }, hasTouch: true, reducedMotion: 'reduce' });
           if (rossi.length) await q.addInitScript((xs) => { for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi);
           await q.goto(url);
@@ -305,11 +305,12 @@ export async function giraAltezze({ build = 'dist', dirDati = 'data', vps, rossi
           await q.close(); })); }
       if (h === 760 && parti.includes('po149')) { const { controllaPo149 } = await import('./foto-po149.mjs'); // PO-149 (D-237): 640/667/760/915 a questa larghezza
         const g = await controllaPo149(b, url, w, rossi, cartella); errori.push(...g.male); }
+      if (h === 760 && parti.includes('po158')) { const { controllaPo158 } = await import('./foto-po158.mjs'); // PO-158 (D-265): 640/760/830/915
+        const g = await controllaPo158(b, url, w, rossi, cartella); errori.push(...g.male); }
       if (h === 760 && parti.includes('po152a')) { const { controllaPo152a } = await import('./foto-po152-a.mjs'); // PO-152 A (D-241): 640 e 760
         const g = await controllaPo152a(b, url, w, rossi, cartella, dati, dich); errori.push(...g.male); }
       if (h === 760 && parti.includes('po152b')) { const { controllaPo152b } = await import('./foto-po152-b.mjs'); // D-241 idea B: 640/667/760
-        const g = await controllaPo152b(b, url, w, rossi, cartella, dati, dich); errori.push(...g.male); }
-      if (h === 760 && parti.includes('versione')) errori.push(...await (await import('./versione-svanisce.mjs')).controllaVersioneSvanisce(b, url, w, rossi, chiamateCostruite(dati, dich)[0].sal)); // D-271
+        const g = await controllaPo152b(b, url, w, rossi, cartella, dati, dich, po152b); errori.push(...g.male); } // D-270: po152b = { giri, episodi } dei bracci
       if (h === 760 && w >= 412 && parti.includes('c52nomi')) { const { controllaNomiCitta } = await import('./foto-c52-nomi.mjs'); // C52-03: dove il nome si vede (D-123)
         const g = await controllaNomiCitta(b, url, w, rossi, cartella); errori.push(...g.male); }
       if (parti.includes('verbali')) for (const c of verbaliCostruiti(dati, dich)) { // D-234: a ogni altezza

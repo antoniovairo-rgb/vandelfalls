@@ -1335,3 +1335,81 @@ Il giro in parallelo girava con un'altra sonda e i test del pre-push. Non lo con
 - Parte altezze: 3252 s nella 1239 (D-268), poi 3297, 3340 e 3346 s nella 1249.
 - Job bracci: 3655 s nella 1239. Nella 1249 3449, 3874 e 917 s; il terzo tentativo è caduto su page.goto (60 s).
 - Nessun controllo tolto, come concordato col PO. Con la correzione 728ae4eb il job bracci non dovrebbe più ripetere i tentativi per eccezione (IPOTESI, la verifica è la CI su 728ae4eb).
+
+## D-270: bracci rossi po152b più corti (solo strumenti)
+
+**Cosa cambia.**
+- `tools/foto-po152-b.mjs`, `puoi(p)`: «Avanti» c'è solo nella risposta e il riquadro della mossa arriva nello stesso disegno (App.tsx, ramo eco). Appena c'è «Avanti» si sa se c'è il «puoi spostare». Prima si aspettavano 15 s a ogni chiamata senza mossa, e con il rosso C241M02 questo accadeva a ogni chiamata.
+- `controllaPo152b(…, solo)`: limita un braccio ai giri (e01, radio, previsione, fermo) e agli episodi del giro radio. Senza `solo` il giro è quello intero: il VERDE resta su 36 episodi a ogni larghezza.
+- `tools/bracci-po152b.mjs`: per ogni braccio indica giri, episodi, il testo del suo rosso e quanti problemi con quel testo servono almeno. Se sono meno, il braccio è cieco (`passi-grafica.mjs`). I conteggi vengono dal giro intero su main 7e753289, sugli stessi episodi.
+- D-269 c riparato (guardiano cieco a caso). I segni ▲/▼ spariscono 1,8 s veri dopo la risposta (App.tsx:85). La lettura da fuori arrivava spesso a segni già spariti, secondo il carico (FATTO MISURATO): rosso C269C01 visto in 6 episodi su 36 nella misura «prima», in 0 su 3 nel braccio ristretto, segni presenti alla prima lettura in 0-2 episodi sotto il carico del passo. Ora la pagina registra a ogni fotogramma il posto del riquadro e la presenza dei segni. Si confronta il posto nell'ultimo fotogramma coi segni (riquadro fermo da almeno 300 ms) con quello a segni spariti. Gli episodi senza segni a riquadro fermo sono contati («no in N») e non danno esito. Il controllo da fuori su 2,5 s resta.
+
+**Bracci e conteggi dichiarati** (360×760; il giro radio è a 360×640):
+
+| braccio | giri | episodi | segno | almeno | misura dopo |
+|---|---|---|---|---|---|
+| C241B01 | e01 | e01 | seconda mossa possibile (PO-152 B) | 3 | 3 |
+| C241M02 | e01 | e01 | PO-152 B) | 18 | 18 |
+| C255R01 | radio | e01, e02 | (D-255) | 11 | 11 |
+| C258S01 | radio | e01, e02 | il costo non si vede (D-258) | 13 | 13 |
+| C259A01 | radio | e01, e02 | (soglia 68, D-258) | 12 | 12 |
+| C261H01 | radio | e35 | (soglia 68, D-258) | 7 | 7 |
+| C261E01 | radio | e01, e02 | (D-261) | 11 | 11 |
+| C262R01 | e01 | e01 | la mossa di quella pausa è persa (C56-02) | 3 | 3 |
+| C262E01 | e01 | e01 | dopo la mossa manca la previsione (D-262) | 3 | 3 |
+| C262M01 | radio | e02, e03 | (C56-03) | 5 | 5 |
+| C262D01 | radio | e02 | (C56-03) | 3 | 3 |
+| C268F01 | e01 | e01 | (C56-05) | 1 | 1 |
+| C268M01 | e01 | e01 | (C56-04) | 54 | 54 |
+| C269M01 | radio | e02, e03 | (C57-01) | 8 | 8 |
+| C269P01 | previsione | e16 | la previsione non si vede (C57-02) | 5 | 5 |
+| C269I01 | radio | e03, e04 | (D-269 a) | 12 | 12 |
+| C269A01 | radio | e21 | (D-269 b) | 1 | 1 |
+| C269C01 | radio | e02, e25, e26 | allo sparire dei segni ▲/▼ | 3 | 3 |
+
+**Stabilità di C269C01 col controllo nei fotogrammi** (FATTO MISURATO, 5 processi insieme):
+- braccio ristretto: 3 su 3 in 9 prove;
+- rosso sui 36 episodi: 8 episodi, gli stessi della prova da sola;
+- verde sui 36 episodi: 0 problemi, segni visti a riquadro fermo in 36.
+
+**Durata del passo «bracci-rossi-grafica»** (VALMORA_LARGHEZZE=360, 5 in parallelo, 4 core, stesso cronometro `tempi-bracci.mjs` fuori dal repository, una prova per lato):
+
+| codice | passo | somma dei bracci | 18 bracci po152b | C241M02 | ciechi |
+|---|---|---|---|---|---|
+| main 7e753289 | 5020 s | 24003 s | 19184 s | 2855 s | nessuno |
+| 28cdaab1 | 1528 s | 7136 s | 1618 s | 109 s | nessuno |
+
+Il passo ora dura quanto i due bracci più lunghi, che non sono po152b e non sono stati toccati: C206I01 (1157 s) e C215L01+C241A01 (1153 s), parte «chiamate». Un tentativo su 4e445af4 (1553 s) non conta: C269C01 cieco, da cui la riparazione qui sopra.
+
+**Verde intero invariato** (CI 1270 su 0e9e19a6, con `puoi`): radio 360×640 su 36 episodi, 276 stati; 375×667 e 412×760 su 36 episodi, 277 stati; previsione 24 mosse a ogni larghezza; fermo 412×915 su 36 episodi. Col D-269 c riparato, verde radio 360×640 in locale: 36 episodi, 276 stati, 0 problemi.
+
+**CI 1277 su 28cdaab1** (codice di D-270): 10 job verdi al primo tentativo.
+- «grafica (360 bracci)»: bracci-rossi-grafica 1950 s, nessun cieco. Nella 1257 era 7189 s, nella 0.64.0 3655 s.
+- Verde intero col D-269 c nei fotogrammi: radio a 360×640 su 36 episodi e 276 stati; a 375×667 e 412×760 su 36 episodi e 277 stati. In tutte e tre le larghezze i segni sono visti a riquadro fermo in 36 episodi e in nessuno manca la misura. Previsione: 24 mosse a ogni larghezza. Fermo 412×915: 36 episodi.
+
+## D-274b: bracci rossi della parte «chiamate» più corti (solo strumenti)
+
+**Cosa cambia.** `giraAltezze({ chiamateDi })` filtra le chiamate costruite (782, di cui 284 imprevisti) e il giro verde resta su tutte. In `tools/bracci-po152b.mjs` c'è `BRACCI_CHIAMATE`, con lo stesso cieco a conteggio di D-270:
+- C215L01+C241A01: rosso di D-215, la mediana degli imprevisti (DECISIONI D-215). Gira solo sugli imprevisti, ma su tutti e 284: la mediana ha senso solo lì. Segno «mediana degli imprevisti», almeno 1.
+- C206I01: gira solo sugli imprevisti di e04, e06, e09, e13. Segno «(soglia 339, D-207)», almeno 5.
+
+**Prove sotto carico** (tre processi insieme, FATTO MISURATO):
+
+| prova | tempo | problemi |
+|---|---|---|
+| C215L01+C241A01 ristretto | 273 s | mediana 286 (soglia 285) e 3 imprevisti oltre 339 |
+| C206I01 ristretto | 49 s | 5 |
+| verde «chiamate» su 782 | 485 s | 0 |
+
+**Durata del passo «bracci-rossi-grafica»** (360, 5 in parallelo, stesso cronometro). «Prima» è la misura su 28cdaab1, che ha src, data e tools uguali a main 09ea6727:
+
+| codice | passo | somma dei bracci | C206I01 | C215L01+C241A01 | ciechi |
+|---|---|---|---|---|---|
+| 28cdaab1 (= main 09ea6727) | 1528 s | 7136 s | 1157 s | 1153 s | nessuno |
+| claude/valmora-chiamate | 1160 s | 5268 s | 55 s | 459 s | nessuno |
+
+Ora il passo è vicino alla somma diviso 5: nessun braccio da solo lo allunga.
+
+**Instabilità vista una volta, non riprodotta.** Nella misura su 28cdaab1 i due bracci «chiamate» hanno scritto «chiamata e19 imp_camion_rifiuti non si apre» (attesa di 8 s). C206I01 ha scritto anche «e19 consiglio». È successo sotto il carico del passo e non ha reso ciechi i bracci. Non è comparsa nel «prima» su 7e753289, nelle tre prove qui sopra né nella misura «dopo». Nel giro verde farebbe rosso il passo: la tengo come candidata del lotto «altezze», non corretta qui.
+
+**CI 1283 su 61f1fe60** (codice di D-274b): 10 job verdi al primo tentativo. In «grafica (360 bracci)» bracci-rossi-grafica dura 1361 s, nessun cieco; con D-274, nella 1277, era 1950 s.

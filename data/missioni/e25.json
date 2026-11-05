@@ -9,8 +9,8 @@
   "titolo": "testi:e25.titolo",
   "disponibile_se": {},
   "luogo": {
-    "x": 15,
-    "y": 20
+    "x": 6,
+    "y": 4
   },
   "introduzione": [
     "testi:e25.intro1",

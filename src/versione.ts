@@ -355,4 +355,11 @@
 //   aria-hidden) per stare in una riga; riquadro fermo a 412×915 su 36 episodi.
 //   guardiano: tools/foto-po152-b.mjs (fermo a 360/375/412, istruzione visibile, nessuna riga sotto «Avanti»), sonda-altezze; rossi
 //   C269M01, C269P01, C269I01, C269A01, C269C01, C269B01.
-export const GAME_VERSION = '0.65.0';
+// 0.66.0 – città più leggibile (PO-158, D-265): meno cielo vuoto, personaggi più grandi, bolle degli episodi distanziate, bloccate
+//   leggibili, nomi delle squadre interi.
+//   causa: foto del PO dal telefono («Si vede male»): sopra le teste 104-131 px di cielo vuoto, bolle sovrapposte (−4,9 px), bloccate
+//   a opacità 0,4, 13 nomi di squadra su 16 tagliati; il nome dell'episodio usciva dal suo disco a 412 (C20-03).
+//   misura: cielo 16 px col busto visibile, distanza fra bolle 26,8 px, bloccate a opacità 1 (contrasto 5,85:1), nomi tagliati 0/36,
+//   C20-03 0 a ogni altezza di 412; mappa ferma e 640/667 senza scorrimento; 48/48 stati identici dopo il merge della 0.65.0.
+//   guardiano: tools/sonda-altezze.mjs parte po158 e foto-c128; rossi C265S01, C265B01, C265C01, C265N01, C265D01.
+export const GAME_VERSION = '0.66.0';
