@@ -1203,3 +1203,186 @@ Il testo nuovo di e29 è più lungo di 9 caratteri; la stessa sonda delle rispos
 FATTO MISURATO: 568 tocchi immediati, pagina spostata 0 volte. Nessuna correzione.
 
 Non verificato: telefono reale.
+
+## D-269: C57-01 e C57-02 — S-11, 4/11
+
+Base: 02e2d458 (la 0.64.0 in arrivo). Ramo claude/valmora-c057. Rapporto della collaudatrice: ramo claude/collaudo-c057, `coordination/collaudi/c057/RAPPORTO.md`.
+
+### C57-01: la mappa della risposta con la mossa scendeva a gradini
+
+FATTO MISURATO, riproduzione con la sonda della collaudatrice (`sonda-stabilita.mjs`, 2 prove per caso, uguali):
+
+| caso | 360×640 | 375×667 |
+|---|---|---|
+| e35 curiosi_notte | 328→302→247→231 | 343→329, al tocco 274 |
+| e03 laser | 328→302, al tocco 247 | 343→274 |
+| e16 imp_buca | 328→266→200 | 343→293→215 |
+
+Causa, misurata fotogramma per fotogramma su e03 ed e35 a 360×640. Ogni volta che la mappa si abbassa, cresce qualcosa fuori dalla mappa:
+- il riquadro radio non ci sta più («stretto»), oppure l'unità in mano lo rende «compatto»: la copia del costo compare nella risposta (D-258), che passa da 139 a 194 px (+55);
+- con «muto», «Home» passa nella testata (D-261), che passa da 62 a 78 px (+16);
+- la pagina scorre di nuovo e `adatta` abbassa ancora la mappa.
+
+Correzione in `src/resa/mappa/adatta.ts`, rosso C269M01:
+- con la mossa, la misura conta la copia del costo come già visibile. Durante la misura c'è la classe `misura-copia` su `main` (stile-idee.css); viene tolta prima del disegno;
+- se «Home» è appena passata nella testata, si rimisura subito invece di aspettare il giro dopo del ResizeObserver.
+
+Il costo resta nel riquadro sopra la mappa quando c'è posto, quindi PO-152 A, D-258, D-259 e D-261 restano validi.
+
+FATTO MISURATO dopo la correzione (stessa sonda, 5 casi, 2 larghezze, 2 prove):
+- una sola discesa, e al tocco dell'unità nessun cambio;
+- le altezze finali sono quelle di prima: e03 a 360 sta a 247 px già prima del tocco (prima 302, e 247 dopo il tocco).
+
+### C57-02: la previsione dopo la mossa non si vedeva
+
+FATTO MISURATO, e16 imp_nebbia a 360×640, ultima unità e ultimo settore come nella foto della collaudatrice:
+- dopo la mossa il riquadro è «compatto muto» (14 px, `clip-path`): la previsione la legge solo il lettore di schermo, anche dopo che i segni sono spariti;
+- gli ostacoli sono «Home» e i due segni ▲/▼, e la riga di due righe non trova posto né a larghezza piena né a metà.
+
+Correzione (rosso C269P01):
+- `src/resa/mossa-ui.tsx` costruisce una copia della previsione; `Ondata.tsx` (Risposta) la mette nella risposta, sotto il costo;
+- si vede solo quando il riquadro è «muto» (stile-idee.css), in testo piccolo come il riquadro;
+- prima della mossa porta la riga più lunga fra le mosse possibili, e `adatta` la conta nella misura (C57-01), così la mappa non cambia altezza quando arriva la previsione.
+
+Misura con il testo in corpo normale: dopo la mossa la risposta scorreva di 85 px (soglia 68), perché la mappa era già al minimo (200 px). Col testo piccolo: 47 px.
+
+### Guardiano (`tools/foto-po152-b.mjs`, giro radio e giro nuovo «previsione»)
+
+- C57-01: l'altezza della mappa si registra a ogni fotogramma da quando c'è la risposta. Dopo «Conferma» cambia al più una volta; con ogni unità in mano e dopo la mossa resta uguale.
+- C57-02: in ogni stato la previsione, se c'è, si vede: nel riquadro non muto e non tagliato, oppure nella copia sotto con lo stesso testo.
+- Giro «previsione»: e16 imp_nebbia, ogni combinazione unità → settore (24); dopo la mossa la previsione si vede, la mappa non cambia altezza, e lo scorrimento resta entro soglia.
+- Bracci in `tools/passi-grafica.mjs`: C269M01 e C269P01, po152b a 360×760.
+
+FATTO MISURATO (po152b, dist del ramo):
+
+| | radio, stati | riquadro muto | «Home» in testata | mappa | scorrimento massimo | previsione sotto la mappa | esito |
+|---|---|---|---|---|---|---|---|
+| 360×640 | 276 | 144 | 22 | 200-240 | 58 (soglia 68) | 2 su 24 | verde |
+| 375×667 | 277 | 114 | 7 | 200-246 | 9 (soglia 56) | 2 su 24 | verde |
+| 412×760 | 277 | 0 | 0 | 285-355 | 0 | 0 su 24 | verde |
+| rosso C269M01, 360 | 277 | 105 | 7 | | | | rosso, 40 problemi (gradini, e cambio d'altezza con l'unità in mano) |
+| rosso C269P01, 360 | 277 | 106 | 7 | | | | rosso, 2 problemi: le due combinazioni di e16 della collaudatrice |
+
+Test: 489/489.
+
+Effetto da sapere: a 360×640 la mappa più bassa già prima del tocco cambia due conteggi. Il riquadro al solo lettore va da 105 a 144 stati, e «Home» nella testata da 7 a 22. Prima ci arrivavano solo dopo il tocco dell'unità. Il costo resta visibile in tutti gli stati (0 non visibili).
+
+Non verificato: telefono reale; testo al 130 % (resta a S-26).
+
+### D-269 a/b/c/d — richiesta della sessione principale dopo la misura indipendente su 614c5103
+
+- **a)** Con il riquadro muto si vede sempre anche l'istruzione della mossa («puoi spostare…», «tocca il settore…», «fatta…»). La copia sotto la mappa (`.istruzione-sotto`, mossa-ui.tsx) porta istruzione e previsione insieme. Prima della mossa `adatta` riserva lo spazio della riga più lunga. Rosso C269I01.
+- **b)** La copia sta sopra il fumetto della risposta, subito sotto la mappa: non finisce più sotto «Avanti» a pagina ferma. Con la copia visibile la punta del fumetto è nascosta: lo spazio per la punta (19 px) portava e21 corteo_dal_cortile a 71 px di scorrimento a 360×640, soglia 68. Rosso C269A01: la copia torna in fondo alla risposta.
+- **c)** FATTO MISURATO: il cambio senza input era reale. Su 0f28754c il guardiano a 2,5 s fermi ne trovava 8-10 per larghezza. Causa: i segni ▲/▼ spariscono (1,8 s di gioco), i nomi dei settori si ridispongono (per loro i segni sono ostacoli), le unità si spostano con i nomi e il riquadro si ricolloca. Esempio: e35 perimetro a 412×760, un'unità da y 170 a y 258. Correzione: `src/resa/mappa/segni-visti.ts`. Nella stessa risposta con la mossa e con la stessa misura della mappa, i segni già visti restano ostacoli per nomi e riquadro. In `collocaRadio`, se testo, misura e ostacoli non cambiano, il riquadro resta com'è. Rosso C269C01.
+- **d)** Guardiano po152b, in ogni stato:
+  - l'istruzione della mossa si vede (nel riquadro non muto, o nella copia);
+  - nessuna riga della copia è coperta da «Avanti» (elementFromPoint, 9 punti per riga, pagina a scorrimento 0);
+  - fermo 2,5 s a «puoi spostare», il riquadro non cambia classe né posto.
+  - Bracci in `tools/passi-grafica.mjs`: C269C01, C269I01, C269A01, po152b a 360×760.
+
+Effetto collaterale: la riserva della copia abbassa la mappa a 360×640 quando il riquadro è muto, nella fascia 200-240 px (per esempio e03 da 247 a 207 px). Lo scorrimento resta entro soglia.
+
+FATTO MISURATO (po152b, f9092cf3, dist del ramo, una prova per braccio):
+
+| | riquadro muto | «Home» in testata | mappa | scorrimento massimo | previsione sotto la mappa | esito |
+|---|---|---|---|---|---|---|
+| 360×640 | 145 su 276 | 22 | 200-240 | 60 (soglia 68) | 5 su 24 | verde |
+| 375×667 | 117 su 277 | 7 | 200-242 | 33 (soglia 56) | 5 su 24 | verde |
+| 412×760 | 1 su 277 | 0 | 281-351 | 0 (soglia 0) | 0 su 24 | verde |
+| rosso C269C01, 360 | | | | | | rosso, 8 (cambi senza input) |
+| rosso C269I01, 360 | | | | | | rosso, 150 (istruzione non visibile) |
+| rosso C269A01, 360 | | | | | | rosso, 9 (copia sotto «Avanti») |
+| rosso C269P01, 360 | | | | | | rosso, 10 (previsione e istruzione di e16) |
+| rosso C269M01, 360 | | | | | | rosso, 78 (gradini) |
+
+Test: 489/489.
+
+### D-269 dopo la CI rossa 1249 (consegna 0.66.0)
+
+**Causa del rosso 1249** (FATTO MISURATO con una sonda temporanea su e02 tornelli_falsi/settore_separato a 360×640). La risposta scorreva di 75 px (soglia 68). La mappa era a 240 px, cioè al pavimento di D-262, con il riquadro «basso stretto muto». La copia sotto la mappa andava su 2 righe (31 px). Copia nascosta: 36 px di scorrimento. Copia di una riga: 59 px. La soglia non è stata toccata.
+
+**Correzioni**
+- **Testo breve approvato dal PO.** `mossa.puoi_breve` = «Puoi spostare un'unità: toccala, poi il settore.» (`data/testi/it/comune.json`). È usato solo nella copia sotto la mappa e nella sua riserva (`src/resa/mossa-ui.tsx`, `breve`). Il riquadro non muto tiene il testo lungo. Rosso C269B01: torna il testo lungo nella copia.
+- **(c) a 412×915.** `segniVisti` si aggancia al riquadro che porta la mossa (`.radio-mappa [data-mossa]`, `src/resa/mappa/segni-visti.ts`). Prima a 412×915 il riquadro cambiava ancora senza input. Esempio: e10 imp_cantiere, il riquadro andava a «posto» 262 e le unità da 151 a 63. Rosso C269C01 invariato.
+- **Guardiano po152b.**
+  - Nuovo giro di fermo a 412×915 (`FERMO_VP`, `controllaFermo`): prima chiamata con la mossa di ogni episodio, 2,5 s senza input, nello stato «puoi». Confronta classe del riquadro, `--radio-y` e posizione delle unità.
+  - Il controllo dell'istruzione verifica anche che la copia corrisponda allo stato della mossa (`data-mossa-sotto`).
+- **Braccio rosso C269B01.** In `tools/passi-grafica.mjs`, sulla parte «risposte» di sonda-altezze a 360×640, prime 120 risposte, cerca C53-02. Misura: e02 77/75/75/79 px, circa 5 min.
+- **`tools/catena.mjs`.** Anche quando il passo finisce rosso si stampano e si registrano in STABILITA i tentativi precedenti. Nella 1249 le cause dei tentativi 1 e 2 non erano visibili.
+- **CI 1256 (6febd9b9), job «360 bracci» rosso 3/3.** Eccezione `page.waitForSelector: Timeout 15000ms`, in attesa di `.mappa [data-mossa="puoi"]`. Causa: nel giro previsione di po152b l'attesa del «puoi spostare» non era protetta. Col rosso C241M02 la mossa non si disegna (`mossa-ui.tsx:29`): il passo cadeva per eccezione invece di segnalare il problema. Correzione (728ae4eb): l'assenza diventa il problema «il «puoi spostare» non compare (C57-02)». Il guardiano non è stato indebolito. IPOTESI non verificata: la stessa eccezione fu la causa dei tentativi 1 e 2 della 1249. Non posso confermarlo, i log di quei tentativi non la mostrano.
+
+**Misura della correzione 728ae4eb** (solo giro previsione, 360×640, sonda temporanea, una prova per caso):
+
+| codice | rossi | esito | tempo |
+|---|---|---|---|
+| 6febd9b9 | C241M02 | eccezione TimeoutError (come in CI) | 19 s |
+| 728ae4eb | C241M02 | 2 problemi segnalati, nessuna eccezione | 19 s |
+| 728ae4eb | nessuno | verde | 117 s |
+
+**sonda-altezze completa in locale** (6febd9b9, dist del ramo):
+
+| larghezza | esito | tempo | scorrimento massimo risposta | note |
+|---|---|---|---|---|
+| 375 | verde | 4422 s | 17 px (soglia 56) | |
+| 360, da sola | verde | 3081 s | 58 px (soglia 68) | previsione sotto la mappa 5 su 24 |
+| 360, in parallelo | rosso | | | «e30 imp_mercatino/si_incontrino non si apre» |
+
+Il giro in parallelo girava con un'altra sonda e i test del pre-push. Non lo conto come verde. Rifatto da solo, quel caso si apre e scorre 0 px. Lo dichiaro come attesa di 8 s superata sotto carico.
+
+**I 2 px senza input a 375** (FATTO MISURATO). In e21 corteo_dal_cortile lo scorrimento passa da 17 a 15 px quando `.fiducia` passa da 20 a 18 px, a circa 3,5 s. In e09 accade lo stesso a circa 4,2 s. È il segno della fiducia variabile già documentato nel commento di `tools/sonda-altezze.mjs` (e03 da 28 a 26).
+
+**Tempi di CI.**
+- Parte altezze: 3252 s nella 1239 (D-268), poi 3297, 3340 e 3346 s nella 1249.
+- Job bracci: 3655 s nella 1239. Nella 1249 3449, 3874 e 917 s; il terzo tentativo è caduto su page.goto (60 s).
+- Nessun controllo tolto, come concordato col PO. Con la correzione 728ae4eb il job bracci non dovrebbe più ripetere i tentativi per eccezione (IPOTESI, la verifica è la CI su 728ae4eb).
+
+## D-270: bracci rossi po152b più corti (solo strumenti)
+
+**Cosa cambia.**
+- `tools/foto-po152-b.mjs`, `puoi(p)`: «Avanti» c'è solo nella risposta e il riquadro della mossa arriva nello stesso disegno (App.tsx, ramo eco). Appena c'è «Avanti» si sa se c'è il «puoi spostare». Prima si aspettavano 15 s a ogni chiamata senza mossa, e con il rosso C241M02 questo accadeva a ogni chiamata.
+- `controllaPo152b(…, solo)`: limita un braccio ai giri (e01, radio, previsione, fermo) e agli episodi del giro radio. Senza `solo` il giro è quello intero: il VERDE resta su 36 episodi a ogni larghezza.
+- `tools/bracci-po152b.mjs`: per ogni braccio indica giri, episodi, il testo del suo rosso e quanti problemi con quel testo servono almeno. Se sono meno, il braccio è cieco (`passi-grafica.mjs`). I conteggi vengono dal giro intero su main 7e753289, sugli stessi episodi.
+- D-269 c riparato (guardiano cieco a caso). I segni ▲/▼ spariscono 1,8 s veri dopo la risposta (App.tsx:85). La lettura da fuori arrivava spesso a segni già spariti, secondo il carico (FATTO MISURATO): rosso C269C01 visto in 6 episodi su 36 nella misura «prima», in 0 su 3 nel braccio ristretto, segni presenti alla prima lettura in 0-2 episodi sotto il carico del passo. Ora la pagina registra a ogni fotogramma il posto del riquadro e la presenza dei segni. Si confronta il posto nell'ultimo fotogramma coi segni (riquadro fermo da almeno 300 ms) con quello a segni spariti. Gli episodi senza segni a riquadro fermo sono contati («no in N») e non danno esito. Il controllo da fuori su 2,5 s resta.
+
+**Bracci e conteggi dichiarati** (360×760; il giro radio è a 360×640):
+
+| braccio | giri | episodi | segno | almeno | misura dopo |
+|---|---|---|---|---|---|
+| C241B01 | e01 | e01 | seconda mossa possibile (PO-152 B) | 3 | 3 |
+| C241M02 | e01 | e01 | PO-152 B) | 18 | 18 |
+| C255R01 | radio | e01, e02 | (D-255) | 11 | 11 |
+| C258S01 | radio | e01, e02 | il costo non si vede (D-258) | 13 | 13 |
+| C259A01 | radio | e01, e02 | (soglia 68, D-258) | 12 | 12 |
+| C261H01 | radio | e35 | (soglia 68, D-258) | 7 | 7 |
+| C261E01 | radio | e01, e02 | (D-261) | 11 | 11 |
+| C262R01 | e01 | e01 | la mossa di quella pausa è persa (C56-02) | 3 | 3 |
+| C262E01 | e01 | e01 | dopo la mossa manca la previsione (D-262) | 3 | 3 |
+| C262M01 | radio | e02, e03 | (C56-03) | 5 | 5 |
+| C262D01 | radio | e02 | (C56-03) | 3 | 3 |
+| C268F01 | e01 | e01 | (C56-05) | 1 | 1 |
+| C268M01 | e01 | e01 | (C56-04) | 54 | 54 |
+| C269M01 | radio | e02, e03 | (C57-01) | 8 | 8 |
+| C269P01 | previsione | e16 | la previsione non si vede (C57-02) | 5 | 5 |
+| C269I01 | radio | e03, e04 | (D-269 a) | 12 | 12 |
+| C269A01 | radio | e21 | (D-269 b) | 1 | 1 |
+| C269C01 | radio | e02, e25, e26 | allo sparire dei segni ▲/▼ | 3 | 3 |
+
+**Stabilità di C269C01 col controllo nei fotogrammi** (FATTO MISURATO, 5 processi insieme):
+- braccio ristretto: 3 su 3 in 9 prove;
+- rosso sui 36 episodi: 8 episodi, gli stessi della prova da sola;
+- verde sui 36 episodi: 0 problemi, segni visti a riquadro fermo in 36.
+
+**Durata del passo «bracci-rossi-grafica»** (VALMORA_LARGHEZZE=360, 5 in parallelo, 4 core, stesso cronometro `tempi-bracci.mjs` fuori dal repository, una prova per lato):
+
+| codice | passo | somma dei bracci | 18 bracci po152b | C241M02 | ciechi |
+|---|---|---|---|---|---|
+| main 7e753289 | 5020 s | 24003 s | 19184 s | 2855 s | nessuno |
+| 28cdaab1 | 1528 s | 7136 s | 1618 s | 109 s | nessuno |
+
+Il passo ora dura quanto i due bracci più lunghi, che non sono po152b e non sono stati toccati: C206I01 (1157 s) e C215L01+C241A01 (1153 s), parte «chiamate». Un tentativo su 4e445af4 (1553 s) non conta: C269C01 cieco, da cui la riparazione qui sopra.
+
+**Verde intero invariato** (CI 1270 su 0e9e19a6, con `puoi`): radio 360×640 su 36 episodi, 276 stati; 375×667 e 412×760 su 36 episodi, 277 stati; previsione 24 mosse a ogni larghezza; fermo 412×915 su 36 episodi. Col D-269 c riparato, verde radio 360×640 in locale: 36 episodi, 276 stati, 0 problemi.
+
+**CI 1277 su 28cdaab1** (codice di D-270): 10 job verdi al primo tentativo.
+- «grafica (360 bracci)»: bracci-rossi-grafica 1950 s, nessun cieco. Nella 1257 era 7189 s, nella 0.64.0 3655 s.
+- Verde intero col D-269 c nei fotogrammi: radio a 360×640 su 36 episodi e 276 stati; a 375×667 e 412×760 su 36 episodi e 277 stati. In tutte e tre le larghezze i segni sono visti a riquadro fermo in 36 episodi e in nessuno manca la misura. Previsione: 24 mosse a ogni larghezza. Fermo 412×915: 36 episodi.
