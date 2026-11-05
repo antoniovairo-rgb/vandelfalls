@@ -1411,3 +1411,5 @@ Il passo ora dura quanto i due bracci più lunghi, che non sono po152b e non son
 Ora il passo è vicino alla somma diviso 5: nessun braccio da solo lo allunga.
 
 **Instabilità vista una volta, non riprodotta.** Nella misura su 28cdaab1 i due bracci «chiamate» hanno scritto «chiamata e19 imp_camion_rifiuti non si apre» (attesa di 8 s). C206I01 ha scritto anche «e19 consiglio». È successo sotto il carico del passo e non ha reso ciechi i bracci. Non è comparsa nel «prima» su 7e753289, nelle tre prove qui sopra né nella misura «dopo». Nel giro verde farebbe rosso il passo: la tengo come candidata del lotto «altezze», non corretta qui.
+
+**CI 1283 su 61f1fe60** (codice di D-274b): 10 job verdi al primo tentativo. In «grafica (360 bracci)» bracci-rossi-grafica dura 1361 s, nessun cieco; con D-274, nella 1277, era 1950 s.
