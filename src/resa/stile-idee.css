@@ -89,3 +89,5 @@ main:not(.rosso-c261e01):not(.rosso-c271t01) .mappa.mossa .tocco-pastiglia:is(.m
   main:not(.rosso-c261e01):not(.rosso-c271t01) .mappa.mossa .tocco-pastiglia:not(:disabled) .pastiglia,
   main:not(.rosso-c261e01):not(.rosso-c271t01) .mappa.mossa .settore-punto:not(:disabled)::after { animation: none; }
 }
+/* D-271 (C271U01): spostamento piccolo delle unità calcolato in etichette.ts, quando nessun posto è pulito (come --nome-dx dei nomi) */
+.mappa .settore-unita { translate: var(--unita-dx, 0) var(--unita-dy, 0); }

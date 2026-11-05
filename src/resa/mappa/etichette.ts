@@ -167,6 +167,9 @@ export function disponiEtichette(contenitore: HTMLElement) {
       if (via) { dx += via[0]; dy += via[1]; }
       if (!dx && !dy) return [0, 0] as const;
       spingi(dx, dy); return [dx, dy] as const; };
+    const costoUnita = (n: Rett, u: Rett) => sottoDisco() + costoDi(u, perUnita) + VERA * area(n, u) + bordoUnita(u) + pastiglieFuori() + suNomi(pastiglie() ?? u, n) * (c33 ? 20 : 1) + lontano(pastiglie() ?? u) + ruba();
+    const gruppo = s.querySelector<HTMLElement>('.settore-unita'), muovi = (dx: number, dy: number) => { gruppo?.style.setProperty('--unita-dx', `${dx}px`); gruppo?.style.setProperty('--unita-dy', `${dy}px`); };
+    gruppo?.style.removeProperty('--unita-dx'); gruppo?.style.removeProperty('--unita-dy');
     let migliore = { nome: NOMI[0] as string, unita: UNITA[0] as string, costo: Infinity, largo: '', dx: 0, dy: 0 };
     cerca: for (const largo of d136 ? ['', 'calc(var(--nome-max) * 0.8)', 'calc(var(--nome-max) * 0.6)'] : ['']) {
     if (largo && migliore.costo === 0) break;
@@ -177,14 +180,25 @@ export function disponiEtichette(contenitore: HTMLElement) {
       const [dx, dy] = sposta();
       const n = nomeDi(s), u = conUnita ? unitaDi(s) : null;
       if (!n || (conUnita && !u)) continue;
-      const costo = costoDi(n, perNome) + nomeLontano(n, punti, i) + VERA * (c27 ? 1e4 : 10) * fuori(n, mappa) + nomiSopra(n) * (c27 ? 2e3 : 1) + sottoPastiglie(n) + (u ? sottoDisco() : 0)
-        + (u ? costoDi(u, perUnita) + VERA * area(n, u) + bordoUnita(u) + pastiglieFuori() + suNomi(pastiglie() ?? u, n) * (c33 ? 20 : 1) + lontano(pastiglie() ?? u) + ruba() : 0);
+      const costo = costoDi(n, perNome) + nomeLontano(n, punti, i) + VERA * (c27 ? 1e4 : 10) * fuori(n, mappa) + nomiSopra(n) * (c27 ? 2e3 : 1) + sottoPastiglie(n) + (u ? costoUnita(n, u) : 0);
       if (costo < migliore.costo - (largo ? 0.5 : 0)) migliore = { nome, unita, costo, largo, dx, dy };
       if (costo === 0) break cerca;
     }
     }
     if (el) el.style.maxWidth = migliore.largo;
     s.setAttribute('data-nome', migliore.nome); s.setAttribute('data-unita', migliore.unita); if (c128) spingi(migliore.dx, migliore.dy);
+    // D-271 (C271U01): con la mappa bassa della risposta può non esserci un posto pulito per le unità (e04 arance a 360: ogni
+    // posto dentro la mappa ha il centro di un tocco sotto il disco di un altro settore). Come per i nomi (C128-02), si prova
+    // a spostare le unità di poco, a passi di un ottavo di disco fino a mezzo tocco, e si tiene lo spostamento che costa meno.
+    // Solo quando il posto scelto ha un quasi vincolo (≥ VERA × 1e6): altrove niente cambia. Rosso C271U01: niente.
+    const nn = nomeDi(s);
+    if (conUnita && gruppo && nn && !spento('C271U01')) {
+      const prova = () => { const u = unitaDi(s); return u ? costoUnita(nn, u) : Infinity; };
+      let meglio = { c: prova(), dx: 0, dy: 0 };
+      if (meglio.c >= VERA * 1e6) for (let k = 1; k <= 4; k++) for (const [ax, ay] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]] as const) {
+        muovi(ax * k * passo, ay * k * passo); const c = prova(); if (c < meglio.c) meglio = { c, dx: ax * k * passo, dy: ay * k * passo }; }
+      if (meglio.dx || meglio.dy) muovi(meglio.dx, meglio.dy); else { gruppo.style.removeProperty('--unita-dx'); gruppo.style.removeProperty('--unita-dy'); }
+    }
   }
 }
 
