@@ -95,3 +95,5 @@ main:not(.rosso-c261e01):not(.rosso-c271t01) .mappa.mossa .tocco-pastiglia:is(.m
 }
 /* D-271 (C271U01): spostamento piccolo delle unità calcolato in etichette.ts, quando nessun posto è pulito (come --nome-dx dei nomi) */
 .mappa .settore-unita { translate: var(--unita-dx, 0) var(--unita-dy, 0); }
+/* D-272 (passo 2): il posto dell'unità partita resta, vuoto e invisibile, fino alla chiamata successiva; non prende tocchi (C56-03) */
+.mappa .tocco-vuoto { min-width: var(--tocco-min); min-height: var(--tocco-min); visibility: hidden; pointer-events: none; }
