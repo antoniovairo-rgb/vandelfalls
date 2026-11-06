@@ -46,19 +46,14 @@ function piazza(el: HTMLElement, attributo: string, posti: readonly string[], mi
   return misura();
 }
 
-export function disponiEtichette(contenitore: HTMLElement, prima?: ReadonlyMap<string, { nome: string | null; unita: string | null }>) {
+export function disponiEtichette(contenitore: HTMLElement) {
   const mappa = contenitore.getBoundingClientRect();
   const settori = [...contenitore.querySelectorAll<HTMLElement>('[data-settore]')];
   // C33-04: si riparte sempre dallo stesso stato (posto delle unità e larghezza dei nomi del giro prima pesavano sul
   // risultato, che cambiava col numero di giri: 2/426 ondate fra due giri uguali). Rosso C102D01: dallo stato di prima.
   if (!spento('C102D01')) for (const s of settori) { s.setAttribute('data-unita', UNITA[0]); s.querySelector<HTMLElement>('.settore-nome')?.style.removeProperty('max-width'); }
   for (const s of settori) { const n = s.querySelector<HTMLElement>('.settore-nome'); n?.style.removeProperty('--nome-dx'); n?.style.removeProperty('--nome-dy'); } // C128-02
-  // D-272 (passo 3): con la mossa, i punti dei settori toccabili hanno l'anello (D-271, stile-idee.css): con la preferenza per il
-  // posto di prima una pastiglia restava sull'anello di Tornelli (e05 sindacato a 360/375, «senza anello pieno»). L'anello conta
-  // come parte del punto. Rosso C272A01: solo il punto.
-  const cs = getComputedStyle(contenitore), px = (k: string) => parseFloat(cs.getPropertyValue(k)) || 0;
-  const anello = contenitore.classList.contains('mossa') && !spento('C272A01') ? 2 * px('--bordo') + px('--bordo-fine') : 0; // --anello e outline (token.css)
-  const punti = settori.map((s) => { const p = s.querySelector<HTMLButtonElement>('.settore-punto')!, r = p.getBoundingClientRect() as Rett; return anello && !p.disabled ? largo(r, anello) : r; });
+  const punti = settori.map((s) => s.querySelector('.settore-punto')!.getBoundingClientRect() as Rett);
   // D-191: con la mappa abbassata (fino a 160 px) i nomi in alto finivano sotto il pulsante «Home» dell'angolo: per i nomi
   // e le unità è un ostacolo come i punti (in coda, così gli indici dei settori restano gli stessi). Rosso C191H01: no.
   const casa = contenitore.querySelector(':scope > .tasto-home');
@@ -176,7 +171,6 @@ export function disponiEtichette(contenitore: HTMLElement, prima?: ReadonlyMap<s
     const gruppo = s.querySelector<HTMLElement>('.settore-unita'), muovi = (dx: number, dy: number) => { gruppo?.style.setProperty('--unita-dx', `${dx}px`); gruppo?.style.setProperty('--unita-dy', `${dy}px`); };
     gruppo?.style.removeProperty('--unita-dx'); gruppo?.style.removeProperty('--unita-dy');
     let migliore = { nome: NOMI[0] as string, unita: UNITA[0] as string, costo: Infinity, largo: '', dx: 0, dy: 0 };
-    const vecchio = prima?.get(s.dataset.settore ?? '');
     cerca: for (const largo of d136 ? ['', 'calc(var(--nome-max) * 0.8)', 'calc(var(--nome-max) * 0.6)'] : ['']) {
     if (largo && migliore.costo === 0) break;
     if (el) el.style.maxWidth = largo;
@@ -186,9 +180,7 @@ export function disponiEtichette(contenitore: HTMLElement, prima?: ReadonlyMap<s
       const [dx, dy] = sposta();
       const n = nomeDi(s), u = conUnita ? unitaDi(s) : null;
       if (!n || (conUnita && !u)) continue;
-      // D-272 (passo 3): con la mossa, a parità vince il posto di prima (1 = meno di un px² di distacco): niente salti dopo la mossa
-      const salto = vecchio && (vecchio.nome !== nome || (conUnita && vecchio.unita !== unita)) ? 1 : 0;
-      const costo = costoDi(n, perNome) + nomeLontano(n, punti, i) + VERA * (c27 ? 1e4 : 10) * fuori(n, mappa) + nomiSopra(n) * (c27 ? 2e3 : 1) + sottoPastiglie(n) + (u ? costoUnita(n, u) : 0) + salto;
+      const costo = costoDi(n, perNome) + nomeLontano(n, punti, i) + VERA * (c27 ? 1e4 : 10) * fuori(n, mappa) + nomiSopra(n) * (c27 ? 2e3 : 1) + sottoPastiglie(n) + (u ? costoUnita(n, u) : 0);
       if (costo < migliore.costo - (largo ? 0.5 : 0)) migliore = { nome, unita, costo, largo, dx, dy };
       if (costo === 0) break cerca;
     }

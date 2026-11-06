@@ -7,9 +7,7 @@
 import { spento } from '../../interruttori.ts';
 
 export interface Posto { nome: string | null; unita: string | null; largo: string; ndx: string; ndy: string; udx: string; udy: string }
-const memo = new WeakMap<HTMLElement, { firma: string; posti: Map<string, Posto>; risposta: Element | null }>();
-
-const rispostaDi = (mappa: HTMLElement) => mappa.closest('main')?.querySelector('[data-messaggio="risposta"]') ?? null;
+const memo = new WeakMap<HTMLElement, { firma: string; posti: Map<string, Posto> }>();
 
 /** Tutto ciò che decide la disposizione, in una stringa. */
 export function firmaDi(mappa: HTMLElement): string {
@@ -50,12 +48,4 @@ export function rimettiUguale(mappa: HTMLElement): boolean {
 }
 
 /** Tiene il risultato appena calcolato, con la firma degli ingressi presa prima del calcolo. */
-export function tieni(mappa: HTMLElement, firma: string) { memo.set(mappa, { firma, posti: leggi(mappa), risposta: rispostaDi(mappa) }); }
-
-/** D-272: dentro la stessa risposta con la mossa, i posti di prima (a parità di costo vincono loro: niente salti dopo la mossa).
- *  Fuori dalla mossa niente: la disposizione non dipende dalla storia (C33-04). Rosso C272P01: nessuna preferenza. */
-export function postiDiPrima(mappa: HTMLElement): Map<string, Posto> | undefined {
-  if (spento('C272P01') || !mappa.classList.contains('mossa')) return undefined;
-  const f = memo.get(mappa), r = rispostaDi(mappa);
-  return f && r && f.risposta === r ? f.posti : undefined;
-}
+export function tieni(mappa: HTMLElement, firma: string) { memo.set(mappa, { firma, posti: leggi(mappa) }); }
