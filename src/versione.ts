@@ -370,4 +370,12 @@
 //   misura: nessun tratteggio, contrasto minimo 3,52:1 (soglia 3:1); unità fuori mappa 0 a 360/375/412 (rosso C271U01 13); il nome
 //   «Parcheggi» resta toccabile (D-145) e il tocco non copre il proprio disco (C56-03); provini approvati dal PO.
 //   guardiano: tools/anelli-mossa.mjs e po152b (unità fuori mappa), tools/versione-svanisce.mjs; rossi C271T01, C271U01, C271V01.
-export const GAME_VERSION = '0.67.0';
+// 0.68.0 – mappa: nomi dei settori mai coperti e disposizione più leggera (PO-160, D-272).
+//   causa: il riquadro radio copriva i nomi in 116/138/148 stati su 277 (360/375/412); la disposizione dei nomi si ricalcolava 4,1 volte
+//   per risposta anche a ingressi uguali (696 ms a CPU ×1, 4342 ms a ×4 su 40 risposte a 360).
+//   misura: nomi coperti 0/0/0 (rosso C272N01); memo della disposizione (C272C01): 2,8 chiamate e 470 ms per risposta (−33%), 2663 ms
+//   a ×4 (−39%, massimo 9049 → 4203); costo sotto la mappa in testo piccolo (C272S01) e «Previsione: nessun cambiamento.» (C272F01):
+//   scorrimento massimo 40/12/0 contro 68/56/0; provini approvati dal PO.
+//   guardiano: tools/foto-po152-b.mjs (nomi coperti dal riquadro), tools/costo-nomi.mjs «conta», bracci po152b sugli episodi del codice
+//   nuovo (C262M01, C269M01) o abbinati ai rossi D-272 dove il difetto non si vede più (C261H01, C269A01, C269C01).
+export const GAME_VERSION = '0.68.0';
