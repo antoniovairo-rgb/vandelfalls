@@ -1459,3 +1459,39 @@ Conteggi verdi identici: 36 episodi, 276 stati a 360 e 277 a 375 e 412, D-269 c 
 **Bracci rossi a 360** (stesso cronometro, 5 in parallelo): 5 giri dopo le modifiche, nessun cieco, conteggi uguali fra i giri (C241M02 21, C255R01 16, C261E01 11, C262D01 3, C268M01 54, C269A01 5, C269C01 5-6, C269P01 10). Durata 960-1135 s.
 
 **Dopo** (stesso script del «prima», 0 problemi in 72 righe): 6835 s (360: 2510, 375: 2179, 412: 2146). po152b 1758 → 707 s. Il resto del calo (soprattutto «risposte») non è attribuibile a questo lotto: il «prima» è su un'altra build (09ea6727 contro 0.66.0); non posso confermarlo.
+
+## D-272 (PO-160): nomi mai coperti dal riquadro radio, disposizione con memo, testo sotto la mappa compatto
+
+**Base.** Ramo claude/valmora-mappa da main 83d48e38. Il PO ha visto i provini: «Va bene, pubblica» (0.68.0). Provini: coordination/handoffs/sviluppatrice/d272/provini-uscita-*.png, rifatti da provini.mjs --uscita.
+
+**Cosa cambia** (ogni pezzo ha il suo rosso):
+- C272N01, radio-mappa.tsx: i nomi dei settori sono ostacoli del riquadro radio. Il guardiano nuovo di po152b dice «il riquadro radio copre i nomi … (D-272)». Prima, su main, i nomi erano coperti in 116 / 138 / 148 stati su 277 del giro radio (360/375/412); ora 0. Variante A scelta dal PO: senza posto il riquadro va «stretto» o «muto» e l'indicazione si legge sotto la mappa.
+- C272C01, congela.ts: la disposizione di nomi e unità si ricalcola solo se cambiano gli ingressi (firma: misura della mappa, classi, unità, punti accesi, nomi, segni, «Home», caratteri). A ingressi uguali si rimette il risultato di prima.
+- C272F01, mossa-ui.tsx: «Previsione: nessun cambiamento.» (mossa.non_cambia_breve), una riga a 360. Prima e02 ed e16 «mossa fatta» scorrevano 75 / 74 px, soglia 68.
+- C272S01, stile-idee.css: il rapporto del costo sotto la mappa col testo piccolo e stretto della copia (--testo-piccolo, --linea-stretta). In e13 viale_pieno a 360 la pagina scorreva 82 px con la mappa già al minimo, 200 px; ora 39.
+
+**Costo della disposizione dei nomi** (tools/costo-nomi.mjs «conta», 40 risposte a 360×640, stessa build; prima = rosso C272C01):
+
+| CPU | chiamate per risposta | ms per risposta (media / mediana / max) |
+|---|---|---|
+| ×1 prima | 4,1 | 696 / 721 / 1373 |
+| ×1 dopo | 2,8 | 470 / 522 / 909 |
+| ×4 prima | 4,1 | 4342 / 4623 / 9049 |
+| ×4 dopo | 2,8 | 2663 / 3057 / 4203 |
+
+A ×4 il costo cresce di 5,35 volte e non di 4. Calibrazione nella stessa pagina: il JavaScript puro rallenta 4,0×, il layout forzato 6,0×, e la disposizione è fatta soprattutto di getBoundingClientRect. È l'emulazione di Chrome, non un telefono. Un primo «6,9×» era un errore di misura, ritirato: la finestra era più corta a ×1.
+
+**Guardiani** (po152b completo su f63453c6): 0 problemi a 360, 375 e 412. Scorrimento massimo 40 / 12 / 0 px.
+
+**Provato e tolto, misurato:**
+- Mappa fino a 186 px: tocchi rossi C56-03 (e14) e anelli sotto 3:1 (minimo 2,02:1) a 360.
+- Congelamento da «puoi» con posto riservato: 32 / 9 / 18 problemi, e con anelli e centri d'arrivo nel calcolo 63 / 39 / 11.
+- Preferenza «posto di prima»: salti uguali, e rompeva gli anelli in e05.
+
+**Resta per il passo 2.** Salti dopo la mossa su e03 (tools/salti-mossa.mjs, 24 mosse):
+- 360: 53 pastiglie su 144 si spostano, mediana 110 px, max 153; nomi mediana 59 px, max 83.
+- 375: max 150-174 px.
+
+**Rilievi separati:**
+- D-269 c su e07 quaranta_pulmini a 412, visto in 1 giro su 2.
+- tests/ripartenza-po083.test.ts: 167-174 s a macchina libera, limite 180; sotto carico scade.
