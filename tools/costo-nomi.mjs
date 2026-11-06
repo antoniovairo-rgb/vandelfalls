@@ -7,7 +7,7 @@
 // risposta ferma, uguale a ogni rallentamento (i segni spariscono dopo 1,8 s veri e portano un'altra chiamata).
 // Uso: node tools/costo-nomi.mjs [quante risposte, 40] [viewport, 360x640] [rallentamenti, 1,4] [profilo|conta]   (costruisce dist-nomi/)
 import { execSync } from 'node:child_process';
-import { cpSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { cpSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 import { servi } from './foto.mjs';
 import { leggiDati } from './dati-disco.mjs';
@@ -15,7 +15,7 @@ import { risposteCostruite } from './sonda-altezze.mjs';
 
 const [n = '40', vp = '360x640', rall = '1,4', modo = 'profilo'] = process.argv.slice(2), [w, h] = vp.split('x').map(Number), conta = modo === 'conta';
 execSync('npx vite build --minify false --outDir dist-nomi --emptyOutDir', { stdio: 'ignore' });
-if (conta) { cpSync('dist-nomi', 'dist-nomi-conta', { recursive: true }); const f = `dist-nomi-conta/assets/${readdirSync('dist-nomi-conta/assets').find((x) => /^index-.*\.js$/.test(x))}`, s0 = readFileSync(f, 'utf8'), A = 'function disponiEtichette(contenitore) {';
+if (conta) { rmSync('dist-nomi-conta', { recursive: true, force: true }); cpSync('dist-nomi', 'dist-nomi-conta', { recursive: true }); // da capo: una copia vecchia aveva due index-*.js const f = `dist-nomi-conta/assets/${readdirSync('dist-nomi-conta/assets').find((x) => /^index-.*\.js$/.test(x))}`, s0 = readFileSync(f, 'utf8'), A = 'function disponiEtichette(contenitore) {';
   if (!s0.includes(A)) throw new Error('disponiEtichette non trovata nella build');
   writeFileSync(f, s0.replace(A, `${A} const t0 = performance.now(), pila = new Error().stack ?? ''; try { return disponiEtichette__vera(contenitore); } finally {
     (globalThis.__DE ??= []).push({ ms: performance.now() - t0, da: pila.includes('commitHook') ? 'effetto' : pila.includes('adatta') ? 'adatta' : 'rifai' }); } }\nfunction disponiEtichette__vera(contenitore) {`)); }
@@ -30,7 +30,7 @@ const stat = (xs) => { const s = [...xs].sort((a, b2) => a - b2), m = s.reduce((
 for (const r of rall.split(',').map(Number)) {
   const q = await b.newPage({ viewport: { width: w, height: h }, hasTouch: true, reducedMotion: 'reduce' }), cdp = await q.context().newCDPSession(q);
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: r }); await cdp.send('Profiler.enable'); await cdp.send('Profiler.setSamplingInterval', { interval: 100 });
-  await q.addInitScript(() => { globalThis.__VALMORA_SECONDO_MS = 1; }); await q.goto(url);
+  await q.addInitScript((xs) => { globalThis.__VALMORA_SECONDO_MS = 1; for (const x of xs) globalThis[`__NO_${x}`] = true; }, (process.env.ROSSI ?? '').split(',').filter(Boolean)); await q.goto(url); // ROSSI=C272C01: il prima, stessa build
   const lento = () => q.waitForFunction(() => { const s = document.querySelectorAll('.scena'); return s.length === 1 && getComputedStyle(s[0]).opacity === '1'; }, null, { timeout: 8000 * r }).catch(() => {});
   const per = Object.fromEntries(FUNZIONI.map((f) => [f, []])), chiamate = Object.fromEntries(FUNZIONI.map((f) => [f, []])), tot = [], da = {}; let saltate = 0;
   for (const c of campione) {
