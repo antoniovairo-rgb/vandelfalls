@@ -4,11 +4,11 @@
 // La tensione si vede SOLO come colore (D-055): classe liv-0…liv-5, mai il numero.
 import { lazy, Suspense, useEffect, type ReactNode, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { disponiEtichette } from './etichette.ts';
-import { firmaDi, primaDi, rimettiUguale, tieni } from './congela.ts';
+import { firmaDi, rimettiUguale, tieni } from './congela.ts';
 
 // Interruttore rosso C05S08: nomi e unità restano al posto fisso (difetto C-008).
 // D-272 (passo 3): si ricalcola solo se cambiano gli ingressi (congela.ts)
-const disponi = (el: HTMLElement) => { if (!spento('C05S08') && !rimettiUguale(el)) { const f = firmaDi(el); disponiEtichette(el, primaDi(el, f)); tieni(el, f); } collocaRadio(el); }; // D-255: il riquadro radio dopo le unità
+const disponi = (el: HTMLElement) => { if (!spento('C05S08') && !rimettiUguale(el)) { const f = firmaDi(el); disponiEtichette(el); tieni(el, f); } collocaRadio(el); }; // D-255: il riquadro radio dopo le unità
 import type { Disposizione, Missione } from '../../logica/tipi.ts';
 import { spento } from '../../interruttori.ts';
 import { club, t, quante } from '../dati.ts';
