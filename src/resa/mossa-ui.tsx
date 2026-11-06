@@ -45,9 +45,7 @@ export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: bo
     onTogli: (r, s) => setInMano((x) => (x && x.risorsa === r && x.settore === s ? null : { risorsa: r, settore: s })),
     onSettore: muovi,
     mossa: { spostabili: spostabili(m, ic).map((x) => `${x.risorsa}@${x.settore}`), inMano: inMano && `${inMano.risorsa}@${inMano.settore}`,
-      ammessi: inMano ? settoriAmmessi(m, inMano.risorsa).filter((k) => k !== inMano.settore) : [],
-      // D-272 (passo 3): i settori dove una delle unità spostabili può arrivare (posto riservato nella disposizione)
-      riserva: [...new Set(spostabili(m, ic).flatMap((x) => settoriAmmessi(m, x.risorsa).filter((k) => k !== x.settore)))] },
+      ammessi: inMano ? settoriAmmessi(m, inMano.risorsa).filter((k) => k !== inMano.settore) : [] },
   // D-262: dopo la mossa il riquadro tiene solo l'indicazione e la previsione (compatto, il costo va nella risposta, D-258):
   // col rapporto intero la previsione era tagliata dal riquadro (alto al più metà mappa). Rosso C262E01: come prima.
   } : fatta && !spento('C262E01') ? { mossa: { spostabili: [], inMano: null, ammessi: [], fatta: true } } : {};

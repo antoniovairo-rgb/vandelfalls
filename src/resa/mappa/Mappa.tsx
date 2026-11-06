@@ -4,11 +4,11 @@
 // La tensione si vede SOLO come colore (D-055): classe liv-0…liv-5, mai il numero.
 import { lazy, Suspense, useEffect, type ReactNode, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { disponiEtichette } from './etichette.ts';
-import { rimettiFerma, tieniFerma } from './congela.ts';
+import { firmaDi, postiDiPrima, rimettiUguale, tieni } from './congela.ts';
 
 // Interruttore rosso C05S08: nomi e unità restano al posto fisso (difetto C-008).
-// D-272 (passo 3): con la mossa la disposizione resta ferma per tutta la risposta (congela.ts)
-const disponi = (el: HTMLElement) => { if (!spento('C05S08') && !rimettiFerma(el)) { disponiEtichette(el); tieniFerma(el); } collocaRadio(el); }; // D-255: il riquadro radio dopo le unità
+// D-272 (passo 3): si ricalcola solo se cambiano gli ingressi (congela.ts); con la mossa vincono i posti di prima a parità
+const disponi = (el: HTMLElement) => { if (!spento('C05S08') && !rimettiUguale(el)) { const f = firmaDi(el); disponiEtichette(el, postiDiPrima(el)); tieni(el, f); } collocaRadio(el); }; // D-255: il riquadro radio dopo le unità
 import type { Disposizione, Missione } from '../../logica/tipi.ts';
 import { spento } from '../../interruttori.ts';
 import { club, t, quante } from '../dati.ts';
@@ -53,7 +53,7 @@ export interface MappaProps {
   /** PO-152 (D-241): senza onSettore il tocco su un settore apre la sua scheda di stato (scheda-settore.tsx) */
   schede?: boolean;
   /** D-241 idea B (mossa-ui.tsx): si toccano solo le unità spostabili («risorsa@settore»), poi solo i settori ammessi */
-  mossa?: { spostabili: string[]; inMano: string | null; ammessi: string[]; fatta?: boolean; riserva?: string[] };
+  mossa?: { spostabili: string[]; inMano: string | null; ammessi: string[]; fatta?: boolean };
   /** PO-152 (D-241): rapporto radio del costo dopo «Conferma», sopra la mappa (RadioMappa) */
   radio?: ReactNode;
   /** D-165 (fischio dell'ultimo derby): settori già spenti, città vuota (niente folla né cortei), sala al buio */
@@ -110,8 +110,6 @@ export function Mappa(p: MappaProps) {
     setAperto(null);
     if (id && dentro) requestAnimationFrame(() => el?.querySelector<HTMLButtonElement>(`[data-settore="${id}"] .settore-punto`)?.focus({ preventScroll: true }));
   };
-  // D-272 (passo 3): dove l'unità mossa può arrivare c'è un posto riservato (rosso C272R01: nessuno, come prima)
-  const riservato = (id: string) => !!p.mossa?.riserva?.includes(id) && !spento('C272R01');
   const statoDi = (s: (typeof settori)[number]) => {
     const liv = p.tensione ? livello(p.tensione[s.id] ?? 0) : null;
     const conta = (d: Disposizione | null | undefined) => Object.entries(d ?? {}).map(([r, ps]) => [r, ps[s.id] ?? 0] as const).filter(([, n]) => n > 0);
@@ -161,7 +159,7 @@ export function Mappa(p: MappaProps) {
                 ))}
               </span>
             )}
-            {(qui.length > 0 || fisse.length > 0 || riservato(s.id)) && (
+            {(qui.length > 0 || fisse.length > 0) && (
               <span className="settore-unita">
                 {fisse.map(([r, n]) => (
                   <span key={`f-${r}`} className="tocco-pastiglia" data-fissa={`${r}@${s.id}`} role="img" aria-label={`${quante(n, r)} ${n === 1 ? 'montata' : 'montate'}, restano fino a fine serata`}>
@@ -175,8 +173,6 @@ export function Mappa(p: MappaProps) {
                     <span className="pastiglia"><Icona di={iconaRisorsa(r)} />{n}</span>
                   </button>
                 ))}
-                {/* D-272 (passo 3): il posto dell'unità che può arrivare qui con la mossa, già nella disposizione (invisibile) */}
-                {riservato(s.id) && <span className="tocco-pastiglia posto-riservato" aria-hidden="true"><span className="pastiglia"><Icona di={iconaRisorsa('squadre')} />9</span></span>}
               </span>
             )}
           </div>

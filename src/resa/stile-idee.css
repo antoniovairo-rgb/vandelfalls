@@ -91,6 +91,3 @@ main:not(.rosso-c261e01):not(.rosso-c271t01) .mappa.mossa .tocco-pastiglia:is(.m
 }
 /* D-271 (C271U01): spostamento piccolo delle unità calcolato in etichette.ts, quando nessun posto è pulito (come --nome-dx dei nomi) */
 .mappa .settore-unita { translate: var(--unita-dx, 0) var(--unita-dy, 0); }
-
-/* D-272 (passo 3): posto riservato all'unità che può arrivare con la mossa: occupa lo spazio, non si vede né si tocca */
-.mappa .posto-riservato { visibility: hidden; pointer-events: none; }
