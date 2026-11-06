@@ -53,12 +53,7 @@ export function disponiEtichette(contenitore: HTMLElement) {
   // risultato, che cambiava col numero di giri: 2/426 ondate fra due giri uguali). Rosso C102D01: dallo stato di prima.
   if (!spento('C102D01')) for (const s of settori) { s.setAttribute('data-unita', UNITA[0]); s.querySelector<HTMLElement>('.settore-nome')?.style.removeProperty('max-width'); }
   for (const s of settori) { const n = s.querySelector<HTMLElement>('.settore-nome'); n?.style.removeProperty('--nome-dx'); n?.style.removeProperty('--nome-dy'); } // C128-02
-  // D-272 (passo 3): la disposizione resta ferma da «puoi» (congela.ts), quindi vale anche con l'unità in mano: i settori dove
-  // un'unità può arrivare (data-riserva) contano già col loro anello e il loro centro non si copre (C56-03). Rosso C272A01: no.
-  const d272 = !spento('C272A01'), cs = getComputedStyle(contenitore), px = (k: string) => parseFloat(cs.getPropertyValue(k)) || 0;
-  const anello = d272 ? 2 * px('--bordo') + px('--bordo-fine') : 0; // --anello (bordo + fine) più l'outline (bordo): token.css
-  const punti = settori.map((s) => { const r = s.querySelector('.settore-punto')!.getBoundingClientRect() as Rett; return d272 && s.dataset.riserva ? largo(r, anello) : r; });
-  const centriRiserva = d272 ? settori.filter((s) => s.dataset.riserva).map((s) => { const r = s.querySelector('.settore-punto')!.getBoundingClientRect(); return [s, (r.left + r.right) / 2, (r.top + r.bottom) / 2] as const; }) : [];
+  const punti = settori.map((s) => s.querySelector('.settore-punto')!.getBoundingClientRect() as Rett);
   // D-191: con la mappa abbassata (fino a 160 px) i nomi in alto finivano sotto il pulsante «Home» dell'angolo: per i nomi
   // e le unità è un ostacolo come i punti (in coda, così gli indici dei settori restano gli stessi). Rosso C191H01: no.
   const casa = contenitore.querySelector(':scope > .tasto-home');
@@ -172,8 +167,7 @@ export function disponiEtichette(contenitore: HTMLElement) {
       if (via) { dx += via[0]; dy += via[1]; }
       if (!dx && !dy) return [0, 0] as const;
       spingi(dx, dy); return [dx, dy] as const; };
-    const copreArrivo = () => (centriRiserva.some(([x, cx, cy]) => x !== s && tocchiDi(s).some((q) => dentro([cx, cy], q))) ? VERA * 1e6 : 0);
-    const costoUnita = (n: Rett, u: Rett) => copreArrivo() + sottoDisco() + costoDi(u, perUnita) + VERA * area(n, u) + bordoUnita(u) + pastiglieFuori() + suNomi(pastiglie() ?? u, n) * (c33 ? 20 : 1) + lontano(pastiglie() ?? u) + ruba();
+    const costoUnita = (n: Rett, u: Rett) => sottoDisco() + costoDi(u, perUnita) + VERA * area(n, u) + bordoUnita(u) + pastiglieFuori() + suNomi(pastiglie() ?? u, n) * (c33 ? 20 : 1) + lontano(pastiglie() ?? u) + ruba();
     const gruppo = s.querySelector<HTMLElement>('.settore-unita'), muovi = (dx: number, dy: number) => { gruppo?.style.setProperty('--unita-dx', `${dx}px`); gruppo?.style.setProperty('--unita-dy', `${dy}px`); };
     gruppo?.style.removeProperty('--unita-dx'); gruppo?.style.removeProperty('--unita-dy');
     let migliore = { nome: NOMI[0] as string, unita: UNITA[0] as string, costo: Infinity, largo: '', dx: 0, dy: 0 };

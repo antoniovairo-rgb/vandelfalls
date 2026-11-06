@@ -147,7 +147,6 @@ export function Mappa(p: MappaProps) {
         const nome = t(`settore.${s.id}`);
         return (
           <div key={s.id} ref={posiziona(s.pos.x, s.pos.y)} data-settore={s.id}
-            data-riserva={riservato(s.id) ? 'si' : undefined}
             className={`settore lato-${lato}${accesi.has(s.id) ? ' acceso' : ''}${liv !== null ? ` liv-${liv}` : ''}${p.vietati?.includes(s.id) ? ' vietato' : ''}${p.spenti?.includes(s.id) ? ' spento' : ''}`} data-vietato={p.vietati?.includes(s.id) ? 'si' : undefined}>
             <button type="button" className="settore-punto" disabled={(!p.onSettore && !schede) || (!!p.mossa && !p.mossa.ammessi.includes(s.id))} onClick={() => (p.onSettore ? p.onSettore(s.id) : setAperto((x) => (x === s.id ? null : s.id)))}
               aria-haspopup={schede ? 'dialog' : undefined} aria-expanded={schede ? aperto === s.id : undefined}
