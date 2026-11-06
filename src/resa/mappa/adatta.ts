@@ -79,11 +79,7 @@ function adatta(m: HTMLElement, giro = false) {
   if (ecc <= 0 && tenute) { m.style.setProperty('--mappa-alta', `${tenute.alta}px`); m.setAttribute('data-adatta', ''); return fine(false, tenute.fuori); }
   if (ecc <= 0) return fine(false);
   const radice = getComputedStyle(document.documentElement);
-  // D-272 (1): coi nomi ostacoli il riquadro radio va spesso «muto» e l'indicazione scende sotto la mappa (+24 px a 360: e13
-  // viale_pieno 58 → 82 px di scorrimento). Allora, con la mossa, la mappa può scendere fino a --mappa-altezza-min-muto.
-  // Rosso C272M01: il minimo di sempre.
-  const muto = deroga && !!m.querySelector(':scope > .radio-mappa.muto') && !spento('C272M01');
-  const min = Math.max(parseFloat(radice.getPropertyValue(LETTURA.has(schermata) && !deroga && !spento('C191L01') ? '--mappa-altezza-min-lettura' : muto ? '--mappa-altezza-min-muto' : '--mappa-altezza-min')) || 0,
+  const min = Math.max(parseFloat(radice.getPropertyValue(LETTURA.has(schermata) && !deroga && !spento('C191L01') ? '--mappa-altezza-min-lettura' : '--mappa-altezza-min')) || 0,
     deroga && !spento('C262D01') ? senzaDischiSovrapposti(m, radice) : 0);
   const nat = m.getBoundingClientRect().height;
   let alta = Math.max(min, nat - ecc);
