@@ -1495,3 +1495,19 @@ A ×4 il costo cresce di 5,35 volte e non di 4. Calibrazione nella stessa pagina
 **Rilievi separati:**
 - D-269 c su e07 quaranta_pulmini a 412, visto in 1 giro su 2.
 - tests/ripartenza-po083.test.ts: 167-174 s a macchina libera, limite 180; sotto carico scade.
+
+**Bracci rossi a 360 (CI 1334 su f63453c6: 5 bracci ciechi, 3 tentativi su 3).** Le correzioni D-272 tolgono ai bracci i casi che li mostravano. Regola: prima episodi dove il difetto si vede ancora col codice nuovo; il rosso D-272 accoppiato solo se un caso così non c'è. Conteggi «almeno» invariati (tools/bracci-po152b.mjs).
+
+Misura: giro radio intero (36 episodi), 360×760, senza rossi D-272; poi un rosso D-272 alla volta sul giro ristretto.
+
+| Braccio | serve | col codice nuovo, tutti gli episodi | scelta |
+|---|---|---|---|
+| C262M01+C271U01 (C56-03) | 5 | 24 in 15 episodi | episodi e02, e05, e26 (3 + 2 + 3) |
+| C269M01 (C57-01) | 8 | 12 in 12 episodi, 1 ciascuno | quei 12 episodi |
+| C261H01 (soglia 68) | 7 | 1 (solo e35 perimetro) | con C272S01: 7 |
+| C269A01 (D-269 b) | 5 | 0 nel giro previsione, 2 in radio + fermo + e01 (e02, e16) | con C272S01: 24 |
+| C269C01+C271U01 (segni ▲/▼) | 3 | 0 | con C272N01: 3 |
+
+Perché l'accoppiamento per gli ultimi tre:
+- C261H01 e C269A01: misurato che nessun giro arriva al conteggio senza C272S01 e che con C272S01 rosso ci arriva. IPOTESI, non misurata a parte: il rapporto col testo piccolo accorcia la pagina, così lo scorrimento (C261H01) resta sotto 68 px e la copia (C269A01) resta in vista.
+- C269C01: misurato 0 casi su 36 episodi col codice nuovo, 3 con C272N01 rosso. IPOTESI: coi nomi come ostacoli il riquadro non si ricolloca più allo sparire dei segni, quindi il difetto non ha casi col codice nuovo; il braccio dimostra che il guardiano lo vedrebbe se i nomi smettessero di essere ostacoli.
