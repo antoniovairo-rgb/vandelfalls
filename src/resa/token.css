@@ -208,6 +208,7 @@
   --margine-nomi: 34px; /* spazio in basso per i nomi dei settori (C-005 R06) */
   --mappa-proporzione: 1 / 1;
   --mappa-altezza-min: 200px; /* D-187: sotto, a 360 i nomi in alto non stanno; in più la mappa non scende dove «Home» copre un settore (adatta.ts, S-21) */
+  --mappa-altezza-min-muto: 186px; /* D-272: con la mossa, contando la copia sotto la mappa (adatta.ts); più giù no senza il PO */
   --mappa-altezza-min-lettura: 160px; /* D-191: risposta, sala e briefing (mappa che non si tocca) */
   --stemma-compatto: 32px; /* D-191: stemmi nella scheda compatta della città */
   --mappa-proporzione-passi: 4 / 3; /* sala e briefing a passi (S-10): mappa più bassa, niente scorrimento */

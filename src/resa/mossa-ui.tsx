@@ -50,11 +50,15 @@ export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: bo
   // col rapporto intero la previsione era tagliata dal riquadro (alto al più metà mappa). Rosso C262E01: come prima.
   } : fatta && !spento('C262E01') ? { mossa: { spostabili: [], inMano: null, ammessi: [], fatta: true } } : {};
   const stato = fatta && !possibile ? 'fatta' : inMano ? 'dove' : 'puoi';
+  // D-272 (passo 3): «Mossa fatta. Previsione alla chiusura: nessun cambiamento.» nella copia sotto la mappa andava su due righe
+  // a 360 e la risposta scorreva oltre soglia (e13 viale_pieno 83 px, e02 ritardo 75; soglia 68). Più breve, una riga, anche nel
+  // riquadro (stesso testo: C57-02 li confronta). Rosso C272F01: il testo di prima.
+  const nonCambia = spento('C272F01') ? 'mossa.non_cambia' : 'mossa.non_cambia_breve';
   // D-262: dopo la mossa, la riga della previsione e i segni ▲/▼ sui due settori (niente segno dove non cambia)
   const cambi = stato === 'fatta' ? (effetto ?? []).filter((e) => e.verso !== 'pari') : [];
   const riga = stato !== 'fatta' || !effetto?.length ? null : cambi.length
     ? `${t('mossa.previsione')} ${cambi.map((e) => `${t(`settore.${e.settore}`)} ${t(e.verso === 'su' ? 'mossa.si_scalda' : 'mossa.si_calma')}`).join(', ')}.`
-    : t('mossa.non_cambia');
+    : t(nonCambia);
   const testo = t(stato === 'puoi' && spento('C268M01') ? 'mossa.puoi_c56' : `mossa.${stato}`); // C56-04: «un'unità», non «una squadra»; rosso C268M01: come prima
   const indicazione = <p className="mossa-indicazione" data-mossa={stato}>{testo}{riga && <> <span data-previsione={cambi.map((e) => `${e.settore}:${e.verso}`).join(' ')}>{riga}</span></>}</p>;
   const segni: Segno[] = cambi.map((e) => ({ settore: e.settore, tipo: 'tensione', verso: e.verso as 'su' | 'giu' }));
@@ -73,7 +77,7 @@ export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: bo
     const unisci = (...xs: string[]) => xs.filter(Boolean).join(' ');
     const verbo = t('mossa.si_scalda').length >= t('mossa.si_calma').length ? t('mossa.si_scalda') : t('mossa.si_calma');
     const prevLunga = !conPrev ? '' : spostabili(m, ic).flatMap((x) => settoriAmmessi(m, x.risorsa).filter((k) => k !== x.settore)
-      .map((a) => `${t('mossa.previsione')} ${t(`settore.${x.settore}`)} ${verbo}, ${t(`settore.${a}`)} ${verbo}.`)).reduce((a, b) => (b.length > a.length ? b : a), t('mossa.non_cambia'));
+      .map((a) => `${t('mossa.previsione')} ${t(`settore.${x.settore}`)} ${verbo}, ${t(`settore.${a}`)} ${verbo}.`)).reduce((a, b) => (b.length > a.length ? b : a), t(nonCambia));
     const ora = unisci(conIstr ? testoSotto : '', conPrev && riga ? riga : '');
     const riserva = !possibile ? ora : [conIstr ? breve('puoi') ?? t('mossa.puoi') : '', conIstr ? t('mossa.dove') : '', unisci(conIstr ? t('mossa.fatta') : '', prevLunga)].reduce((a, b) => (b.length > a.length ? b : a), ora);
     sotto = (

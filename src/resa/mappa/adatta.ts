@@ -79,7 +79,12 @@ function adatta(m: HTMLElement, giro = false) {
   if (ecc <= 0 && tenute) { m.style.setProperty('--mappa-alta', `${tenute.alta}px`); m.setAttribute('data-adatta', ''); return fine(false, tenute.fuori); }
   if (ecc <= 0) return fine(false);
   const radice = getComputedStyle(document.documentElement);
-  const min = Math.max(parseFloat(radice.getPropertyValue(LETTURA.has(schermata) && !deroga && !spento('C191L01') ? '--mappa-altezza-min-lettura' : '--mappa-altezza-min')) || 0,
+  // D-272 (passo 3): coi nomi ostacoli del riquadro radio (passo 1) il riquadro va spesso «muto» e l'indicazione scende sotto la
+  // mappa: e13 viale_pieno a 360×640 scorreva 82 px (soglia 68). La misura qui conta già la copia come visibile (C57-01), quindi
+  // la mappa può scendere fino a --mappa-altezza-min-muto nella stessa misura, una volta sola (prova con «muto» deciso dopo:
+  // 328 → 200 → 186 px, C57-01 rosso). Rosso C272M01: il minimo di sempre.
+  const minimo = LETTURA.has(schermata) && !deroga && !spento('C191L01') ? '--mappa-altezza-min-lettura' : copia && !spento('C272M01') ? '--mappa-altezza-min-muto' : '--mappa-altezza-min';
+  const min = Math.max(parseFloat(radice.getPropertyValue(minimo)) || 0,
     deroga && !spento('C262D01') ? senzaDischiSovrapposti(m, radice) : 0);
   const nat = m.getBoundingClientRect().height;
   let alta = Math.max(min, nat - ecc);
