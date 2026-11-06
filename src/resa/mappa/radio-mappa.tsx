@@ -41,14 +41,17 @@ export function collocaRadio(mappa: HTMLElement) {
   const m0 = mappa.getBoundingClientRect(), rel = (b: Rett): Rett => ({ left: b.left - m0.left, right: b.right - m0.left, top: b.top - m0.top, bottom: b.bottom - m0.top });
   const stato = `${r.textContent}|${Math.round(m0.width)}x${Math.round(m0.height)}`, prima = fermo ? visto.get(r) : undefined;
   const segni = segniVisti(mappa, 'radio', [...mappa.querySelectorAll('[data-segno]')].map((e) => e.getBoundingClientRect())).map(rel);
-  const fissi = [...mappa.querySelectorAll('[data-presenza]:not(:disabled), .settore-punto:not(:disabled), .tasto-home')].map((e) => rel(e.getBoundingClientRect()));
+  // D-272 (1): anche i nomi dei settori sono ostacoli (prima il riquadro li copriva in 116-148 stati su 277 del giro radio di
+  // po152b, a ogni larghezza). Rosso C272N01: solo unità, settori e «Home», come prima.
+  const SEL = `[data-presenza]:not(:disabled), .settore-punto:not(:disabled), .tasto-home${spento('C272N01') ? '' : ', .settore-nome'}`;
+  const fissi = [...mappa.querySelectorAll(SEL)].map((e) => rel(e.getBoundingClientRect())).filter((x) => x.right > x.left && x.bottom > x.top);
   const firma = [...fissi, ...segni].map((b) => [b.left, b.top, b.right, b.bottom].map(Math.round).join(',')).sort().filter((x, i, a) => a.indexOf(x) === i).join(' ');
   if (fermo) { const ok = prima?.stato === stato && prima.firma === firma; visto.set(r, { stato, firma }); if (ok) return; }
   r.classList.remove('posto', 'stretto', 'muto', ...MODI.filter(Boolean));
   if (r.dataset.evita !== 'si') return;
   const m = mappa.getBoundingClientRect(), base = r.getBoundingClientRect();
   const ass = (b: Rett): Rett => ({ left: b.left + m.left, right: b.right + m.left, top: b.top + m.top, bottom: b.bottom + m.top });
-  const bersagli = fermo ? [...fissi, ...segni].map(ass) : [...mappa.querySelectorAll('[data-presenza]:not(:disabled), .settore-punto:not(:disabled), .tasto-home, [data-segno]')].map((e) => e.getBoundingClientRect());
+  const bersagli = fermo ? [...fissi, ...segni].map(ass) : [...mappa.querySelectorAll(`${SEL}, [data-segno]`)].map((e) => e.getBoundingClientRect());
   const v = (k: string) => parseFloat(getComputedStyle(mappa).getPropertyValue(k)) || 0, bordo = v('--spazio-2'), aria = v('--spazio-1');
   // un filo d'aria (--spazio-1) fra il riquadro e i bersagli: a filo i pixel frazionari si toccano
   const urto = (l: number, d: number, y: number, h: number) => bersagli.reduce((a, x) => a + Math.max(0, Math.min(d, x.right + aria) - Math.max(l, x.left - aria)) * Math.max(0, Math.min(y + h, x.bottom + aria) - Math.max(y, x.top - aria)), 0);

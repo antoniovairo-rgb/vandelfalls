@@ -44,6 +44,10 @@ main:not(.rosso-c241n01) .mappa.citta .settore-nome { min-width: min-content; }
 main:has(.mappa .radio-mappa:is(.compatto, .stretto, .muto)) .rapporto-sotto { display: block; }
 /* C57-01 (D-269): durante la misura di adatta.ts la copia conta come visibile (classe tolta prima del disegno) */
 main.misura-copia .rapporto-sotto { display: block; }
+/* D-272 (strada 1, scelta della principale): il rapporto sotto la mappa ha lo stesso testo piccolo e stretto della copia
+   dell'indicazione (una copia sola, compatta): in e13 viale_pieno a 360×640 la pagina scorreva 82 px (soglia 68) e la mappa è
+   già al minimo (200 px). Rosso C272S01: testo di prima. */
+main:not(.rosso-c272s01) .rapporto-sotto { font-size: var(--testo-piccolo); line-height: var(--linea-stretta); }
 /* C57-02 e D-269 a: istruzione e previsione della mossa si leggono sotto la mappa quando il riquadro è al solo lettore («muto»);
    nella misura di adatta.ts conta sempre, col testo più lungo fra gli stati («riserva»), così la mappa non cambia altezza */
 .istruzione-sotto { display: none; margin: var(--spazio-1) 0 0; font-size: var(--testo-piccolo); line-height: var(--linea-stretta); font-weight: 700; }

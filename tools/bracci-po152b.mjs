@@ -8,25 +8,30 @@ export const BRACCI_PO152B = {
   C255R01: { giri: ['radio'], episodi: ['e01', 'e02'], segno: '(D-255)', almeno: 11 }, // 6 + 5
   C258S01: { giri: ['radio'], episodi: ['e01', 'e02'], segno: 'il costo non si vede (D-258)', almeno: 13 }, // 7 + 6
   C259A01: { giri: ['radio'], episodi: ['e01', 'e02'], segno: '(soglia 68, D-258)', almeno: 12 }, // 7 + 5
-  C261H01: { giri: ['radio'], episodi: ['e35'], segno: '(soglia 68, D-258)', almeno: 7 }, // solo e35 perimetro
+  'C261H01,C272S01': { giri: ['radio'], episodi: ['e35'], segno: '(soglia 68, D-258)', almeno: 7 }, // solo e35 perimetro
   C261E01: { giri: ['radio'], episodi: ['e01', 'e02'], segno: '(D-261)', almeno: 11 }, // 6 + 5
   C262R01: { giri: ['e01'], segno: 'la mossa di quella pausa è persa (C56-02)', almeno: 3 }, // giro «ricarica» alle 3 altezze
   C262E01: { giri: ['e01'], segno: 'dopo la mossa manca la previsione (D-262)', almeno: 3 }, // giro «mossa» alle 3 altezze
-  'C262M01,C271U01': { giri: ['radio'], episodi: ['e02', 'e03'], segno: '(C56-03)', almeno: 5 }, // 3 + 2
+  'C262M01,C271U01': { giri: ['radio'], episodi: ['e02', 'e05', 'e26'], segno: '(C56-03)', almeno: 5 }, // 3 + 2 + 3 (D-272: giro radio intero sul codice nuovo)
   C262D01: { giri: ['radio'], episodi: ['e02'], segno: '(C56-03)', almeno: 3 }, // solo e02 ritardo
   C268F01: { giri: ['e01'], segno: '(C56-05)', almeno: 1 }, // solo da tastiera, 760
   C268M01: { giri: ['e01'], segno: '(C56-04)', almeno: 54 }, // 3 altezze × 3 giri × 6
-  C269M01: { giri: ['radio'], episodi: ['e02', 'e03'], segno: '(C57-01)', almeno: 8 }, // 1 + 7
+  C269M01: { giri: ['radio'], episodi: ['e01', 'e03', 'e06', 'e07', 'e09', 'e15', 'e17', 'e20', 'e22', 'e24', 'e32', 'e35'], segno: '(C57-01)', almeno: 8 }, // 1 per episodio (D-272)
   C269P01: { giri: ['previsione'], segno: 'la previsione non si vede (C57-02)', almeno: 5 }, // e16 imp_nebbia
   C269I01: { giri: ['radio'], episodi: ['e03', 'e04'], segno: '(D-269 a)', almeno: 12 }, // 7 + 5
   // lotto «altezze» (S-11): su e21 nel giro radio il rosso si vedeva solo coi segni della risposta (1,8 s veri) ancora in pagina,
   // cioè secondo il carico (CI 1295 su main: cieco in 2 tentativi su 3). A segni spariti il giro radio non lo mostra in nessuno
   // dei 36 episodi; il giro previsione sì: e16 imp_nebbia, 5 mosse su 24, 5 su 5 in 9 prove (8 insieme a 8 processi)
-  C269A01: { giri: ['previsione'], segno: '(D-269 b)', almeno: 5 },
-  'C269C01,C271U01': { giri: ['radio'], episodi: ['e02', 'e25', 'e26'], segno: 'allo sparire dei segni ▲/▼', almeno: 3 }, // 1 + 1 + 1: il controllo nei fotogrammi (D-270), 3 su 3 in 9 prove a 5 processi; 8 episodi su 36
+  'C269A01,C272S01': { giri: ['previsione'], segno: '(D-269 b)', almeno: 5 },
+  'C269C01,C271U01,C272N01': { giri: ['radio'], episodi: ['e02', 'e25', 'e26'], segno: 'allo sparire dei segni ▲/▼', almeno: 3 }, // 1 + 1 + 1: il controllo nei fotogrammi (D-270), 3 su 3 in 9 prove a 5 processi; 8 episodi su 36
   // D-271 (S-27): misure sul merge della 0.66.0 (360×760, giro ristretto come qui). Lo spostamento piccolo delle unità (C271U01)
   // toglie a C262M01 e C269C01 i casi che li rendevano visibili (CI 74eb83f: 1 su 5 e 2 su 3; spento C271U01: 5 e 3): girano con
   // C271U01, come C215L01 con C241A01. Conteggi invariati.
+  // D-272 (S-11, CI 1334 su f63453c6: 5 bracci ciechi in 3 tentativi su 3). Col codice nuovo il braccio cerca prima episodi dove il
+  // difetto si vede ancora (giro radio intero, 36 episodi, 360×760, senza rossi D-272): C262M01 24 in 15 episodi → e02, e05, e26;
+  // C269M01 12 in 12 episodi, 1 ciascuno → quei 12. Dove non basta in nessun episodio il braccio gira col rosso D-272 che gli toglie
+  // i casi (un rosso D-272 alla volta, giro ristretto): C261H01 1 in tutto (e35) → 7 con C272S01; C269A01 2 in radio+fermo+e01, 0 in
+  // previsione → 24 con C272S01; C269C01 0 → 3 con C272N01. Perché nel README di d187 (D-272). Conteggi invariati.
   C271T01: { giri: ['radio'], episodi: ['e01', 'e02'], segno: 'tratteggio nella mossa', almeno: 11 }, // e01 6 + e02 5 stati con tratteggio
   C271U01: { giri: ['radio'], episodi: ['e04', 'e16'], segno: '(D-271, C271U01)', almeno: 13 }, // e04 arance 7 + e16 magazzino_sette 6
   C271V01: { giri: ['versione'], segno: 'la versione non svanisce (D-271)', almeno: 2 }, // movimento e movimento ridotto

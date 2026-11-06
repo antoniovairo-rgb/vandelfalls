@@ -156,5 +156,6 @@
   "mossa.previsione": "Previsione alla chiusura:",
   "mossa.si_scalda": "si scalda",
   "mossa.si_calma": "si calma",
-  "mossa.non_cambia": "Previsione alla chiusura: nessun cambiamento."
+  "mossa.non_cambia": "Previsione alla chiusura: nessun cambiamento.",
+  "mossa.non_cambia_breve": "Previsione: nessun cambiamento."
 }
