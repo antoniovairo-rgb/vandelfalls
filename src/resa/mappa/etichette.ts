@@ -53,7 +53,12 @@ export function disponiEtichette(contenitore: HTMLElement, prima?: ReadonlyMap<s
   // risultato, che cambiava col numero di giri: 2/426 ondate fra due giri uguali). Rosso C102D01: dallo stato di prima.
   if (!spento('C102D01')) for (const s of settori) { s.setAttribute('data-unita', UNITA[0]); s.querySelector<HTMLElement>('.settore-nome')?.style.removeProperty('max-width'); }
   for (const s of settori) { const n = s.querySelector<HTMLElement>('.settore-nome'); n?.style.removeProperty('--nome-dx'); n?.style.removeProperty('--nome-dy'); } // C128-02
-  const punti = settori.map((s) => s.querySelector('.settore-punto')!.getBoundingClientRect() as Rett);
+  // D-272 (passo 3): con la mossa, i punti dei settori toccabili hanno l'anello (D-271, stile-idee.css): con la preferenza per il
+  // posto di prima una pastiglia restava sull'anello di Tornelli (e05 sindacato a 360/375, «senza anello pieno»). L'anello conta
+  // come parte del punto. Rosso C272A01: solo il punto.
+  const cs = getComputedStyle(contenitore), px = (k: string) => parseFloat(cs.getPropertyValue(k)) || 0;
+  const anello = contenitore.classList.contains('mossa') && !spento('C272A01') ? 2 * px('--bordo') + px('--bordo-fine') : 0; // --anello e outline (token.css)
+  const punti = settori.map((s) => { const p = s.querySelector<HTMLButtonElement>('.settore-punto')!, r = p.getBoundingClientRect() as Rett; return anello && !p.disabled ? largo(r, anello) : r; });
   // D-191: con la mappa abbassata (fino a 160 px) i nomi in alto finivano sotto il pulsante «Home» dell'angolo: per i nomi
   // e le unità è un ostacolo come i punti (in coda, così gli indici dei settori restano gli stessi). Rosso C191H01: no.
   const casa = contenitore.querySelector(':scope > .tasto-home');
