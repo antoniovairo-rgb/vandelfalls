@@ -39,6 +39,9 @@ export const BRACCI_PO152B = {
   // spostamento (C272W01) 0 / 0 / 9: a 360 il salto massimo resta 42 px, sotto la soglia di 44, quindi quel braccio gira a 412×760
   C272V01: { giri: ['salti'], segno: '(soglia 44, D-272 salti)', almeno: 20 },
   C272W01: { giri: ['salti'], segno: '(soglia 44, D-272 salti)', almeno: 6 },
+  // D-272 passo 2, vicinanza (giro radio, soglia 95 / 93 / 93): senza i posti e la larghezza di C28-14 (C94N01) le pastiglie di Magazzino
+  // in e16 magazzino_sette finiscono a 108-110 px dal disco, in 6 stati a 360; unico episodio col segno su 36
+  C94N01: { giri: ['radio'], episodi: ['e16'], segno: 'D-272 vicinanza)', almeno: 5 },
 };
 
 // D-274b: i bracci della parte «chiamate» (D-207) misurano solo gli imprevisti: le chiamate normali (498 su 782) non servono.
