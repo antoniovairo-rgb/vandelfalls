@@ -97,9 +97,14 @@ main:not(.rosso-c261e01):not(.rosso-c271t01) .mappa.mossa .tocco-pastiglia:is(.m
 .mappa .settore-unita { translate: var(--unita-dx, 0) var(--unita-dy, 0); }
 /* D-272 (passo 2): il posto dell'unità partita resta, vuoto e invisibile, fino alla chiamata successiva; non prende tocchi (C56-03) */
 .mappa .tocco-vuoto { min-width: var(--tocco-min); min-height: var(--tocco-min); visibility: hidden; pointer-events: none; }
-/* D-272 (passo 4): «−1» / «+1» per circa 2 s dopo la mossa, a sinistra sopra il disco (i segni ▲/▼ stanno a destra); non prende tocchi.
+/* D-272 (passo 4): «−1» / «+1» per circa 2 s dopo la mossa, al centro del disco del settore e sotto nomi e pastiglie (a fianco del disco
+   copriva nomi e pastiglie vicini: e03 a 360, «Curva ospiti» e una pastiglia di Piazzale, provini 7/11; sul disco, sopra, il nome di
+   Piazzale che sta sul disco di Parcheggi); sopra dischi e fondo, sotto il riquadro radio (3); non prende tocchi.
    Colori dei segni della risposta (bordo nero sopra la mappa); con riduzione del movimento niente animazione. */
-.mappa .segno-mossa { position: absolute; right: calc(var(--settore) / 4); bottom: calc(var(--settore) / 3); z-index: 4; display: flex; align-items: center; gap: var(--spazio-px); min-width: var(--icona); height: var(--icona); padding: 0 var(--spazio-1); border: var(--bordo-fine) solid var(--nero); box-shadow: var(--ombra-1); font: 700 var(--testo-piccolo) / 1 var(--font-titoli); white-space: nowrap; pointer-events: none; animation: segno-effetto 2s ease-out both; }
+.mappa .settore-nome, .mappa .settore-unita { z-index: 2; }
+.mappa .segno-mossa { position: absolute; left: 0; top: 0; translate: -50% -50%; z-index: 1; display: flex; align-items: center; gap: var(--spazio-px); min-width: var(--icona); height: var(--icona); padding: 0 var(--spazio-1); border: var(--bordo-fine) solid var(--nero); box-shadow: var(--ombra-1); font: 700 var(--testo-piccolo) / 1 var(--font-titoli); white-space: nowrap; pointer-events: none; animation: segno-effetto 2s ease-out both; }
 .mappa .segno-mossa.via { background: var(--ciano); color: var(--nero); }
 .mappa .segno-mossa.arriva { background: var(--magenta); color: var(--bianco); }
 @media (prefers-reduced-motion: reduce) { .mappa .segno-mossa { animation: none; } }
+/* rosso C272D02: il segno a fianco del disco e sopra tutto, come la prima prova (copriva nomi e pastiglie) */
+.rosso-c272d02 .mappa .segno-mossa { left: auto; top: auto; translate: none; right: calc(var(--settore) / 4); bottom: calc(var(--settore) / 3); z-index: 4; }

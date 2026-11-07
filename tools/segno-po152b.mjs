@@ -1,8 +1,8 @@
-// D-272 passo 4: dopo la mossa, per circa 2 s, «−1» sul settore lasciato e «+1» su quello d'arrivo (Mappa.tsx, mossa-ui.tsx;
+// D-272 passo 4: dopo la mossa, per circa 2 s, «−1» sul settore lasciato e «+1» su quello d'arrivo (Mappa.tsx, mossa-ui.tsx, al centro del disco e sotto nomi e pastiglie;
 // rosso C272D01: nessun segno). Giro «segno» di po152b, e03 auto_in_sosta, ogni unità spostabile verso il primo settore ammesso.
-// Subito dopo la mossa (150 ms): un solo «−1» sul settore di partenza e un solo «+1» su quello d'arrivo, con l'icona dell'unità;
+// Subito dopo la mossa (150 ms): un solo «−1» sul settore di partenza e un solo «+1» su quello d'arrivo;
 // testo e bordo staccati dal fondo almeno 3:1; nessun tocco (centro di dischi e pastiglie) preso dal segno; la pagina non scorre
-// più di prima della mossa; con la riduzione del movimento niente animazione. Dopo 2,5 s veri il segno non c'è più.
+// più di prima della mossa; il segno non copre nomi, pastiglie, «Home» né dischi altrui; con la riduzione del movimento niente animazione. Dopo 2,5 s veri il segno non c'è più.
 import { chiamateCostruite } from './sonda-altezze.mjs';
 import { contrasto } from './anelli-mossa.mjs';
 import { CASI_SALTI } from './salti-po152b.mjs';
@@ -14,13 +14,23 @@ const leggi = (p) => p.evaluate(() => {
   const presi = [...document.querySelectorAll('.mappa [data-presenza], .mappa [data-fissa], .mappa .settore-punto')].flatMap((e) => { const r = e.getBoundingClientRect();
     const x = (r.left + r.right) / 2, y = (r.top + r.bottom) / 2, su = document.elementFromPoint(x, y);
     return su?.closest('.segno-mossa') ? [e.dataset.presenza ?? e.dataset.fissa ?? e.closest('[data-settore]')?.dataset.settore] : []; });
-  return { segni, presi, scorre: document.documentElement.scrollHeight - innerHeight };
+  // il segno non copre nomi, pastiglie, «Home» né i dischi degli altri settori (il proprio disco sì: ci sta sopra); dove si
+  // sovrappone conta solo se è disegnato sopra (nel centro della parte in comune il segno è in cima)
+  const area = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+  const coperti = [...document.querySelectorAll('.mappa .segno-mossa')].flatMap((g) => { const r = g.getBoundingClientRect(), mio = g.closest('[data-settore]');
+    return [...document.querySelectorAll('.mappa .settore-nome, .mappa .pastiglia, .mappa .tasto-home, .mappa .settore-punto')].filter((e) => !(e.classList.contains('settore-punto') && e.closest('[data-settore]') === mio))
+      .map((e) => { const q = e.getBoundingClientRect(), x = (Math.max(r.left, q.left) + Math.min(r.right, q.right)) / 2, y = (Math.max(r.top, q.top) + Math.min(r.bottom, q.bottom)) / 2;
+        // solo se il segno è disegnato sopra: per la prova toccabili tutti e due (nomi e segno hanno pointer-events none, elementFromPoint li salterebbe)
+        const pe = e.style.pointerEvents; g.style.pointerEvents = 'auto'; e.style.pointerEvents = 'auto'; const su = area(r, q) > 0 ? document.elementFromPoint(x, y) : null; g.style.pointerEvents = ''; e.style.pointerEvents = pe;
+        return [e, su && g.contains(su) ? Math.round(area(r, q)) : 0]; }).filter(([, a]) => a > 0)
+      .map(([e, a]) => `${g.dataset.segnoMossa} su ${e.className.split(' ')[0]} ${e.closest('[data-presenza], [data-fissa]')?.dataset.presenza ?? e.closest('[data-settore]')?.dataset.settore ?? ''} (${a} px²)`); });
+  return { segni, presi, coperti, scorre: document.documentElement.scrollHeight - innerHeight };
 });
 
 /** Giro «segno»: problemi e conto alla larghezza data. */
 export async function controllaSegno(browser, url, larghezza, h, rossi, dati, insieme, pagine = 1) {
   const male = [], vp = `${larghezza}x${h}`, dich = new Map(dati['stato.json'].variabili.map((d) => [d.id, d])), tutte = chiamateCostruite(dati, dich);
-  const conto = { vp, giro: 'segno', mosse: 0, conSegno: 0, contrastoMin: Infinity, presi: 0, rimasti: 0 }, D = '(D-272 segno)';
+  const conto = { vp, giro: 'segno', mosse: 0, conSegno: 0, contrastoMin: Infinity, presi: 0, coperti: 0, rimasti: 0 }, D = '(D-272 segno)';
   for (const [ep, id] of CASI_SALTI) {
     const c = tutte.find((x) => x.ep === ep && x.id === id), ch = dati[`missioni/${ep}.json`].ondate.flatMap((o) => o.chiamate ?? []).find((x) => x.id === id);
     if (!c || !ch) { male.push(`${vp} ${ep} ${id}: chiamata non trovata ${D}`); continue; }
@@ -44,8 +54,9 @@ export async function controllaSegno(browser, url, larghezza, h, rossi, dati, in
       if (visti.join(' ') !== [...atteso].sort().join(' ')) male.push(`${dove}: segni ${visti.join(' ') || 'nessuno'}, attesi ${atteso.join(' ')} ${D}`); else conto.conSegno++;
       for (const x of ora.segni) { const t = contrasto(rgb(x.colore), rgb(x.fondo)), b = contrasto(rgb(x.bordo), rgb(x.fondo)); conto.contrastoMin = Math.min(conto.contrastoMin, t, b);
         if (t < 3 || b < 3) male.push(`${dove}: segno ${x.k} con contrasto ${t.toFixed(2)}:1 (testo) e ${b.toFixed(2)}:1 (bordo), sotto 3:1 ${D}`);
-        if (!/^[−+]1$/.test(x.testo.trim()) || !x.icona) male.push(`${dove}: segno ${x.k} «${x.testo}»${x.icona ? '' : ' senza icona'} ${D}`);
+        if (!/^[−+]1$/.test(x.testo.trim())) male.push(`${dove}: segno ${x.k} «${x.testo}» ${D}`);
         if (x.anim !== 'none') male.push(`${dove}: segno ${x.k} animato (${x.anim}) con la riduzione del movimento ${D}`); }
+      if (ora.coperti.length) { conto.coperti += ora.coperti.length; male.push(`${dove}: il segno copre ${ora.coperti.join('; ')} ${D}`); }
       if (ora.presi.length) { conto.presi += ora.presi.length; male.push(`${dove}: il segno prende il tocco di ${ora.presi.join(', ')} ${D}`); }
       if (ora.scorre > Math.max(0, prima.scorre)) male.push(`${dove}: col segno la pagina scorre ${ora.scorre} px (prima ${prima.scorre}) ${D}`);
       await p.waitForTimeout(2500); const poi = await leggi(p); await p.close();
@@ -53,7 +64,7 @@ export async function controllaSegno(browser, url, larghezza, h, rossi, dati, in
     }), pagine);
   }
   if (conto.contrastoMin === Infinity) conto.contrastoMin = null; else conto.contrastoMin = Math.round(conto.contrastoMin * 100) / 100;
-  console.log(`segno dopo la mossa ${vp}: ${conto.mosse} mosse, col segno giusto ${conto.conSegno}, contrasto minimo ${conto.contrastoMin}:1, tocchi presi ${conto.presi}, rimasti dopo 2,5 s ${conto.rimasti}`);
+  console.log(`segno dopo la mossa ${vp}: ${conto.mosse} mosse, col segno giusto ${conto.conSegno}, contrasto minimo ${conto.contrastoMin}:1, tocchi presi ${conto.presi}, sovrapposizioni ${conto.coperti}, rimasti dopo 2,5 s ${conto.rimasti}`);
   if (!conto.mosse) male.push(`${vp}: nessuna mossa provata ${D}`);
   return { ris: conto, male };
 }

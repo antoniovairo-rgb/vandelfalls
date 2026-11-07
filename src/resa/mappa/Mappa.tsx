@@ -172,7 +172,7 @@ export function Mappa(p: MappaProps) {
                 ostacoli dei nomi (né segni-effetto né data-segno): comparendo e sparendo non ridispone niente; non prende tocchi. */}
             {[p.mossa?.spostata].filter((x) => x && (x.da === s.id || x.a === s.id)).map((x) => { const via = x!.da === s.id;
               return <span key="segno-mossa" className={`segno-mossa ${via ? 'via' : 'arriva'}`} role="status" data-segno-mossa={`${s.id}:${via ? '-1' : '+1'}:${x!.risorsa}`}
-                aria-label={`${nome}: ${t(via ? 'mossa.segno_via' : 'mossa.segno_arriva')}`}>{via ? '−1' : '+1'}<Icona di={iconaRisorsa(x!.risorsa)} /></span>; })}
+                aria-label={`${nome}: ${t(via ? 'mossa.segno_via' : 'mossa.segno_arriva')}`}>{via ? '−1' : '+1'}</span>; })}
             {(fila.length > 0 || fisse.length > 0) && (
               <span className="settore-unita">
                 {fisse.map(([r, n]) => (
