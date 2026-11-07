@@ -378,4 +378,11 @@
 //   scorrimento massimo 40/12/0 contro 68/56/0; provini approvati dal PO.
 //   guardiano: tools/foto-po152-b.mjs (nomi coperti dal riquadro), tools/costo-nomi.mjs «conta», bracci po152b sugli episodi del codice
 //   nuovo (C262M01, C269M01) o abbinati ai rossi D-272 dove il difetto non si vede più (C261H01, C269A01, C269C01).
-export const GAME_VERSION = '0.68.0';
+// 0.69.0 – mappa: le pastiglie rimaste non saltano più dopo la mossa (PO-160, D-272 passo 2).
+//   causa: il gruppo .settore-unita va a capo dopo 3 tocchi (stile.css:101); togliendo un'unità le altre cambiavano riga e posto
+//   (e03: salto massimo 133/110/98 px a 360/375/412).
+//   misura: posto vuoto invisibile al posto dell'unità partita fino alla chiamata dopo (C272V01) e costo di spostamento solo durante la
+//   mossa (C272W01, C272W02 per lo schieramento C33-04): partenza 6/0/0 px; nomi dopo la mossa 96/124/88 (prima 83/75/52), compromesso
+//   accettato dal PO; vicinanza massima invariata 95/93/93; verifica indipendente su e03, e04, e16, e30.
+//   guardiano: salti dopo la mossa ≤ 44 px e vicinanza nel giro po152b; rossi C272V01, C272W01, C272W02.
+export const GAME_VERSION = '0.69.0';
