@@ -97,3 +97,9 @@ main:not(.rosso-c261e01):not(.rosso-c271t01) .mappa.mossa .tocco-pastiglia:is(.m
 .mappa .settore-unita { translate: var(--unita-dx, 0) var(--unita-dy, 0); }
 /* D-272 (passo 2): il posto dell'unità partita resta, vuoto e invisibile, fino alla chiamata successiva; non prende tocchi (C56-03) */
 .mappa .tocco-vuoto { min-width: var(--tocco-min); min-height: var(--tocco-min); visibility: hidden; pointer-events: none; }
+/* D-272 (passo 4): «−1» / «+1» per circa 2 s dopo la mossa, a sinistra sopra il disco (i segni ▲/▼ stanno a destra); non prende tocchi.
+   Colori dei segni della risposta (bordo nero sopra la mappa); con riduzione del movimento niente animazione. */
+.mappa .segno-mossa { position: absolute; right: calc(var(--settore) / 4); bottom: calc(var(--settore) / 3); z-index: 4; display: flex; align-items: center; gap: var(--spazio-px); min-width: var(--icona); height: var(--icona); padding: 0 var(--spazio-1); border: var(--bordo-fine) solid var(--nero); box-shadow: var(--ombra-1); font: 700 var(--testo-piccolo) / 1 var(--font-titoli); white-space: nowrap; pointer-events: none; animation: segno-effetto 2s ease-out both; }
+.mappa .segno-mossa.via { background: var(--ciano); color: var(--nero); }
+.mappa .segno-mossa.arriva { background: var(--magenta); color: var(--bianco); }
+@media (prefers-reduced-motion: reduce) { .mappa .segno-mossa { animation: none; } }

@@ -18,8 +18,12 @@ export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: bo
   const [inMano, setInMano] = useState<{ risorsa: string; settore: string } | null>(null);
   // D-262: l'effetto previsto della mossa fatta (settore lasciato e coperto), finché resta questa pausa
   const [effetto, setEffetto] = useState<EffettoMossa[] | null>(null);
+  // D-272 passo 4: per circa 2 s dopo la mossa, «−1» sul settore lasciato e «+1» su quello d'arrivo (Mappa.tsx, segno-mossa).
+  // Tempo vero come i segni ▲/▼ della risposta (App.tsx, 1,8 s). Rosso C272D01: nessun segno.
+  const [spostata, setSpostata] = useState<{ risorsa: string; da: string; a: string } | null>(null);
+  useEffect(() => { if (!spostata) return; const id = setTimeout(() => setSpostata(null), 2000); return () => clearTimeout(id); }, [spostata]);
   const pausa = p.ic ? `${p.ic.ondata}:${p.ic.scelte.length}` : '';
-  useEffect(() => { setInMano(null); setEffetto(null); }, [pausa, p.attiva]);
+  useEffect(() => { setInMano(null); setEffetto(null); setSpostata(null); }, [pausa, p.attiva]);
   useEffect(() => {
     if (!inMano) return;
     const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setInMano(null); };
@@ -36,6 +40,7 @@ export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: bo
     const mossa = { risorsa: inMano.risorsa, da: inMano.settore, a }, dopo = sposta(m, ora, mossa);
     p.conIc(dopo);
     setEffetto(effettoMossa(m, ora, dopo, mossa, dichiarate));
+    if (!spento('C272D01')) setSpostata(mossa);
     setInMano(null);
     // C56-05 (D-268): dopo la mossa il fuoco va su «Avanti» (prima finiva su «i» in cima: da tastiera si ripassava tutta
     // l'intestazione). Rosso C268F01: il fuoco resta dove lo mette il browser.
@@ -48,7 +53,7 @@ export function useMossa(p: { m: Missione | null; ic: InCorso | null; attiva: bo
       ammessi: inMano ? settoriAmmessi(m, inMano.risorsa).filter((k) => k !== inMano.settore) : [] },
   // D-262: dopo la mossa il riquadro tiene solo l'indicazione e la previsione (compatto, il costo va nella risposta, D-258):
   // col rapporto intero la previsione era tagliata dal riquadro (alto al più metà mappa). Rosso C262E01: come prima.
-  } : fatta && !spento('C262E01') ? { mossa: { spostabili: [], inMano: null, ammessi: [], fatta: true } } : {};
+  } : fatta && !spento('C262E01') ? { mossa: { spostabili: [], inMano: null, ammessi: [], fatta: true, ...(spostata ? { spostata } : {}) } } : {};
   const stato = fatta && !possibile ? 'fatta' : inMano ? 'dove' : 'puoi';
   // D-272 (passo 3): «Mossa fatta. Previsione alla chiusura: nessun cambiamento.» nella copia sotto la mappa andava su due righe
   // a 360 e la risposta scorreva oltre soglia (e13 viale_pieno 83 px, e02 ritardo 75; soglia 68). Più breve, una riga, anche nel

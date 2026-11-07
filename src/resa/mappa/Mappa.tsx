@@ -53,7 +53,7 @@ export interface MappaProps {
   /** PO-152 (D-241): senza onSettore il tocco su un settore apre la sua scheda di stato (scheda-settore.tsx) */
   schede?: boolean;
   /** D-241 idea B (mossa-ui.tsx): si toccano solo le unità spostabili («risorsa@settore»), poi solo i settori ammessi */
-  mossa?: { spostabili: string[]; inMano: string | null; ammessi: string[]; fatta?: boolean };
+  mossa?: { spostabili: string[]; inMano: string | null; ammessi: string[]; fatta?: boolean; spostata?: { risorsa: string; da: string; a: string } };
   /** PO-152 (D-241): rapporto radio del costo dopo «Conferma», sopra la mappa (RadioMappa) */
   radio?: ReactNode;
   /** D-165 (fischio dell'ultimo derby): settori già spenti, città vuota (niente folla né cortei), sala al buio */
@@ -168,6 +168,11 @@ export function Mappa(p: MappaProps) {
                 ))}
               </span>
             )}
+            {/* D-272 passo 4: «−1» da dove è partita l'unità, «+1» dove è arrivata, per circa 2 s (mossa-ui.tsx). Fuori dalla firma e dagli
+                ostacoli dei nomi (né segni-effetto né data-segno): comparendo e sparendo non ridispone niente; non prende tocchi. */}
+            {[p.mossa?.spostata].filter((x) => x && (x.da === s.id || x.a === s.id)).map((x) => { const via = x!.da === s.id;
+              return <span key="segno-mossa" className={`segno-mossa ${via ? 'via' : 'arriva'}`} role="status" data-segno-mossa={`${s.id}:${via ? '-1' : '+1'}:${x!.risorsa}`}
+                aria-label={`${nome}: ${t(via ? 'mossa.segno_via' : 'mossa.segno_arriva')}`}>{via ? '−1' : '+1'}<Icona di={iconaRisorsa(x!.risorsa)} /></span>; })}
             {(fila.length > 0 || fisse.length > 0) && (
               <span className="settore-unita">
                 {fisse.map(([r, n]) => (
