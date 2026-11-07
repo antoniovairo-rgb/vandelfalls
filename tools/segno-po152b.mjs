@@ -1,4 +1,4 @@
-// D-272 passo 4: dopo la mossa, per circa 2 s, «−1» sul settore lasciato e «+1» su quello d'arrivo (Mappa.tsx, mossa-ui.tsx, al centro del disco e sotto nomi e pastiglie;
+// D-272 passo 4: dopo la mossa, per circa 2 s, «−1» sul settore lasciato e «+1» su quello d'arrivo (Mappa.tsx, mossa-ui.tsx, al centro del disco e sotto i nomi;
 // rosso C272D01: nessun segno). Giro «segno» di po152b, e03 auto_in_sosta, ogni unità spostabile verso il primo settore ammesso.
 // Subito dopo la mossa (150 ms): un solo «−1» sul settore di partenza e un solo «+1» su quello d'arrivo;
 // testo e bordo staccati dal fondo almeno 3:1; nessun tocco (centro di dischi e pastiglie) preso dal segno; la pagina non scorre

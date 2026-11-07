@@ -38,7 +38,7 @@ for (const [w, h] of VP) {
     h1{font-size:18px;margin:0 0 4px}p{margin:0 0 10px}table{border-collapse:collapse}td,th{padding:4px 6px;vertical-align:top;text-align:center}
     .sx{border-left:2px solid #111}img{display:block;border:1px solid #999}.m{font-size:12px}</style>
     <h1>D-272 passo 4: segno «−1 / +1» dopo la mossa · ${w}×${h}</h1>
-    <p>e03 «${ID}», mossa ${U} → ${A}. PRIMA: main 0.69.0 (5bdf0515). DOPO: per circa 2 s «−1» sul disco del settore lasciato e «+1» su quello d'arrivo, sotto nomi e pastiglie; non prende tocchi, non sposta nomi né pastiglie.</p>
+    <p>e03 «${ID}», mossa ${U} → ${A}. PRIMA: main 0.69.0 (5bdf0515). DOPO: per circa 2 s «−1» sul disco del settore lasciato e «+1» su quello d'arrivo, sotto i nomi; non prende tocchi, non sposta nomi né pastiglie.</p>
     <table><tr><th class="sx">PRIMA, 0,3 s dopo la mossa</th><th class="sx">DOPO, 0,3 s dopo la mossa</th><th>DOPO, 2,5 s dopo la mossa</th></tr>
     <tr><td class="sx">${cella('PRIMA', 300)}</td><td class="sx">${cella('DOPO', 300)}</td><td>${cella('DOPO', 2500)}</td></tr>
     <tr class="m"><td class="sx">segni: ${visti[`PRIMA ${w} 300`].join(', ') || 'nessuno'}</td><td class="sx">segni: ${visti[`DOPO ${w} 300`].join(', ') || 'nessuno'}</td><td>segni: ${visti[`DOPO ${w} 2500`].join(', ') || 'nessuno'}</td></tr></table>`;
