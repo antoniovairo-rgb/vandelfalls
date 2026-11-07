@@ -36,7 +36,7 @@ export async function controllaSalti(browser, url, larghezza, h, rossi, dati, in
       if (!(await p.waitForSelector(`[data-messaggio="chiamata-${id}"]`, { timeout: 15000 }).then(() => true, () => false))) { await p.close(); return null; }
       await p.click(`[data-opzione="${ch.opzioni[0].id}"]`); await p.click('[data-conferma]').catch(() => {});
       if (!(await p.waitForSelector('.mappa [data-mossa="puoi"]', { timeout: 15000, state: 'attached' }).then(() => true, () => false))) { await p.close(); return null; }
-      await ferma(p); return p; };
+      await p.waitForTimeout(2500); await ferma(p); return p; }; // «puoi» fermo: anche i segni ▲/▼ della risposta sono spariti (1,8 s veri)
     const p0 = await apri(); if (!p0) { male.push(`${vp} ${ep} ${id}: il «puoi spostare» non compare (D-272 salti)`); continue; }
     const unita = await p0.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza)); await p0.close();
     await insieme(unita.map((u) => async () => { for (let j = 0, n = 1; j < n; j++) {
