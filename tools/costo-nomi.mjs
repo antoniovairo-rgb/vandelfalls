@@ -15,10 +15,10 @@ import { risposteCostruite } from './sonda-altezze.mjs';
 
 const [n = '40', vp = '360x640', rall = '1,4', modo = 'profilo'] = process.argv.slice(2), [w, h] = vp.split('x').map(Number), conta = modo === 'conta';
 execSync('npx vite build --minify false --outDir dist-nomi --emptyOutDir', { stdio: 'ignore' });
-if (conta) { rmSync('dist-nomi-conta', { recursive: true, force: true }); cpSync('dist-nomi', 'dist-nomi-conta', { recursive: true }); /* da capo: una copia vecchia aveva due index-*.js */ const f = `dist-nomi-conta/assets/${readdirSync('dist-nomi-conta/assets').find((x) => /^index-.*\.js$/.test(x))}`, s0 = readFileSync(f, 'utf8'), A = 'function disponiEtichette(contenitore) {';
-  if (!s0.includes(A)) throw new Error('disponiEtichette non trovata nella build');
-  writeFileSync(f, s0.replace(A, `${A} const t0 = performance.now(), pila = new Error().stack ?? ''; try { return disponiEtichette__vera(contenitore); } finally {
-    (globalThis.__DE ??= []).push({ ms: performance.now() - t0, da: pila.includes('commitHook') ? 'effetto' : pila.includes('adatta') ? 'adatta' : 'rifai' }); } }\nfunction disponiEtichette__vera(contenitore) {`)); }
+if (conta) { rmSync('dist-nomi-conta', { recursive: true, force: true }); cpSync('dist-nomi', 'dist-nomi-conta', { recursive: true }); /* da capo: una copia vecchia aveva due index-*.js */ const f = `dist-nomi-conta/assets/${readdirSync('dist-nomi-conta/assets').find((x) => /^index-.*\.js$/.test(x))}`, s0 = readFileSync(f, 'utf8'), A = s0.match(/function disponiEtichette\(([^)]*)\) \{/)?.[0] ?? ''; // D-272 passo 2: anche con la disposizione di prima fra gli argomenti
+  if (!A) throw new Error('disponiEtichette non trovata nella build');
+  writeFileSync(f, s0.replace(A, `${A} const t0 = performance.now(), pila = new Error().stack ?? ''; try { return disponiEtichette__vera(...arguments); } finally {
+    (globalThis.__DE ??= []).push({ ms: performance.now() - t0, da: pila.includes('commitHook') ? 'effetto' : pila.includes('adatta') ? 'adatta' : 'rifai' }); } }\nfunction disponiEtichette__vera${A.slice('function disponiEtichette'.length)}`)); }
 const dati = leggiDati('data'), dich = new Map(dati['stato.json'].variabili.map((d) => [d.id, d]));
 // una risposta per chiamata (la prima opzione valida), le prime n in ordine di episodio: stesso campione prima e dopo
 const viste = new Set(), campione = risposteCostruite(dati, dich).filter((c) => !viste.has(`${c.ep}|${c.id}`) && viste.add(`${c.ep}|${c.id}`)).slice(0, Number(n));

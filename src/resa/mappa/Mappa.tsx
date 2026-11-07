@@ -4,11 +4,11 @@
 // La tensione si vede SOLO come colore (D-055): classe liv-0…liv-5, mai il numero.
 import { lazy, Suspense, useEffect, type ReactNode, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { disponiEtichette } from './etichette.ts';
-import { firmaDi, rimettiUguale, tieni } from './congela.ts';
+import { firmaDi, primaDi, rimettiUguale, tieni } from './congela.ts';
 
 // Interruttore rosso C05S08: nomi e unità restano al posto fisso (difetto C-008).
 // D-272 (passo 3): si ricalcola solo se cambiano gli ingressi (congela.ts)
-const disponi = (el: HTMLElement) => { if (!spento('C05S08') && !rimettiUguale(el)) { const f = firmaDi(el); disponiEtichette(el); tieni(el, f); } collocaRadio(el); }; // D-255: il riquadro radio dopo le unità
+const disponi = (el: HTMLElement) => { if (!spento('C05S08') && !rimettiUguale(el)) { const f = firmaDi(el); disponiEtichette(el, primaDi(el, f)); tieni(el, f); } collocaRadio(el); }; // D-255: il riquadro radio dopo le unità
 import type { Disposizione, Missione } from '../../logica/tipi.ts';
 import { spento } from '../../interruttori.ts';
 import { club, t, quante } from '../dati.ts';
@@ -100,6 +100,15 @@ export function Mappa(p: MappaProps) {
   // Nomi e unità al posto che non copre niente (C-008): a ogni disegno, quando la mappa cambia misura e
   // quando arrivano i caratteri.
   useLayoutEffect(() => { if (contenitore.current) disponi(contenitore.current); });
+  // D-272 (passo 2, scelta del PO «Sì, posto vuoto»): durante la mossa ogni gruppo tiene l'ordine dei suoi tocchi; l'unità partita
+  // lascia un posto vuoto invisibile fino alla chiamata successiva e quella arrivata va in coda. Prima il gruppo andava a capo in
+  // un altro modo (3 tocchi per riga, stile.css) e le unità rimaste saltavano fino a 133 px (e03 a 360, salti-mossa.mjs).
+  // L'ordine dipende solo dai disegni della stessa chiamata (deterministico). Rosso C272V01: niente posto vuoto, ordine dei dati.
+  const ordine = useRef(new Map<string, string[]>());
+  if (!p.mossa || spento('C272V01')) ordine.current.clear();
+  const inFila = (sid: string, qui: readonly string[]) => { if (!p.mossa || spento('C272V01')) return qui.map((r) => ({ r, c: true }));
+    const prima = ordine.current.get(sid) ?? [], tutti = [...prima, ...qui.filter((r) => !prima.includes(r))]; ordine.current.set(sid, tutti);
+    return tutti.map((r) => ({ r, c: qui.includes(r) })); };
   useAdatta(contenitore, disponi, p.nascosta); // D-187, D-191
   // PO-152: una scheda alla volta; si chiude da sola quando cambia la chiamata. Chiusa dalla tastiera, il fuoco torna al settore.
   const schede = !!p.schede && !p.onSettore;
@@ -142,7 +151,7 @@ export function Mappa(p: MappaProps) {
         const lato = s.pos.x < 30 ? 'sinistra' : s.pos.x > 70 ? 'destra' : 'centro';
         const qui = Object.entries(p.presenze ?? {}).map(([r, ps]) => [r, ps[s.id] ?? 0] as const).filter(([, n]) => n > 0);
         const fisse = Object.entries(p.fisse ?? {}).map(([r, ps]) => [r, ps[s.id] ?? 0] as const).filter(([, n]) => n > 0);
-        const nome = t(`settore.${s.id}`);
+        const nome = t(`settore.${s.id}`), fila = inFila(s.id, qui.map(([r]) => r)), quanti = new Map(qui);
         return (
           <div key={s.id} ref={posiziona(s.pos.x, s.pos.y)} data-settore={s.id}
             className={`settore lato-${lato}${accesi.has(s.id) ? ' acceso' : ''}${liv !== null ? ` liv-${liv}` : ''}${p.vietati?.includes(s.id) ? ' vietato' : ''}${p.spenti?.includes(s.id) ? ' spento' : ''}`} data-vietato={p.vietati?.includes(s.id) ? 'si' : undefined}>
@@ -159,20 +168,20 @@ export function Mappa(p: MappaProps) {
                 ))}
               </span>
             )}
-            {(qui.length > 0 || fisse.length > 0) && (
+            {(fila.length > 0 || fisse.length > 0) && (
               <span className="settore-unita">
                 {fisse.map(([r, n]) => (
                   <span key={`f-${r}`} className="tocco-pastiglia" data-fissa={`${r}@${s.id}`} role="img" aria-label={`${quante(n, r)} ${n === 1 ? 'montata' : 'montate'}, restano fino a fine serata`}>
                     <span className="pastiglia fissa"><Icona di={Lock} /><Icona di={iconaRisorsa(r)} />{n}</span>
                   </span>
                 ))}
-                {qui.map(([r, n]) => (
+                {fila.map(({ r, c }) => { const n = quanti.get(r) ?? 0; return !c ? <span key={r} className="tocco-vuoto" aria-hidden="true" data-vuoto={`${r}@${s.id}`} /> : (
                   <button key={r} type="button" className={`${spento('C05R05') ? 'pastiglia-rossa' : 'tocco-pastiglia'}${p.mossa?.inMano === `${r}@${s.id}` ? (spento('C262M01') ? ' in-mano' : ' mossa-in-mano') : ''}`} data-presenza={`${r}@${s.id}`}
                     disabled={!p.onTogli || (!!p.mossa && !p.mossa.spostabili.includes(`${r}@${s.id}`))} aria-pressed={p.mossa ? p.mossa.inMano === `${r}@${s.id}` : undefined}
                     aria-label={p.mossa ? `${t('mossa.sposta')} ${t(`risorsa.${r}`)} da ${nome}${spento('C268M01') ? '' : `, ${quante(n, r)}`}` /* C56-04: quante ce ne sono */ : `ritira ${t(`risorsa.${r}`)} da ${nome}`} onClick={() => p.onTogli?.(r, s.id)}>
                     <span className="pastiglia"><Icona di={iconaRisorsa(r)} />{n}</span>
                   </button>
-                ))}
+                ); })}
               </span>
             )}
           </div>

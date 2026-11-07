@@ -1,0 +1,6 @@
+{
+ "fonte": "tools/zz-salti2.mjs (salti-mossa) e03 auto_in_sosta, 24 mosse, 1 prova per build (deterministico: seme fisso, __VALMORA_SECONDO_MS=1); PRIMA su 553c26fa, DOPO su c456106b (7/11), nomi30 su 4b285c28 con SPOSTO_NOME 30 (taratura scartata)",
+ "360": { "vp": "360x640", "prima": { "partenza": 133, "arrivo": 93, "altri": 91, "nomi": 83 }, "dopo": { "partenza": 5, "arrivo": 70, "altri": 88, "nomi": 96 }, "nomi30": { "partenza": 5, "arrivo": 70, "altri": 0, "nomi": 0 } },
+ "375": { "vp": "375x667", "prima": { "partenza": 110, "arrivo": 98, "altri": 91, "nomi": 75 }, "dopo": { "partenza": 0, "arrivo": 70, "altri": 88, "nomi": 123 }, "nomi30": { "partenza": 117, "arrivo": 70, "altri": 117, "nomi": 0 } },
+ "412": { "vp": "412x915", "prima": { "partenza": 98, "arrivo": 88, "altri": 22, "nomi": 52 }, "dopo": { "partenza": 0, "arrivo": 98, "altri": 0, "nomi": 88 }, "nomi30": { "partenza": 0, "arrivo": 31, "altri": 0, "nomi": 0 } }
+}

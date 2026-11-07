@@ -5,6 +5,7 @@
 
 import { spento } from '../../interruttori.ts';
 import { segniVisti } from './segni-visti.ts';
+import { chiaveUnita, metti, type Prima } from './congela.ts';
 
 type Rett = { left: number; top: number; right: number; bottom: number };
 const MARGINE = 5; // distanza minima dal bordo della mappa (controllo R06 di tools/foto.mjs)
@@ -15,6 +16,10 @@ const LONTANO = 0; // C23-02: px² di stelline che vale un px di distanza in pi�
 const NOMI = ['sotto', 'sopra', 'destra', 'sinistra', 'sotto-sx', 'sotto-dx', 'sopra-sx', 'sopra-dx'] as const;
 const UNITA = ['sopra', 'destra', 'sinistra', 'destra-alto', 'sinistra-alto', 'sotto'] as const;
 const UNITA_PIU = ['destra-basso', 'sinistra-basso'] as const; // C28-14 / D-136
+// D-272 (passo 2): px di spostamento dal posto di prima che valgono un px² di sovrapposizione vera (VERA): sotto ogni
+// sovrapposizione vera di più di qualche px², sopra i distacchi mancanti fra due nomi
+const SPOSTO = 0.1;
+const primoIl = <T,>(xs: readonly T[], x: T | null | undefined): readonly T[] => (x != null && xs.includes(x) ? [x, ...xs.filter((y) => y !== x)] : xs);
 
 const area = (a: Rett, b: Rett) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
 const fuori = (r: Rett, m: Rett) => {
@@ -46,7 +51,7 @@ function piazza(el: HTMLElement, attributo: string, posti: readonly string[], mi
   return misura();
 }
 
-export function disponiEtichette(contenitore: HTMLElement) {
+export function disponiEtichette(contenitore: HTMLElement, prima: Prima | null = null) {
   const mappa = contenitore.getBoundingClientRect();
   const settori = [...contenitore.querySelectorAll<HTMLElement>('[data-settore]')];
   // C33-04: si riparte sempre dallo stesso stato (posto delle unità e larghezza dei nomi del giro prima pesavano sul
@@ -79,6 +84,8 @@ export function disponiEtichette(contenitore: HTMLElement) {
   // D-187 (S-12): nella chiamata i segni dell'ultima risposta (▲/▼, +⚑) finivano sotto i nomi (fino a 506 px² a 360):
   // per i nomi sono ostacoli. Rosso C187S01: no, come prima.
   // D-269 c: nella risposta con la mossa anche quelli già spariti (segni-visti.ts), così i nomi non si ridispongono senza input
+  // D-272 (passo 2): si parte dalla disposizione di prima, così anche il primo giro vede i vicini dove erano
+  if (prima) for (const s of settori) { const p = prima.posti.get(s.dataset.settore ?? ''); if (p) metti(s, p); }
   const segni = spento('C187S01') ? [] : segniVisti(contenitore, 'nomi', [...contenitore.querySelectorAll('.settore .segni-effetto')].map((e) => e.getBoundingClientRect() as Rett));
   // 2) nome e unità insieme (6 × 6 combinazioni; solo il nome per i settori senza unità), si tiene quella che costa meno
   //    (due passate, così anche i primi settori vedono dove sono finiti gli ultimi).
@@ -136,6 +143,10 @@ export function disponiEtichette(contenitore: HTMLElement) {
     // ondata 2: 70 px dal Piazzale, 43 dal Viale della stazione) e non si capiva di chi fossero: costa la differenza,
     // in px × VERA × 10 (meno di qualunque sovrapposizione vera). Rosso C103P01: nessun costo, come prima.
     const centro = (r: Rett) => [(r.left + r.right) / 2, (r.top + r.bottom) / 2] as const, mio = centro(punti[i]!);
+    // D-272 (passo 2): quanto si sposta, dal posto di prima, il nome o un tocco che c'era già (px × VERA × SPOSTO)
+    const via = (k: string | null, r: Rett) => { const q = k && prima?.centri.get(k); if (!q) return 0; const [x, y] = centro(r); return Math.hypot(x - mappa.left - q[0], y - mappa.top - q[1]) * VERA * SPOSTO; };
+    const viaUnita = () => [...(s.querySelector('.settore-unita')?.children ?? [])].reduce((a, c) => a + via(chiaveUnita(c), c.getBoundingClientRect()), 0);
+    const pp = prima?.posti.get(s.dataset.settore ?? '');
     const lontano = (u: Rett) => { if (spento('C103P01')) return 0; const [x, y] = centro(u), d = (q: readonly [number, number]) => Math.hypot(q[0] - x, q[1] - y);
       const altro = Math.min(...punti.filter((_, j) => j !== i).map((r) => d(centro(r)))); return altro < d(mio) ? VERA * 10 * (d(mio) - altro) : 0; };
     // D-145 (C33-01): un'area di tocco può coprire un nome ma non «rubarlo»: toccando il nome (centro di ogni riga del
@@ -167,26 +178,39 @@ export function disponiEtichette(contenitore: HTMLElement) {
       if (via) { dx += via[0]; dy += via[1]; }
       if (!dx && !dy) return [0, 0] as const;
       spingi(dx, dy); return [dx, dy] as const; };
-    const costoUnita = (n: Rett, u: Rett) => sottoDisco() + costoDi(u, perUnita) + VERA * area(n, u) + bordoUnita(u) + pastiglieFuori() + suNomi(pastiglie() ?? u, n) * (c33 ? 20 : 1) + lontano(pastiglie() ?? u) + ruba();
+    const costoUnita = (n: Rett, u: Rett) => sottoDisco() + costoDi(u, perUnita) + VERA * area(n, u) + bordoUnita(u) + pastiglieFuori() + suNomi(pastiglie() ?? u, n) * (c33 ? 20 : 1) + lontano(pastiglie() ?? u) + ruba() + viaUnita();
     const gruppo = s.querySelector<HTMLElement>('.settore-unita'), muovi = (dx: number, dy: number) => { gruppo?.style.setProperty('--unita-dx', `${dx}px`); gruppo?.style.setProperty('--unita-dy', `${dy}px`); };
     gruppo?.style.removeProperty('--unita-dx'); gruppo?.style.removeProperty('--unita-dy');
-    let migliore = { nome: NOMI[0] as string, unita: UNITA[0] as string, costo: Infinity, largo: '', dx: 0, dy: 0 };
-    cerca: for (const largo of d136 ? ['', 'calc(var(--nome-max) * 0.8)', 'calc(var(--nome-max) * 0.6)'] : ['']) {
+    let migliore = { nome: NOMI[0] as string, unita: UNITA[0] as string, costo: Infinity, largo: '', dx: 0, dy: 0, ux: 0, uy: 0 };
+    // D-272 (passo 2): nel posto di prima il gruppo si ricentra quando un'unità parte o arriva, e i tocchi rimasti cambiano
+    // posto (e03 a 360, squadre@quartiere → parcheggi: con 3 pastiglie il centro di una cade sotto un disco, 2e8, e il gruppo
+    // salta da «sopra» a «sotto»). Si prova anche il gruppo spostato di quanto riporta i tocchi rimasti dove erano (media),
+    // fino a un disco e senza coprire il proprio disco (C56-03). Rosso C272W01: niente prima, niente prova.
+    const [px0, py0] = centro(punti[i]!), copreIlSuo = () => tocchiDi(s).some((q) => dentro([px0, py0], q)), disco = punti[i]!.right - punti[i]!.left;
+    const ritorno = () => { const d = [...(gruppo?.children ?? [])].flatMap((c) => { const k = chiaveUnita(c), q = k && prima?.centri.get(k); if (!q) return [];
+      const [x, y] = centro(c.getBoundingClientRect()); return [[q[0] + mappa.left - x, q[1] + mappa.top - y] as const]; });
+      if (!d.length) return null; const dx = d.reduce((a, z) => a + z[0], 0) / d.length, dy = d.reduce((a, z) => a + z[1], 0) / d.length;
+      return Math.abs(dx) + Math.abs(dy) > 0.5 && Math.abs(dx) <= disco && Math.abs(dy) <= disco ? [dx, dy] as const : null; };
+    cerca: for (const largo of primoIl(d136 ? ['', 'calc(var(--nome-max) * 0.8)', 'calc(var(--nome-max) * 0.6)'] : [''], pp?.largo)) {
     if (largo && migliore.costo === 0) break;
     if (el) el.style.maxWidth = largo;
     if (largo && el && el.scrollWidth > el.clientWidth + 1 && !spento('C100N01')) continue; // C33-01: il testo non ci sta
-    for (const nome of NOMI) for (const unita of conUnita ? posti : [UNITA[0]]) {
+    for (const nome of primoIl(NOMI, pp?.nome)) for (const unita of conUnita ? primoIl(posti, pp?.unita) : [UNITA[0]]) {
       s.setAttribute('data-nome', nome); s.setAttribute('data-unita', unita);
       const [dx, dy] = sposta();
       const n = nomeDi(s), u = conUnita ? unitaDi(s) : null;
       if (!n || (conUnita && !u)) continue;
-      const costo = costoDi(n, perNome) + nomeLontano(n, punti, i) + VERA * (c27 ? 1e4 : 10) * fuori(n, mappa) + nomiSopra(n) * (c27 ? 2e3 : 1) + sottoPastiglie(n) + (u ? costoUnita(n, u) : 0);
-      if (costo < migliore.costo - (largo ? 0.5 : 0)) migliore = { nome, unita, costo, largo, dx, dy };
+      const base = costoDi(n, perNome) + nomeLontano(n, punti, i) + VERA * (c27 ? 1e4 : 10) * fuori(n, mappa) + nomiSopra(n) * (c27 ? 2e3 : 1) + sottoPastiglie(n) + via(`nome ${s.dataset.settore}`, n);
+      let costo = base + (u ? costoUnita(n, u) : 0), ux = 0, uy = 0;
+      const r = u && costo > 0 && unita === pp?.unita ? ritorno() : null;
+      if (r) { muovi(r[0], r[1]); const u2 = unitaDi(s); const c2 = u2 && !copreIlSuo() ? base + costoUnita(n, u2) : Infinity; if (c2 < costo) { costo = c2; ux = r[0]; uy = r[1]; } muovi(0, 0); }
+      if (costo < migliore.costo - (largo ? 0.5 : 0)) migliore = { nome, unita, costo, largo, dx, dy, ux, uy };
       if (costo === 0) break cerca;
     }
     }
     if (el) el.style.maxWidth = migliore.largo;
     s.setAttribute('data-nome', migliore.nome); s.setAttribute('data-unita', migliore.unita); if (c128) spingi(migliore.dx, migliore.dy);
+    muovi(migliore.ux, migliore.uy);
     // D-271 (C271U01): con la mappa bassa della risposta può non esserci un posto pulito per le unità (e04 arance a 360: ogni
     // posto dentro la mappa ha il centro di un tocco sotto il disco di un altro settore). Come per i nomi (C128-02), si prova
     // a spostare le unità di poco, a passi di un ottavo di disco fino a mezzo tocco, e si tiene lo spostamento che costa meno.
@@ -199,9 +223,10 @@ export function disponiEtichette(contenitore: HTMLElement) {
       // il costo conta solo i dischi degli altri settori, perché nei posti fissi il proprio non si copre mai
       const [px, py] = centro(punti[i]!), proprio = () => tocchiDi(s).some((q) => dentro([px, py], q));
       const prova = () => { const u = unitaDi(s); return u && !proprio() ? costoUnita(nn, u) : Infinity; };
-      let meglio = { c: (() => { const u = unitaDi(s); return u ? costoUnita(nn, u) : Infinity; })(), dx: 0, dy: 0 };
+      const { ux: bx, uy: by } = migliore; // D-272: gli spostamenti partono da quello del ritorno, se c'è
+      let meglio = { c: (() => { const u = unitaDi(s); return u ? costoUnita(nn, u) : Infinity; })(), dx: bx, dy: by };
       if (meglio.c >= VERA * 1e6 || ruba() > 0) for (let k = 1; k <= 4; k++) for (const [ax, ay] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]] as const) {
-        muovi(ax * k * passo, ay * k * passo); const c = prova(); if (c < meglio.c) meglio = { c, dx: ax * k * passo, dy: ay * k * passo }; }
+        muovi(bx + ax * k * passo, by + ay * k * passo); const c = prova(); if (c < meglio.c) meglio = { c, dx: bx + ax * k * passo, dy: by + ay * k * passo }; }
       if (meglio.dx || meglio.dy) muovi(meglio.dx, meglio.dy); else { gruppo.style.removeProperty('--unita-dx'); gruppo.style.removeProperty('--unita-dy'); }
     }
   }
