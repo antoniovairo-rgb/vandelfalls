@@ -86,3 +86,15 @@ le differenze stanno entro circa 1,5 errori standard: non posso confermare né c
 ## Provini
 
 `provini-passo2-360x640.png`, `-375x667.png`, `-412x915.png` (script `provini-passo2.mjs`, numeri in `misure-passo2.json`).
+
+## Da riprendere dopo la 0.69.0 (verifica a mente fresca del principale su c456106b)
+
+Sono IPOTESI del verificatore, non misurate da questa sessione.
+
+1. e16 magazzino_sette a 375: dopo la mossa le pastiglie della partenza saltano ancora di 23 px (4 elementi su 24), perché il
+   gruppo si sposta tutto insieme. È sotto la soglia di 44 px; il giro «salti» guarda solo e03.
+2. foto-schieramenti a 360×760 fa 139 controlli sul ramo verde, contro i 142 di main e del rosso. IPOTESI: uno schieramento che
+   non si apre entro 5 s viene saltato in silenzio. Un guardiano che salta in silenzio va riparato: deve contare i controlli
+   mancanti e dichiararli.
+3. Il posto vuoto (`.tocco-vuoto`) si sovrappone in parte al riquadro dei dischi vicini in 4 situazioni (per esempio e03 a 375
+   su curva_ospiti, 15×21 px). Non intercetta i tocchi: elementFromPoint dà il disco in 61 punti su 88.
