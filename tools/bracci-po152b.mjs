@@ -35,6 +35,10 @@ export const BRACCI_PO152B = {
   C271T01: { giri: ['radio'], episodi: ['e01', 'e02'], segno: 'tratteggio nella mossa', almeno: 11 }, // e01 6 + e02 5 stati con tratteggio
   C271U01: { giri: ['radio'], episodi: ['e03', 'e04'], segno: '(D-271, C271U01)', almeno: 13 }, // e03 8 + e04 arance 7 (D-272 passo 2: e16 magazzino_sette da 6 a 0 col costo di spostamento)
   C271V01: { giri: ['versione'], segno: 'la versione non svanisce (D-271)', almeno: 2 }, // movimento e movimento ridotto
+  // D-272 passo 2, giro «salti» (e03, 24 mosse): senza posto vuoto (C272V01) 28 / 28 / 16 problemi a 360 / 375 / 412; senza costo di
+  // spostamento (C272W01) 0 / 0 / 9: a 360 il salto massimo resta 42 px, sotto la soglia di 44, quindi quel braccio gira a 412×760
+  C272V01: { giri: ['salti'], segno: '(soglia 44, D-272 salti)', almeno: 20 },
+  C272W01: { giri: ['salti'], segno: '(soglia 44, D-272 salti)', almeno: 6 },
 };
 
 // D-274b: i bracci della parte «chiamate» (D-207) misurano solo gli imprevisti: le chiamate normali (498 su 782) non servono.
