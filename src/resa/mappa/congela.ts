@@ -53,10 +53,13 @@ export function metti(s: HTMLElement, p: Posto) {
 // D-272 (passo 2): dopo la mossa le pastiglie rimaste ferme saltavano fino a 133 px (e03 a 360, squadre@quartiere → piazzale:
 // il gruppo di Quartiere da «sopra» a «sotto»), perché ogni ricalcolo ripartiva da zero. Il ricalcolo riceve la disposizione di
 // prima (posti e centri di nomi e tocchi, rispetto alla mappa) e conta quanto sposta ogni elemento che c'era già.
-// Con gli stessi ingressi (stessa firma) non c'è un «prima»: il ricalcolo resta quello di sempre (C33-04). Rosso C272W01: nessun prima.
+// Con gli stessi ingressi (stessa firma) non c'è un «prima»: il ricalcolo resta quello di sempre. Il «prima» vale solo nella
+// mossa e alla stessa larghezza: fuori (schieramento, cambio di misura) la disposizione non dipende dallo stato di prima
+// (C33-04; CI 1355 rossa su 8329ef4b, «la disposizione cambia ripartendo da un altro stato» in e02-e06). Rosso C272W01: nessun prima;
+// rosso C272W02: il «prima» anche fuori dalla mossa e a un'altra larghezza, com'era su 8329ef4b.
 export function primaDi(mappa: HTMLElement, firma: string): Prima | null {
   const f = memo.get(mappa);
-  return !f || f.firma === firma || spento('C272W01') ? null : f;
+  return !f || f.firma === firma || spento('C272W01') || (!spento('C272W02') && (!mappa.querySelector('.radio-mappa [data-mossa]') || f.firma.split('#')[0] !== firma.split('#')[0])) ? null : f;
 }
 
 const centriDi = (mappa: HTMLElement) => {
