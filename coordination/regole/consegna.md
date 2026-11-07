@@ -14,6 +14,7 @@ Il messaggio di consegna contiene questa lista, compilata. Una riga mancante blo
 | Pre-push | verde, con la durata dei test |
 | Verde locale | i guardiani dell'area toccata, a 360, 375 e 412 px, con il numero di problemi |
 | Rossi locali | ogni rosso nuovo e i bracci della larghezza 360 (`VALMORA_LARGHEZZE=360 VALMORA_PASSI=build,bracci-rossi-grafica node tools/catena.mjs grafica`), nessun cieco |
+| Catena grafica a 360 | `VALMORA_LARGHEZZE=360 node tools/catena.mjs grafica`, tutti i passi, verde; le altre larghezze le copre la CI (aggiunta 07/11: lo schieramento C33-04 era rimasto fuori) |
 | CI | numero del run sul commit col codice, 10 job su 10 eseguiti e verdi (D-270); un run con i job saltati non vale |
 | Foto | per ogni modifica visibile, provini PRIMA/DOPO a 360, 375 e 412 px |
 | Misure | prima e dopo, con strumento, campione e numero di prove |
