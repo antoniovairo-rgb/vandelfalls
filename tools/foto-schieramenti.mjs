@@ -180,7 +180,7 @@ export async function controllaSchieramenti(browser, url, dirDati, cartella, att
       atteso(`${dove} con le unità: pastiglie sopra i nomi ${r.suNomi.join('; ')} (C27-06, il caso del collaudo)`, st.m.id !== 'e19' || !r.suNomi.length);
       atteso(`${dove} con le unità: pastiglie fuori dalla mappa ${r.fuori.join('; ')} (C27-06)`, !r.fuori.length);
       nomiVicini.push(...r.nomiVicini.map((x) => `${st.m.id} o${st.n} ${x}`));
-      if (w === 360) { // C33-04: la disposizione non dipende dallo stato del giro prima (rosso VALMORA_ROSSI=C102D01)
+      if (w === 360) { // C33-04: la disposizione non dipende dallo stato del giro prima (rosso VALMORA_ROSSI=C102D01; anche C272W02: il «prima» del D-272 fuori dalla mossa, 132 su 1044 a 360)
         const posti = () => q6.evaluate(() => [...document.querySelectorAll('.mappa:not(.citta) [data-settore]')].map((x) => `${x.dataset.settore}:${x.dataset.nome}/${x.dataset.unita}/${x.querySelector('.settore-nome')?.style.maxWidth ?? ''}`).join(' '));
         const prima = await posti();
         // la mappa deve cambiare misura (w+1: in 25 ondate non cambiava) e la disposizione finale deve partire dallo stato sporco
