@@ -56,7 +56,16 @@ larghezza, contate una volta per ogni stato. Lo strumento è `PO152B=./zz-po152b
 Misura ritirata: i p95 dati prima, cioè base 53 / 51 / 49 e nuovo 61 / 53 / 52 su «1636 pastiglie», non li ritrovo con nessuna
 definizione dai log. Li sostituisce la tabella qui sopra.
 
-**Costo dei nomi**: `tools/costo-nomi.mjs 40 360x640 1,4 conta`. Vedi la consegna per i numeri sulla build finale.
+**Costo dei nomi**: ms per risposta, `tools/costo-nomi.mjs 40 360x640 1,4 conta`, 40 risposte per prova, 2 prove per build
+alternate sulla stessa macchina (7/11). Chiamate per risposta 2,8 in tutte.
+
+| Build | ×1 media | ×1 mediana | ×1 sd | ×4 media | ×4 mediana | ×4 sd |
+|---|---|---|---|---|---|---|
+| main 553c26fa | 474 / 459 | 507 / 486 | 203 / 184 | 2581 / 2446 | 3024 / 2775 | 1142 / 1040 |
+| questo ramo c456106b | 451 / 450 | 531 / 520 | 213 / 219 | 2672 / 2653 | 3186 / 3267 | 1336 / 1220 |
+
+Mediana: +5,8 % a ×1 e +11 % a ×4. Media: −3 % a ×1 e +6 % a ×4. Con dispersione di 200 / 1200 ms su 40 risposte
+le differenze stanno entro circa 1,5 errori standard: non posso confermare né che sia peggiorato né che sia uguale.
 
 ## Limiti e ipotesi
 
