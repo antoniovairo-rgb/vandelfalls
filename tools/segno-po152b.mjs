@@ -3,7 +3,7 @@
 // C272D03 fermo al centro del disco). Giro «segno» di po152b: subito dopo la mossa (150 ms) un solo «−1» sul settore di partenza
 // e un solo «+1» su quello d'arrivo; testo e bordo staccati dal proprio fondo almeno 3:1 (verso la mappa no: è un indicatore di
 // 2 s, non un comando; decisione del principale 8/11); niente ombra (sporge oltre il riquadro misurato); nessun tocco preso; la
-// pagina non scorre più di prima; non copre nomi, pastiglie, «Home» né dischi altrui; niente animazione con la riduzione del
+// pagina non scorre più che senza il segno; non copre nomi, pastiglie, «Home» né dischi altrui; niente animazione con la riduzione del
 // movimento; dopo 2,5 s veri non c'è più.
 // Episodi (verifica del principale su a66978a8: in e02 il «+1» sopra il disco di curva_ospiti, in e04 il «−1» sopra una pastiglia
 // di mercato, 6 mosse su 6 a 360): nel verde e02, e03, e04 e i due con i dischi più vicini dopo e02 (e05, e13: distanza minima
@@ -52,7 +52,7 @@ export async function controllaSegno(browser, url, larghezza, h, rossi, dati, in
     const unita = await p0.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza)); await p0.close();
     await insieme(unita.map((u) => async () => { for (let j = 0, n = 1; j < n; j++) { try {
       const p = await apri(); if (!p) { male.push(`${vp} ${ep} ${id} ${u}: il «puoi spostare» non compare ${D}`); break; }
-      const prima = await leggi(p), da = u.split('@')[1], r = u.split('@')[0];
+      const da = u.split('@')[1], r = u.split('@')[0];
       await p.locator(`.mappa [data-presenza="${u}"]`).click({ force: true }); await p.waitForTimeout(80);
       const ss = await p.$$('.mappa .settore-punto:not(:disabled)'); n = ss.length; if (!ss[j]) { if (!j) male.push(`${vp} ${ep} ${id} ${u}: nessun settore ammesso ${D}`); await p.close(); break; }
       const a = await ss[j].evaluate((e) => e.closest('[data-settore]').dataset.settore); await ss[j].click({ force: true }); await p.waitForTimeout(150);
@@ -66,8 +66,9 @@ export async function controllaSegno(browser, url, larghezza, h, rossi, dati, in
         if (x.anim !== 'none') male.push(`${dove}: segno ${x.k} animato (${x.anim}) con la riduzione del movimento ${D}`); }
       if (ora.coperti.length) { conto.coperti += ora.coperti.length; male.push(`${dove}: il segno copre ${ora.coperti.join('; ')} ${D}`); }
       if (ora.presi.length) { conto.presi += ora.presi.length; male.push(`${dove}: il segno prende il tocco di ${ora.presi.join(', ')} ${D}`); }
-      if (ora.scorre > Math.max(0, prima.scorre)) male.push(`${dove}: col segno la pagina scorre ${ora.scorre} px (prima ${prima.scorre}) ${D}`);
       await p.waitForTimeout(2500); const poi = await leggi(p); await p.close();
+      // lo scorrimento che aggiunge il segno: col segno contro la stessa pagina senza (la mossa può allungarla da sé: e05 a 360, 16 px anche col rosso C272D01)
+      if (ora.scorre > Math.max(0, poi.scorre)) male.push(`${dove}: col segno la pagina scorre ${ora.scorre} px (senza ${poi.scorre}) ${D}`);
       if (poi.segni.length) { conto.rimasti++; male.push(`${dove}: dopo 2,5 s il segno c'è ancora (${poi.segni.map((x) => x.k).join(' ')}) ${D}`); }
     } catch (e) { male.push(`${vp} ${ep} ${id} ${u}: mossa ${j + 1} non riuscita: ${String(e).split('\n')[0].slice(0, 120)} ${D}`); break; } } }), pagine);
     return true;
