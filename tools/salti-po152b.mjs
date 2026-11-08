@@ -48,7 +48,7 @@ export async function controllaSalti(browser, url, larghezza, h, rossi, dati, in
     const p0 = await apri(); if (!p0) { if (stretto) male.push(`${vp} ${ep} ${id}: il «puoi spostare» non compare (D-272 salti)`); return null; }
     const unita = await p0.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza)); await p0.close();
     const r = { righe: [], max: 0 };
-    await insieme(unita.map((u) => async () => { for (let j = 0, n = 1; j < n; j++) {
+    await insieme(unita.map((u) => async () => { for (let j = 0, n = 1; j < n; j++) { try {
       const p = await apri(); if (!p) { male.push(`${vp} ${ep} ${id} ${u}: il «puoi spostare» non compare (D-272 salti)`); break; }
       const prima = await centri(p);
       await p.locator(`.mappa [data-presenza="${u}"]`).click({ force: true }); await p.waitForTimeout(80);
@@ -59,7 +59,7 @@ export async function controllaSalti(browser, url, larghezza, h, rossi, dati, in
       for (const [k, [x, y]] of Object.entries(prima)) { if (k === u || k.split('@')[1] !== da || !dopo[k]) continue;
         const px = Math.round(Math.hypot(dopo[k][0] - x, dopo[k][1] - y)); r.max = Math.max(r.max, px); if (stretto) { conto.unita++; conto.max = Math.max(conto.max, px); }
         if (px > SOGLIA_SALTO) r.righe.push(`${vp} ${ep} ${id} ${u} → ${a}: ${k}, rimasta nel settore di partenza, salta di ${px} px (soglia ${SOGLIA_SALTO}, D-272 salti)`); }
-    } }), pagine);
+    } catch (e) { male.push(`${vp} ${ep} ${id} ${u}: mossa ${j + 1} non riuscita: ${String(e).split('\n')[0].slice(0, 120)} (D-272 salti)`); break; } } }), pagine); // una pagina chiusa non ferma il giro: è un problema dichiarato
     return r;
   };
   const fatti = new Map();
