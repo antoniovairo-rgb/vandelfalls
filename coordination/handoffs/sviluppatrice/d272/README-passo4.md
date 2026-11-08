@@ -104,3 +104,94 @@ Il passo 2 riduce i salti ma non li toglie. Un guardiano su tutti gli episodi og
 Il segnaposto è `visibility: hidden` e `pointer-events: none`. Il guardiano dei tocchi (C56-03, centro dei dischi toccabile)
 è verde nella catena grafica a 360 su a66978a8 e nella CI 1366. Non cambio niente: l'effetto è solo sull'ingombro usato dalla
 disposizione.
+
+## 4. Dopo la verifica a mente fresca su a66978a8 (8/11)
+
+### Segno spostato dove non copre (cbcdeb24, 9f76c47e, 383bd995)
+
+La verifica ha trovato due casi fuori da e03, a 360×640, 6 mosse su 6:
+- e02: il «+1» stava sopra il disco di curva_ospiti, 223-243 px²;
+- e04: il «−1» stava sopra la pastiglia squadre@mercato, 48-50 px².
+
+Inoltre l'ombra sporgeva oltre il riquadro misurato. Mettere il segno sotto anche a pastiglie e dischi non si può: i dischi
+(`.settore-punto::after`) e i gruppi stanno nell'ordine del DOM, e il proprio disco lo coprirebbe. In più, i gruppi a z-index 2
+rompevano C56-03 (CI 1365).
+
+Soluzione: `src/resa/mappa/segno-mossa.ts`, chiamato dopo ogni disposizione.
+- Il segno prova il centro del proprio disco, poi 64 posti: 16 direzioni a 0,75, 1,1, 1,5 e 2 dischi.
+- Prende il primo che non copre nomi, pastiglie, «Home», dischi altrui o l'altro segno, con 1 px di margine. Non esce mai
+  dalla mappa.
+- Tocca solo lo stile del segno: nessuna ridisposizione, deterministico.
+- Niente ombra.
+- Rosso C272D03: segno fermo al centro.
+
+Prove intermedie (FATTO):
+
+| Prova | Esito a 360 |
+|---|---|
+| 9 posti a 0,75 dischi | e02 scende a circa 20 px², restano 28 sovrapposizioni |
+| 48 posti | e05 esce dalla mappa: la pagina scorre di 16 px |
+| Fuori mappa vietato | e13: nessun posto libero fino a 1,5 dischi, 3 px² su una pastiglia |
+| Anello a 2 dischi | 0 sovrapposizioni |
+
+### Contrasto del segno
+
+Verso il proprio fondo il contrasto è 4,76-9,21:1: il guardiano chiede ≥ 3:1 e il minimo misurato è 3,97:1, sul bordo nero
+contro il fondo. Verso la mappa resta sotto 3:1. Il principale lo accetta (8/11): il segno è un indicatore di 2 s, non un comando.
+
+### Guardiano «segno»
+
+Ogni mossa della prima chiamata con la mossa, per episodio. Lo scorrimento si confronta con la stessa pagina senza segno: a 360
+e05 la mossa da sola allunga la pagina di 16 px, anche col rosso C272D01.
+
+| Dove | Episodi |
+|---|---|
+| Verde in CI, 360 | e02, e04 |
+| Verde in CI, 375 e 412 | e03 |
+| Catena «completa» e consegna locale | e02, e03, e04, e05, e13 (e05 ed e13 hanno i dischi più vicini dopo e02 nei dati) |
+| Bracci | C272D01 e C272D02 su e03 (24 e 24, almeno 20); C272D03 su e02 ed e04 (28, almeno 22) |
+
+FATTO, sulla build finale: e02, e03, e04, e05 ed e13 a 360, 375 e 412, 108 mosse su 108 col segno giusto. 0 sovrapposizioni,
+0 tocchi presi, 0 segni rimasti.
+
+### Guardiano «salti» esteso (decisioni del principale 8/11)
+
+| Dove | Episodi e tetto |
+|---|---|
+| Verde in CI, 360 | e03 stretto, più e05 ed e26 con tetto per episodio (oltre 44 px / massimo: e05 4 / 79, e26 6 / 176) e sul totale |
+| Verde in CI, 375 e 412 | solo e03 |
+| Catena «completa» e consegna locale | tutti i 36, tetto 95 / 47 / 33 oltre 44 px, massimo 176 / 176 / 120 |
+| Bracci | C272V01 e C272W01 su e03; C272V01,C272W01 su e05 ed e26 (2 problemi a 360, almeno 2) |
+
+FATTO, verde con tutti i 36 a 360: 95 su 95 di tetto, massimo 176. Rosso C272V01,C272W01: 252, cioè 553c26fa.
+
+Una mossa non riuscita (pagina chiusa) ora è un problema dichiarato e non ferma più il giro: prima il rosso finiva in eccezione.
+
+### Tempi
+
+| Misura | Tempo |
+|---|---|
+| Giro su tutti i 36 a 360, 1 pagina | 6117 s |
+| Giro su tutti i 36 a 360, 4 pagine | 2556 s |
+| CI 1373, 375 / 412 | +22 / +17 min su 1366 |
+| CI 1374, 412 | 48,1 min contro 49,6 |
+| CI 1374, 360 bracci | 22,4 min contro 28,0 |
+| CI 1374, 360 schieramenti | 45,9 min contro 63,6 |
+| CI 1374, 375 | 100,8 min, due tentativi (vedi sotto) |
+| CI 1374, 375, un tentativo | altezze 2741 s contro 2062 di 1366; foto +38% e schieramenti +20% senza cambi: la macchina era più lenta |
+
+Su 1373 i 6 episodi giravano anche a 375 e 412. Dentro il job 375 di 1374, i giri salti e segno aggiungono circa 76 s.
+
+In locale a 360 la catena grafica intera supera il limite di 2 h del terminale. È girata in giri separati, tutti verdi su
+9c35a3b8: token…caratteri e altezze, poi bracci. Altezze 2892 s (era 2570), bracci 1591 s (era 1244).
+
+### Strumento instabile: anelli (216468c5)
+
+CI 1374, 375×667, e21 corteo_dal_cortile «puoi spostare»: due unità «senza anello pieno», contrasto 0,00. Al tentativo 2 era
+verde. Non l'ho riprodotto in 9 giri locali, 3 processi insieme.
+
+IPOTESI: le posizioni si leggevano prima della foto, e la pagina si muoveva in mezzo. Lo strumento ora legge le posizioni, fa
+la foto e rilegge, finché le due letture coincidono (al più 5 volte). Il giro radio conta le «foto riprese a pagina non ferma»:
+0 nel giro locale a 375.
+
+Senza riproduzione non posso confermare che la causa sia questa.
