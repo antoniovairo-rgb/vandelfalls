@@ -6,12 +6,14 @@
 // pagina non scorre più che senza il segno; non copre nomi, pastiglie, «Home» né dischi altrui; niente animazione con la riduzione del
 // movimento; dopo 2,5 s veri non c'è più.
 // Episodi (verifica del principale su a66978a8: in e02 il «+1» sopra il disco di curva_ospiti, in e04 il «−1» sopra una pastiglia
-// di mercato, 6 mosse su 6 a 360): nel verde e02, e03, e04 e i due con i dischi più vicini dopo e02 (e05, e13: distanza minima
-// fra i dischi nei dati 24 e 25,5 contro 15,1 di e02), tutte le mosse della prima chiamata con la mossa; nella catena «completa»
-// (VALMORA_SEGNO_TUTTI=1) tutti i 36. I bracci passano i loro episodi.
+// di mercato, 6 mosse su 6 a 360): nel verde e02 ed e04, tutte le mosse della prima chiamata con la mossa; nella catena «completa»
+// (VALMORA_SEGNO_TUTTI=1) anche e03 e i due con i dischi più vicini dopo e02 (e05, e13: distanza minima fra i dischi nei dati 24 e
+// 25,5 contro 15,1 di e02). I bracci passano i loro episodi.
 import { chiamateCostruite } from './sonda-altezze.mjs';
 import { contrasto } from './anelli-mossa.mjs';
-export const EPISODI_SEGNO = ['e02', 'e03', 'e04', 'e05', 'e13'];
+// nel verde (anche in CI) i due casi della verifica; nella catena «completa» i 5 (decisione del principale 8/11: il giro sui 5 nel
+// verde portava il passo «altezze» a 360 da 2570 a 3360 s, oltre i circa 10 minuti per job accettati)
+export const EPISODI_SEGNO = ['e02', 'e04'], EPISODI_SEGNO_COMPLETA = ['e02', 'e03', 'e04', 'e05', 'e13'];
 
 const rgb = (s) => (s.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
 const leggi = (p) => p.evaluate(() => {
@@ -37,7 +39,7 @@ const leggi = (p) => p.evaluate(() => {
 export async function controllaSegno(browser, url, larghezza, h, rossi, dati, insieme, pagine = 1, episodi = null) {
   const male = [], vp = `${larghezza}x${h}`, dich = new Map(dati['stato.json'].variabili.map((d) => [d.id, d])), tutte = chiamateCostruite(dati, dich);
   const conto = { vp, giro: 'segno', episodi: 0, mosse: 0, conSegno: 0, contrastoMin: Infinity, presi: 0, coperti: 0, rimasti: 0 }, D = '(D-272 segno)';
-  const eps = episodi ? [...episodi] : process.env.VALMORA_SEGNO_TUTTI ? [...new Set(tutte.map((x) => x.ep))].sort() : EPISODI_SEGNO;
+  const eps = episodi ? [...episodi] : process.env.VALMORA_SEGNO_TUTTI ? EPISODI_SEGNO_COMPLETA : EPISODI_SEGNO;
   const caso = async (ep, id) => {
     const c = tutte.find((x) => x.ep === ep && x.id === id), ch = dati[`missioni/${ep}.json`].ondate.flatMap((o) => o.chiamate ?? []).find((x) => x.id === id);
     if (!c || !ch) return false;
