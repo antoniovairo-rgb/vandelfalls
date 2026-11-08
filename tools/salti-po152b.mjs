@@ -23,13 +23,21 @@ const centri = (p) => p.evaluate(() => { const m = document.querySelector('.mapp
   return Object.fromEntries([...document.querySelectorAll('.mappa [data-presenza], .mappa [data-fissa]')].map((e) => { const r = e.getBoundingClientRect();
     return [e.dataset.presenza ?? e.dataset.fissa, [(r.left + r.right) / 2 - m.left, (r.top + r.bottom) / 2 - m.top]]; })); });
 
+// D-272 (decisione del principale, 8/11): oltre a e03, la prima chiamata con la mossa di ognuno dei 36 episodi, tutte le mosse.
+// Su 553c26fa (prima del passo 2) gli elementi oltre 44 px erano 252 / 264 / 99 a 360 / 375 / 412 (massimo 176 / 176 / 132); col
+// passo 2 sono 95 / 47 / 33 (massimo 176 / 176 / 120, e26 pullman_sparsi ed e34 mercato_spostato a 360). Tetto: il conteggio di
+// oggi, perché non si possa peggiorare; la causa dei salti rimasti è un lotto dopo la 0.70.0 (obiettivo 44 px, tetto che scende).
+// Rosso: C272V01,C272W01 (il comportamento di 553c26fa).
+export const TETTO_SALTI = { 360: 95, 375: 47, 412: 33 }, MAX_SALTI = { 360: 176, 375: 176, 412: 120 };
+
 /** Giro «salti»: problemi e conto alla larghezza data. */
 export async function controllaSalti(browser, url, larghezza, h, rossi, dati, insieme, pagine = 1) {
   const male = [], vp = `${larghezza}x${h}`, dich = new Map(dati['stato.json'].variabili.map((d) => [d.id, d])), tutte = chiamateCostruite(dati, dich);
-  const conto = { vp, giro: 'salti', mosse: 0, unita: 0, max: 0 };
-  for (const [ep, id] of CASI_SALTI) {
+  const conto = { vp, giro: 'salti', mosse: 0, unita: 0, max: 0, episodi: 0, oltre: 0, maxTutti: 0 };
+  // una chiamata: null se il «puoi spostare» non compare; altrimenti i salti oltre soglia (righe) e il massimo
+  const caso = async (ep, id, stretto) => {
     const c = tutte.find((x) => x.ep === ep && x.id === id), ch = dati[`missioni/${ep}.json`].ondate.flatMap((o) => o.chiamate ?? []).find((x) => x.id === id);
-    if (!c || !ch) { male.push(`${vp} ${ep} ${id}: chiamata non trovata (D-272 salti)`); continue; }
+    if (!c || !ch) { if (stretto) male.push(`${vp} ${ep} ${id}: chiamata non trovata (D-272 salti)`); return null; }
     const apri = async () => { const p = await browser.newPage({ viewport: { width: larghezza, height: h }, hasTouch: true, reducedMotion: 'reduce' });
       await p.addInitScript((xs) => { globalThis.__VALMORA_SECONDO_MS = 1; for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi);
       await p.goto(url); await p.evaluate((v) => localStorage.setItem('vandelfalls-salvataggio', v), c.sal); await p.reload(); await p.getByRole('button', { name: 'Riprendi' }).click();
@@ -37,22 +45,36 @@ export async function controllaSalti(browser, url, larghezza, h, rossi, dati, in
       await p.click(`[data-opzione="${ch.opzioni[0].id}"]`); await p.click('[data-conferma]').catch(() => {});
       if (!(await p.waitForSelector('.mappa [data-mossa="puoi"]', { timeout: 15000, state: 'attached' }).then(() => true, () => false))) { await p.close(); return null; }
       await p.waitForTimeout(2500); await ferma(p); return p; }; // «puoi» fermo: anche i segni ▲/▼ della risposta sono spariti (1,8 s veri)
-    const p0 = await apri(); if (!p0) { male.push(`${vp} ${ep} ${id}: il «puoi spostare» non compare (D-272 salti)`); continue; }
+    const p0 = await apri(); if (!p0) { if (stretto) male.push(`${vp} ${ep} ${id}: il «puoi spostare» non compare (D-272 salti)`); return null; }
     const unita = await p0.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza)); await p0.close();
+    const r = { righe: [], max: 0 };
     await insieme(unita.map((u) => async () => { for (let j = 0, n = 1; j < n; j++) {
       const p = await apri(); if (!p) { male.push(`${vp} ${ep} ${id} ${u}: il «puoi spostare» non compare (D-272 salti)`); break; }
       const prima = await centri(p);
       await p.locator(`.mappa [data-presenza="${u}"]`).click({ force: true }); await p.waitForTimeout(80);
       const ss = await p.$$('.mappa .settore-punto:not(:disabled)'); n = ss.length; if (!ss[j]) { await p.close(); break; }
       const a = await ss[j].evaluate((e) => e.closest('[data-settore]').dataset.settore); await ss[j].click({ force: true }); await p.waitForTimeout(2500); await ferma(p); // anche dopo che spariscono i segni ▲/▼ (1,8 s veri)
-      const dopo = await centri(p); await p.close(); conto.mosse++;
+      const dopo = await centri(p); await p.close(); if (stretto) conto.mosse++;
       const da = u.split('@')[1];
       for (const [k, [x, y]] of Object.entries(prima)) { if (k === u || k.split('@')[1] !== da || !dopo[k]) continue;
-        const px = Math.round(Math.hypot(dopo[k][0] - x, dopo[k][1] - y)); conto.unita++; conto.max = Math.max(conto.max, px);
-        if (px > SOGLIA_SALTO) male.push(`${vp} ${ep} ${id} ${u} → ${a}: ${k}, rimasta nel settore di partenza, salta di ${px} px (soglia ${SOGLIA_SALTO}, D-272 salti)`); }
+        const px = Math.round(Math.hypot(dopo[k][0] - x, dopo[k][1] - y)); r.max = Math.max(r.max, px); if (stretto) { conto.unita++; conto.max = Math.max(conto.max, px); }
+        if (px > SOGLIA_SALTO) r.righe.push(`${vp} ${ep} ${id} ${u} → ${a}: ${k}, rimasta nel settore di partenza, salta di ${px} px (soglia ${SOGLIA_SALTO}, D-272 salti)`); }
     } }), pagine);
+    return r;
+  };
+  const fatti = new Map();
+  for (const [ep, id] of CASI_SALTI) { const r = await caso(ep, id, true); if (r) { male.push(...r.righe); fatti.set(`${ep} ${id}`, r); } }
+  // tutti gli episodi: la prima delle prime 4 chiamate dove il «puoi spostare» compare (come il giro radio)
+  const per = [];
+  for (const ep of [...new Set(tutte.map((x) => x.ep))].sort()) {
+    let r = null, quale = '';
+    for (const c of tutte.filter((x) => x.ep === ep).slice(0, 4)) { quale = c.id; r = fatti.get(`${ep} ${c.id}`) ?? await caso(ep, c.id, false); if (r) break; }
+    if (!r) { male.push(`${vp} ${ep}: nessuna chiamata con la mossa fra le prime 4 (D-272 salti, tutti)`); continue; }
+    conto.episodi++; conto.oltre += r.righe.length; conto.maxTutti = Math.max(conto.maxTutti, r.max); per.push([`${ep} ${quale}`, r.max, r.righe.length]);
   }
-  console.log(`salti dopo la mossa ${vp}: ${conto.mosse} mosse, ${conto.unita} unità rimaste, salto massimo ${conto.max} px (soglia ${SOGLIA_SALTO})`);
+  const tetto = TETTO_SALTI[larghezza], tmax = MAX_SALTI[larghezza], peggiori = per.sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k, m, n]) => `${k} ${m} px (${n} oltre)`).join(', ');
+  if (tetto !== undefined && (conto.oltre > tetto || conto.maxTutti > tmax)) male.push(`${vp}: salti oltre ${SOGLIA_SALTO} px su ${conto.episodi} episodi ${conto.oltre} (tetto ${tetto}), massimo ${conto.maxTutti} px (tetto ${tmax}); peggiori ${peggiori} (D-272 salti, tetto)`);
+  console.log(`salti dopo la mossa ${vp}: ${conto.mosse} mosse, ${conto.unita} unità rimaste, salto massimo ${conto.max} px (soglia ${SOGLIA_SALTO}); tutti gli episodi: ${conto.episodi}, oltre ${SOGLIA_SALTO} px ${conto.oltre} (tetto ${tetto}), massimo ${conto.maxTutti} px (tetto ${tmax})`);
   if (!conto.mosse) male.push(`${vp}: nessuna mossa provata (D-272 salti)`);
   return { ris: conto, male };
 }
