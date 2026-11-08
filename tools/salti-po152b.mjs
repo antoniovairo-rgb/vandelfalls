@@ -88,7 +88,7 @@ export async function controllaSalti(browser, url, larghezza, h, rossi, dati, in
   const te7 = Object.values(TETTO_EPISODIO[larghezza] ?? {}), tetto = tuttiEp ? TETTO_SALTI[larghezza] : te7.length ? te7.reduce((a, [n]) => a + n, 0) : undefined, tmax = tuttiEp ? MAX_SALTI[larghezza] : te7.length ? Math.max(...te7.map(([, m]) => m)) : undefined, peggiori = per.sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k, m, n]) => `${k} ${m} px (${n} oltre)`).join(', ');
   if (tetto !== undefined && !episodi && (conto.oltre > tetto || conto.maxTutti > tmax)) male.push(`${vp}: salti oltre ${SOGLIA_SALTO} px su ${conto.episodi} episodi ${conto.oltre} (tetto ${tetto}), massimo ${conto.maxTutti} px (tetto ${tmax}); peggiori ${peggiori} (D-272 salti, tetto)`);
   console.log(`salti dopo la mossa ${vp}: ${conto.mosse} mosse, ${conto.unita} unità rimaste, salto massimo ${conto.max} px (soglia ${SOGLIA_SALTO}); ${tuttiEp ? 'tutti gli episodi' : 'e03 e i 6 peggiori'}: ${conto.episodi}, oltre ${SOGLIA_SALTO} px ${conto.oltre} (tetto ${tetto}), massimo ${conto.maxTutti} px (tetto ${tmax})`);
-  if (!conto.mosse) male.push(`${vp}: nessuna mossa provata (D-272 salti)`);
+  if (!conto.mosse && !conto.episodi) male.push(`${vp}: nessuna mossa provata (D-272 salti)`); // i bracci senza e03 provano solo gli episodi
   return { ris: conto, male };
 }
 
