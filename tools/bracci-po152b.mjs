@@ -38,8 +38,8 @@ export const BRACCI_PO152B = {
   // D-272 passo 2, giro «salti» (e03, 24 mosse): senza posto vuoto (C272V01) 28 / 28 / 16 problemi a 360 / 375 / 412; senza costo di
   // spostamento (C272W01) 0 / 0 / 9: a 360 il salto massimo resta 42 px, sotto la soglia di 44, quindi quel braccio gira a 412×760
   C272V01: { giri: ['salti'], episodi: ['e03'], segno: '(soglia 44, D-272 salti)', almeno: 20 },
-  // D-272 (8/11): coi due rossi, il comportamento di 553c26fa, i 6 episodi peggiori superano il loro tetto (EPISODI_SALTI, TETTO_EPISODIO)
-  'C272V01,C272W01': { giri: ['salti'], episodi: ['e05', 'e06', 'e08', 'e10', 'e26', 'e31'], segno: '(D-272 salti, tetto episodio)', almeno: 5 },
+  // D-272 (8/11): coi due rossi, il comportamento di 553c26fa, e05 ed e26 superano il loro tetto (EPISODI_SALTI, TETTO_EPISODIO)
+  'C272V01,C272W01': { giri: ['salti'], episodi: ['e05', 'e26'], segno: '(D-272 salti, tetto episodio)', almeno: 2 }, // e05 12 > 4, e26 14 > 6 a 360; gli stessi del verde in CI (decisione 8/11, tempi)
   // D-272 passo 4, giro «segno» (e03, tutte le mosse: 24): senza «−1» / «+1» (C272D01) 24 problemi a 360 (prima 6 su 6 con la sola prima mossa), verde 0
   C272D01: { giri: ['segno'], episodi: ['e03'], segno: '(D-272 segno)', almeno: 20 },
   // e col segno a fianco del disco e sopra tutto (C272D02) 24 mosse su 24 coprono nomi o dischi altrui a 360
