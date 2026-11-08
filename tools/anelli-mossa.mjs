@@ -54,11 +54,18 @@ const leggiPagina = (p) => p.evaluate(() => {
  *  misura: l'anello deve vedersi almeno da un lato e ogni lato visto deve stare a ≥ 3:1. */
 export async function misuraAnelli(p) {
   // strumento instabile (CI 1374, 375×667 e21 corteo_dal_cortile «puoi spostare»: due unità «senza anello pieno», contrasto 0,00,
-  // verde al tentativo 2; non riprodotto in 9 giri locali sotto carico): le posizioni si leggevano prima della foto, e se la pagina
+  // verde al tentativo 2; prima e28 voce_magazzino a 360 il 7/11): le posizioni si leggevano prima della foto, e se la pagina
   // si muoveva in mezzo l'anello non era dove lo si cercava. Ora posizioni, foto e di nuovo posizioni, finché le due letture
   // coincidono (al più 5 volte, 100 ms fra una e l'altra); quante ripetizioni servono resta nel conto (riprese).
-  let g = await leggiPagina(p), img = leggiPng(await p.screenshot()), riprese = 0;
-  for (let dopo = await leggiPagina(p); JSON.stringify(dopo.bersagli) !== JSON.stringify(g.bersagli) && riprese < 5; dopo = await leggiPagina(p)) { riprese++; await p.waitForTimeout(100); g = await leggiPagina(p); img = leggiPng(await p.screenshot()); }
+  // Causa comune (sonda 8/11, tools/zz-anello.mjs): nello stato «puoi» i segni ▲/▼ della risposta durano 1,8 s veri e, quando
+  // spariscono, la disposizione cambia (sono nella firma e ostacoli dei nomi): e21 a 375 squadre e steward@piazza_fonderie si
+  // spostano di 132 px, e28 a 360 steward e mediatore@curva_cinderwick di 11 px; sono le unità «senza anello pieno» dei due casi.
+  // Rosso C272A01 (strumento, deterministico): posizioni lette coi segni, foto dopo che sono spariti, senza rilettura.
+  const rosso = await p.evaluate(() => !!globalThis.__NO_C272A01).catch(() => false);
+  let g = await leggiPagina(p), riprese = 0;
+  if (rosso) { await p.waitForFunction(() => !document.querySelector('.mappa [data-segno]'), null, { timeout: 5000 }).catch(() => {}); await p.waitForTimeout(300); }
+  let img = leggiPng(await p.screenshot());
+  if (!rosso) for (let dopo = await leggiPagina(p); JSON.stringify(dopo.bersagli) !== JSON.stringify(g.bersagli) && riprese < 5; dopo = await leggiPagina(p)) { riprese++; await p.waitForTimeout(100); g = await leggiPagina(p); img = leggiPng(await p.screenshot()); }
   const sotto = [], sovrapposti = [], lati = [0, 0];
   let minimo = Infinity;
   for (const x of g.bersagli) {
