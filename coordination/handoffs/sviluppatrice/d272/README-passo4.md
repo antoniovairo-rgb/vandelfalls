@@ -195,3 +195,46 @@ la foto e rilegge, finché le due letture coincidono (al più 5 volte). Il giro 
 0 nel giro locale a 375.
 
 Senza riproduzione non posso confermare che la causa sia questa.
+
+### Causa comune degli «anello 0,00» e rosso deterministico (c86fb95a)
+
+I due casi, e28 voce_magazzino a 360 (7/11) ed e21 corteo_dal_cortile a 375 (CI 1374), hanno la stessa causa. Nello stato
+«puoi» i segni ▲/▼ della risposta durano 1,8 s veri; quando spariscono la disposizione cambia, perché i segni stanno nella firma
+e fanno da ostacolo ai nomi. Lo strumento leggeva le posizioni prima della foto.
+
+Sonda `tools/zz-anello.mjs` (temporanea), con le pastiglie misurate coi segni e 500 ms dopo che sono spariti:
+
+| Caso | Pastiglie che si spostano |
+|---|---|
+| e21 a 375 | squadre e steward@piazza_fonderie, 132 px |
+| e28 a 360 | steward e mediatore@curva_cinderwick, 11 px |
+
+Sono le stesse unità «senza anello pieno» dei due casi.
+
+I nomi a z-index 2 sono esclusi: il caso e28 è comparso su 4b285c28 e 8329ef4b, dove quella regola non c'era.
+
+Rosso C272A01 (strumento): posizioni coi segni, foto dopo che spariscono, senza rilettura. Riproduce testualmente i due messaggi,
+3 volte su 3 ciascuno; senza rosso dà 0. Il braccio è su e28 a 360×760, almeno 1.
+
+In CI 1377 il giro radio a 375 ha ripreso la foto 3 volte, su 277 stati, «a pagina non ferma».
+
+Il salto delle pastiglie a 1,8 s dalla risposta è un difetto del gioco, non riparato qui. Va nel lotto «salti residui» dopo la
+0.70.0: prima la misura su 0.67.0 (d4663239), 0.68.0 (553c26fa) e 0.69.0 (5bdf0515); se su 0.67.0 non c'era, è una regressione del
+memo (D-272 passo 3) e ha la precedenza.
+
+### Tempi CI dopo la restrizione: due run
+
+Durata del passo `catena grafica` in minuti.
+
+| Job | 1366 (a66978a8) | 1375 (216468c5) | 1377 (c86fb95a) | Media 1375-1377 | Differenza |
+|---|---|---|---|---|---|
+| 375 | 41,4 | 33,7 | 54,4 | 44,0 | +2,6 |
+| 412 | 49,6 | 56,7 | 50,0 | 53,4 | +3,8 |
+| 360 bracci | 28,0 | 25,4 | 19,4 | 22,4 | −5,6 |
+| 360 schieramenti | 63,6 | 67,1 | 68,3 | 67,7 | +4,1 |
+
+Tutte le run sono 10/10 verdi, senza tentativi ripetuti.
+
+Dentro i job, dai log, il giro segno su e03 (24 mosse) costa circa 81-87 s contro 21 s della 1366 (6 mosse); il giro salti è
+invariato a 375 e 412. La dispersione fra due run sullo stesso codice arriva a 20 min (375: 33,7 contro 54,4): il giro radio, non
+toccato, va da 31 a 40 min.
