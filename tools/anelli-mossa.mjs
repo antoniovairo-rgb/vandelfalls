@@ -53,7 +53,13 @@ const leggiPagina = (p) => p.evaluate(() => {
  *  più basso), lati (visti, provati), sovrapposti, n }. Un lato coperto (da «Home», da un nome, da un'altra pastiglia) non si
  *  misura: l'anello deve vedersi almeno da un lato e ogni lato visto deve stare a ≥ 3:1. */
 export async function misuraAnelli(p) {
-  const g = await leggiPagina(p), img = leggiPng(await p.screenshot()), sotto = [], sovrapposti = [], lati = [0, 0];
+  // strumento instabile (CI 1374, 375×667 e21 corteo_dal_cortile «puoi spostare»: due unità «senza anello pieno», contrasto 0,00,
+  // verde al tentativo 2; non riprodotto in 9 giri locali sotto carico): le posizioni si leggevano prima della foto, e se la pagina
+  // si muoveva in mezzo l'anello non era dove lo si cercava. Ora posizioni, foto e di nuovo posizioni, finché le due letture
+  // coincidono (al più 5 volte, 100 ms fra una e l'altra); quante ripetizioni servono resta nel conto (riprese).
+  let g = await leggiPagina(p), img = leggiPng(await p.screenshot()), riprese = 0;
+  for (let dopo = await leggiPagina(p); JSON.stringify(dopo.bersagli) !== JSON.stringify(g.bersagli) && riprese < 5; dopo = await leggiPagina(p)) { riprese++; await p.waitForTimeout(100); g = await leggiPagina(p); img = leggiPng(await p.screenshot()); }
+  const sotto = [], sovrapposti = [], lati = [0, 0];
   let minimo = Infinity;
   for (const x of g.bersagli) {
     // una pastiglia sul bordo della mappa è tagliata: centro della parte che si vede, e i lati fuori dalla mappa non si misurano
@@ -85,5 +91,5 @@ export async function misuraAnelli(p) {
   for (let i = 0; i < g.settori.length; i++) for (let j = i + 1; j < g.settori.length; j++) { const a = g.settori[i], b = g.settori[j];
     const d = Math.hypot((a.l + a.r) / 2 - (b.l + b.r) / 2, (a.t + a.b) / 2 - (b.t + b.b) / 2);
     if (d < a.raggio + b.raggio) sovrapposti.push(`${a.id}/${b.id} (${Math.round(a.raggio + b.raggio - d)} px)`); }
-  return { copia: g.copia, tratteggi: g.tratteggi, sotto, minimo: g.bersagli.length ? minimo : null, lati, sovrapposti, n: g.bersagli.length };
+  return { copia: g.copia, tratteggi: g.tratteggi, sotto, minimo: g.bersagli.length ? minimo : null, lati, sovrapposti, n: g.bersagli.length, riprese };
 }
