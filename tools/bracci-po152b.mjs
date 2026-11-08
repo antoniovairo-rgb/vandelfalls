@@ -37,12 +37,14 @@ export const BRACCI_PO152B = {
   C271V01: { giri: ['versione'], segno: 'la versione non svanisce (D-271)', almeno: 2 }, // movimento e movimento ridotto
   // D-272 passo 2, giro «salti» (e03, 24 mosse): senza posto vuoto (C272V01) 28 / 28 / 16 problemi a 360 / 375 / 412; senza costo di
   // spostamento (C272W01) 0 / 0 / 9: a 360 il salto massimo resta 42 px, sotto la soglia di 44, quindi quel braccio gira a 412×760
-  C272V01: { giri: ['salti'], segno: '(soglia 44, D-272 salti)', almeno: 20 },
+  C272V01: { giri: ['salti'], episodi: ['e03'], segno: '(soglia 44, D-272 salti)', almeno: 20 },
+  // D-272 (8/11): coi due rossi, il comportamento di 553c26fa, i 6 episodi peggiori superano il loro tetto (EPISODI_SALTI, TETTO_EPISODIO)
+  'C272V01,C272W01': { giri: ['salti'], episodi: ['e05', 'e06', 'e08', 'e10', 'e26', 'e31'], segno: '(D-272 salti, tetto episodio)', almeno: 5 },
   // D-272 passo 4, giro «segno» (e03, 6 mosse): senza «−1» / «+1» (C272D01) 6 problemi su 6 a 360 / 375 / 412, verde 0
   C272D01: { giri: ['segno'], segno: '(D-272 segno)', almeno: 6 },
   // e col segno a fianco del disco e sopra tutto (C272D02) 6 mosse su 6 coprono nomi o dischi altrui a 360 (16 sovrapposizioni)
   C272D02: { giri: ['segno'], segno: 'il segno copre', almeno: 6 },
-  C272W01: { giri: ['salti'], segno: '(soglia 44, D-272 salti)', almeno: 6 },
+  C272W01: { giri: ['salti'], episodi: ['e03'], segno: '(soglia 44, D-272 salti)', almeno: 6 },
   // D-272 passo 2, vicinanza (giro radio, soglia 95 / 93 / 93): senza i posti e la larghezza di C28-14 (C94N01) le pastiglie di Magazzino
   // in e16 magazzino_sette finiscono a 108-110 px dal disco, in 6 stati a 360; unico episodio col segno su 36
   C94N01: { giri: ['radio'], episodi: ['e16'], segno: 'D-272 vicinanza)', almeno: 5 },

@@ -54,6 +54,8 @@ CATENE.completa = [...CATENE.governo, ...CATENE.logica, ...CATENE.grafica];
 // Solo per le catene con passi della grafica: il lavoro «governo» della CI non installa node_modules (playwright-core).
 if ((CATENE[process.argv[2]] ?? []).some((p) => CATENE.grafica.includes(p))) (await import('./caratteri.mjs')).resaFissa();
 const nome = process.argv[2];
+// D-272: nella catena «completa» (quella del Play) il giro «salti» guarda tutti i 36 episodi, non solo e03 e i 6 peggiori
+if (nome === 'completa') process.env.VALMORA_SALTI_TUTTI = '1';
 if (!CATENE[nome]) {
   console.error(`Catena sconosciuta «${nome}». Disponibili: ${Object.keys(CATENE).join(', ')}`);
   process.exit(2);

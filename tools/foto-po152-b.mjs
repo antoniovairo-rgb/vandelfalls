@@ -180,7 +180,7 @@ export async function controllaPo152b(browser, url, larghezza, rossi = [], carte
   const hr = RADIO_VP[larghezza];
   if (hr && giri.includes('radio')) { const r = await controllaRadio(browser, url, larghezza, hr, rossi, dati, dich, solo.episodi, pagine); male.push(...r.male); ris.push(r.ris); }
   if (hr && giri.includes('previsione')) { const r = await controllaPrevisione(browser, url, larghezza, hr, rossi, dati, dich, pagine); male.push(...r.male); ris.push(r.ris); }
-  if (hr && giri.includes('salti')) { const r = await controllaSalti(browser, url, larghezza, hr, rossi, dati, insieme, pagine); male.push(...r.male); ris.push(r.ris); } // D-272 passo 2
+  if (hr && giri.includes('salti')) { const r = await controllaSalti(browser, url, larghezza, hr, rossi, dati, insieme, pagine, solo.episodi); male.push(...r.male); ris.push(r.ris); } // D-272 passo 2
   if (hr && giri.includes('segno')) { const r = await controllaSegno(browser, url, larghezza, hr, rossi, dati, insieme, pagine); male.push(...r.male); ris.push(r.ris); } // D-272 passo 4
   if (giri.includes('versione')) male.push(...await (await import('./versione-svanisce.mjs')).controllaVersioneSvanisce(browser, url, larghezza, rossi, chiamateCostruite(dati, dich)[0].sal)); // D-271
   if (FERMO_VP[larghezza] && giri.includes('fermo')) { const r = await controllaFermo(browser, url, larghezza, FERMO_VP[larghezza], rossi, dati, dich, pagine); male.push(...r.male); ris.push(r.ris); }

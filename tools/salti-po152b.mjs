@@ -23,15 +23,25 @@ const centri = (p) => p.evaluate(() => { const m = document.querySelector('.mapp
   return Object.fromEntries([...document.querySelectorAll('.mappa [data-presenza], .mappa [data-fissa]')].map((e) => { const r = e.getBoundingClientRect();
     return [e.dataset.presenza ?? e.dataset.fissa, [(r.left + r.right) / 2 - m.left, (r.top + r.bottom) / 2 - m.top]]; })); });
 
-// D-272 (decisione del principale, 8/11): oltre a e03, la prima chiamata con la mossa di ognuno dei 36 episodi, tutte le mosse.
-// Su 553c26fa (prima del passo 2) gli elementi oltre 44 px erano 252 / 264 / 99 a 360 / 375 / 412 (massimo 176 / 176 / 132); col
-// passo 2 sono 95 / 47 / 33 (massimo 176 / 176 / 120, e26 pullman_sparsi ed e34 mercato_spostato a 360). Tetto: il conteggio di
-// oggi, perché non si possa peggiorare; la causa dei salti rimasti è un lotto dopo la 0.70.0 (obiettivo 44 px, tetto che scende).
+// D-272 (decisione del principale, 8/11): oltre a e03, altri episodi con tutte le mosse della prima chiamata con la mossa.
+// Su 553c26fa (prima del passo 2), su tutti i 36 episodi, gli elementi oltre 44 px erano 252 / 264 / 99 a 360 / 375 / 412
+// (massimo 176 / 176 / 132); col passo 2 sono 95 / 47 / 33 (massimo 176 / 176 / 120). Il tetto è il conteggio di oggi, perché non si
+// possa peggiorare; la causa dei salti rimasti è un lotto dopo la 0.70.0 (obiettivo 44 px, tetto che scende).
+// - Verde di ogni catena (CI compresa): e03 stretto più i 6 episodi peggiori su 553c26fa (EPISODI_SALTI), con un tetto per episodio
+//   (elementi oltre 44 px e salto massimo, misurati su a66978a8, tools/zz-salti-tutti.mjs) e uno sul totale dei 7.
+// - Catena «completa» (VALMORA_SALTI_TUTTI=1, la mette catena.mjs): tutti i 36 episodi, tetto sul totale (TETTO_SALTI, MAX_SALTI).
 // Rosso: C272V01,C272W01 (il comportamento di 553c26fa).
+export const EPISODI_SALTI = ['e05', 'e06', 'e08', 'e10', 'e26', 'e31'];
+export const TETTO_EPISODIO = { // [elementi oltre 44 px, salto massimo in px]
+  360: { e03: [0, 6], e05: [4, 79], e06: [0, 22], e08: [0, 0], e10: [0, 0], e26: [6, 176], e31: [6, 88] },
+  375: { e03: [0, 0], e05: [4, 79], e06: [0, 22], e08: [8, 79], e10: [0, 0], e26: [5, 176], e31: [3, 93] },
+  412: { e03: [0, 0], e05: [8, 93], e06: [0, 0], e08: [0, 38], e10: [0, 0], e26: [4, 91], e31: [0, 0] },
+};
 export const TETTO_SALTI = { 360: 95, 375: 47, 412: 33 }, MAX_SALTI = { 360: 176, 375: 176, 412: 120 };
 
 /** Giro «salti»: problemi e conto alla larghezza data. */
-export async function controllaSalti(browser, url, larghezza, h, rossi, dati, insieme, pagine = 1) {
+// episodi: se dato (i bracci, BRACCI_PO152B.episodi), solo quegli episodi; e03 stretto solo se c'è.
+export async function controllaSalti(browser, url, larghezza, h, rossi, dati, insieme, pagine = 1, episodi = null) {
   const male = [], vp = `${larghezza}x${h}`, dich = new Map(dati['stato.json'].variabili.map((d) => [d.id, d])), tutte = chiamateCostruite(dati, dich);
   const conto = { vp, giro: 'salti', mosse: 0, unita: 0, max: 0, episodi: 0, oltre: 0, maxTutti: 0 };
   // una chiamata: null se il «puoi spostare» non compare; altrimenti i salti oltre soglia (righe) e il massimo
@@ -63,18 +73,21 @@ export async function controllaSalti(browser, url, larghezza, h, rossi, dati, in
     return r;
   };
   const fatti = new Map();
-  for (const [ep, id] of CASI_SALTI) { const r = await caso(ep, id, true); if (r) { male.push(...r.righe); fatti.set(`${ep} ${id}`, r); } }
+  for (const [ep, id] of CASI_SALTI.filter(([e]) => !episodi || episodi.includes(e))) { const r = await caso(ep, id, true); if (r) { male.push(...r.righe); fatti.set(`${ep} ${id}`, r); } }
   // tutti gli episodi: la prima delle prime 4 chiamate dove il «puoi spostare» compare (come il giro radio)
   const per = [];
-  for (const ep of [...new Set(tutte.map((x) => x.ep))].sort()) {
+  const tuttiEp = !!process.env.VALMORA_SALTI_TUTTI, eps = tuttiEp ? [...new Set(tutte.map((x) => x.ep))].sort() : episodi ? [...episodi].sort() : [...new Set([...CASI_SALTI.map(([e]) => e), ...EPISODI_SALTI])].sort();
+  for (const ep of eps) {
     let r = null, quale = '';
     for (const c of tutte.filter((x) => x.ep === ep).slice(0, 4)) { quale = c.id; r = fatti.get(`${ep} ${c.id}`) ?? await caso(ep, c.id, false); if (r) break; }
-    if (!r) { male.push(`${vp} ${ep}: nessuna chiamata con la mossa fra le prime 4 (D-272 salti, tutti)`); continue; }
+    if (!r) { male.push(`${vp} ${ep}: nessuna chiamata con la mossa fra le prime 4 (D-272 salti)`); continue; }
     conto.episodi++; conto.oltre += r.righe.length; conto.maxTutti = Math.max(conto.maxTutti, r.max); per.push([`${ep} ${quale}`, r.max, r.righe.length]);
+    const te = !tuttiEp && TETTO_EPISODIO[larghezza]?.[ep];
+    if (te && (r.righe.length > te[0] || r.max > te[1])) male.push(`${vp} ${ep} ${quale}: salti oltre ${SOGLIA_SALTO} px ${r.righe.length} (tetto ${te[0]}), massimo ${r.max} px (tetto ${te[1]}) (D-272 salti, tetto episodio)`);
   }
-  const tetto = TETTO_SALTI[larghezza], tmax = MAX_SALTI[larghezza], peggiori = per.sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k, m, n]) => `${k} ${m} px (${n} oltre)`).join(', ');
-  if (tetto !== undefined && (conto.oltre > tetto || conto.maxTutti > tmax)) male.push(`${vp}: salti oltre ${SOGLIA_SALTO} px su ${conto.episodi} episodi ${conto.oltre} (tetto ${tetto}), massimo ${conto.maxTutti} px (tetto ${tmax}); peggiori ${peggiori} (D-272 salti, tetto)`);
-  console.log(`salti dopo la mossa ${vp}: ${conto.mosse} mosse, ${conto.unita} unità rimaste, salto massimo ${conto.max} px (soglia ${SOGLIA_SALTO}); tutti gli episodi: ${conto.episodi}, oltre ${SOGLIA_SALTO} px ${conto.oltre} (tetto ${tetto}), massimo ${conto.maxTutti} px (tetto ${tmax})`);
+  const te7 = Object.values(TETTO_EPISODIO[larghezza] ?? {}), tetto = tuttiEp ? TETTO_SALTI[larghezza] : te7.length ? te7.reduce((a, [n]) => a + n, 0) : undefined, tmax = tuttiEp ? MAX_SALTI[larghezza] : te7.length ? Math.max(...te7.map(([, m]) => m)) : undefined, peggiori = per.sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k, m, n]) => `${k} ${m} px (${n} oltre)`).join(', ');
+  if (tetto !== undefined && !episodi && (conto.oltre > tetto || conto.maxTutti > tmax)) male.push(`${vp}: salti oltre ${SOGLIA_SALTO} px su ${conto.episodi} episodi ${conto.oltre} (tetto ${tetto}), massimo ${conto.maxTutti} px (tetto ${tmax}); peggiori ${peggiori} (D-272 salti, tetto)`);
+  console.log(`salti dopo la mossa ${vp}: ${conto.mosse} mosse, ${conto.unita} unità rimaste, salto massimo ${conto.max} px (soglia ${SOGLIA_SALTO}); ${tuttiEp ? 'tutti gli episodi' : 'e03 e i 6 peggiori'}: ${conto.episodi}, oltre ${SOGLIA_SALTO} px ${conto.oltre} (tetto ${tetto}), massimo ${conto.maxTutti} px (tetto ${tmax})`);
   if (!conto.mosse) male.push(`${vp}: nessuna mossa provata (D-272 salti)`);
   return { ris: conto, male };
 }
