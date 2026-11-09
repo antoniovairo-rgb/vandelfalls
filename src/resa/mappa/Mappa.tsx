@@ -9,7 +9,7 @@ import { collocaSegni } from './segno-mossa.ts';
 
 // Interruttore rosso C05S08: nomi e unità restano al posto fisso (difetto C-008).
 // D-272 (passo 3): si ricalcola solo se cambiano gli ingressi (congela.ts)
-const disponi = (el: HTMLElement) => { if (!spento('C05S08') && !rimettiUguale(el)) { const f = firmaDi(el); disponiEtichette(el, primaDi(el, f)); tieni(el, f); } collocaRadio(el); collocaSegni(el); }; // D-255; D-272 passo 4: il segno della mossa dove non copre: il riquadro radio dopo le unità
+const disponi = (el: HTMLElement) => { if (!spento('C05S08') && !rimettiUguale(el)) { const f = firmaDi(el), pr = primaDi(el, f); disponiEtichette(el, pr); tieni(el, f, pr); } collocaRadio(el); collocaSegni(el); }; // D-255; D-272 passo 4: il segno della mossa dove non copre: il riquadro radio dopo le unità
 import type { Disposizione, Missione } from '../../logica/tipi.ts';
 import { spento } from '../../interruttori.ts';
 import { club, t, quante } from '../dati.ts';
