@@ -157,5 +157,7 @@
   "mossa.si_scalda": "si scalda",
   "mossa.si_calma": "si calma",
   "mossa.non_cambia": "Previsione alla chiusura: nessun cambiamento.",
-  "mossa.non_cambia_breve": "Previsione: nessun cambiamento."
+  "mossa.non_cambia_breve": "Previsione: nessun cambiamento.",
+  "mossa.segno_via": "un'unità in meno",
+  "mossa.segno_arriva": "un'unità in più"
 }

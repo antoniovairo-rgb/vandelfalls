@@ -162,14 +162,17 @@ export async function controllaSchieramenti(browser, url, dirDati, cartella, att
   // 375 e 412 (prima solo 360)
   const suNomi = [], attente = partenzeAttente(dirDati);
   for (const [w, h] of [[360, 760], [375, 812], [412, 915]].filter(([w]) => tocca(w))) {
-    const vicine = [], tocchi = [], rubati = [], nomiVicini = [];
+    // 7/11 (verifica del principale su c456106b): uno schieramento che non si apriva in 5 s era saltato in silenzio (139 controlli
+    // contro 142 a 360×760). Ora attende 15 s come il giro a mappa vuota, il mancante è rosso e il giro dice quanti ne ha aperti.
+    const vicine = [], tocchi = [], rubati = [], nomiVicini = []; let aperti = 0;
     // Gli stati sono indipendenti e il tempo è quasi tutto attesa (carattere rallentato a 360, 500 ms di quiete): si fanno su
     // più pagine insieme (prima una sola: il job a 360 durava 35-38 minuti). Gli elenchi cambiano ordine, conteggi e soglie no.
     const pagine = await Promise.all(Array.from({ length: PARALLELE }, async () => { const q = await nuova({ viewport: { width: w, height: h }, reducedMotion: 'reduce' }); if (w === 360) await rallentaCaratteri(q); await q.goto(url); return q; }));
     const corpo = async (q6, st) => {
       await q6.evaluate((v) => localStorage.setItem('vandelfalls-salvataggio', v), JSON.stringify({ ...base, in_corso: st.s, bozza: { missione: st.s.missione, ondata: st.s.ondata, d: st.d } }));
       await q6.reload(); await q6.getByRole('button', { name: 'Riprendi' }).click();
-      if (!(await q6.waitForSelector('[data-barra]', { timeout: 5000 }).then(() => true, () => false))) return;
+      if (!(await q6.waitForSelector('[data-barra]', { timeout: 15000 }).then(() => true, () => false))) { atteso(`${st.m.id} ondata ${st.n} ${w}×${h} con le unità: lo schieramento non si apre in 15 s (controllo mancante)`, false); return; }
+      aperti++;
       await ascoltaEtichette(q6); await etichetteFerme(q6);
       const r = await mappaSchieramento(q6), dove = `${st.m.id} ondata ${st.n} ${w}×${h}`;
       atteso(`${dove} con le unità: nomi sovrapposti ${r.sopra.join('; ')}, pastiglie col centro coperto ${r.coperte.join(', ')} (C26-11)`, !r.sopra.length && !r.coperte.length);
@@ -193,6 +196,7 @@ export async function controllaSchieramenti(browser, url, dirDati, cartella, att
         };
     await Promise.all(pagine.map((q6, k) => (async () => { for (const st of attente.filter((_, i) => i % PARALLELE === k)) await corpo(q6, st); })()));
     for (const q6 of pagine) await q6.close();
+    atteso(`${w}×${h} con le unità: ${aperti} schieramenti aperti su ${attente.length}`, aperti === attente.length);
     // C33-05: non più gruppi vicini al disco di un altro settore che nella 0.31.0 (36 / 29 / 9, collaudo C-033); elenco in cartella
     writeFileSync(join(cartella, `vicine-${w}.txt`), `${vicine.length}\n${vicine.join('\n')}\n`);
     writeFileSync(join(cartella, `tocchi-${w}.txt`), `${new Set(tocchi.map((x) => x.split(' ').slice(0, 2).join(' '))).size} ondate\n${tocchi.join('\n')}\n`); // misura, senza soglia
@@ -211,7 +215,7 @@ export async function controllaSchieramenti(browser, url, dirDati, cartella, att
   for (const st of tocca(360) ? attente.filter((x) => x.n === 1) : []) {
     await qp.evaluate((v) => localStorage.setItem('vandelfalls-salvataggio', v), JSON.stringify({ ...base, in_corso: st.s }));
     await qp.reload(); await qp.getByRole('button', { name: 'Riprendi' }).click();
-    if (!(await qp.waitForSelector('[data-barra]', { timeout: 5000 }).then(() => true, () => false))) continue;
+    if (!(await qp.waitForSelector('[data-barra]', { timeout: 15000 }).then(() => true, () => false))) { atteso(`${st.m.id} ondata 1 360×760 coi tocchi: lo schieramento non si apre in 15 s (controllo mancante, C33-03)`, false); continue; }
     const male = new Set();
     for (const [ris, posti] of Object.entries(st.d)) for (const [sett, n] of Object.entries(posti)) for (let k = 0; k < n; k++) {
       if ((await qp.getAttribute(`[data-risorsa="${ris}"]`, 'aria-pressed').catch(() => null)) !== 'true') await qp.click(`[data-risorsa="${ris}"]`).catch(() => {});

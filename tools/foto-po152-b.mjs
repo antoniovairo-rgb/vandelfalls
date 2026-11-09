@@ -32,6 +32,7 @@ import { chiamateCostruite, SOGLIE } from './sonda-altezze.mjs';
 import { effettoMossa } from '../src/logica/previsione.ts';
 import { misuraAnelli } from './anelli-mossa.mjs';
 import { controllaSalti, lontananze, VICINANZA_MAX } from './salti-po152b.mjs';
+import { controllaSegno } from './segno-po152b.mjs';
 
 export const ALTEZZE_PO152B = [640, 667, 760];
 export const RADIO_VP = { 360: 640, 375: 667, 412: 760 };
@@ -103,7 +104,7 @@ const stato = (p) => p.evaluate(() => {
 /** Problemi alla larghezza data, alle altezze di ALTEZZE_PO152B. */
 // D-270: `solo` restringe un braccio rosso ai giri (e01, radio, previsione, fermo, versione) e agli episodi del giro radio dove il suo rosso si vede
 export async function controllaPo152b(browser, url, larghezza, rossi = [], cartella = '', dati, dich, solo = {}) {
-  const giri = solo.giri ?? ['e01', 'radio', 'previsione', 'fermo', 'versione', 'salti']; // D-271: «versione» (versione-svanisce.mjs)
+  const giri = solo.giri ?? ['e01', 'radio', 'previsione', 'fermo', 'versione', 'salti', 'segno']; // D-271: «versione» (versione-svanisce.mjs); D-272 passo 4: «segno»
   // lotto «altezze» (S-11): il verde gira radio, previsione e fermo su PAGINE_RADIO pagine insieme; i bracci (5 processi insieme,
   // pochi episodi) su una: con 4 anche lì, in 1 giro su 3, C269A01 ha dato 0 problemi e C269P01 un'attesa scaduta di 15 s
   const pagine = solo.giri ? 1 : PAGINE_RADIO;
@@ -179,7 +180,8 @@ export async function controllaPo152b(browser, url, larghezza, rossi = [], carte
   const hr = RADIO_VP[larghezza];
   if (hr && giri.includes('radio')) { const r = await controllaRadio(browser, url, larghezza, hr, rossi, dati, dich, solo.episodi, pagine); male.push(...r.male); ris.push(r.ris); }
   if (hr && giri.includes('previsione')) { const r = await controllaPrevisione(browser, url, larghezza, hr, rossi, dati, dich, pagine); male.push(...r.male); ris.push(r.ris); }
-  if (hr && giri.includes('salti')) { const r = await controllaSalti(browser, url, larghezza, hr, rossi, dati, insieme, pagine); male.push(...r.male); ris.push(r.ris); } // D-272 passo 2
+  if (hr && giri.includes('salti')) { const r = await controllaSalti(browser, url, larghezza, hr, rossi, dati, insieme, pagine, solo.episodi); male.push(...r.male); ris.push(r.ris); } // D-272 passo 2
+  if (hr && giri.includes('segno')) { const r = await controllaSegno(browser, url, larghezza, hr, rossi, dati, insieme, pagine, solo.episodi); male.push(...r.male); ris.push(r.ris); } // D-272 passo 4
   if (giri.includes('versione')) male.push(...await (await import('./versione-svanisce.mjs')).controllaVersioneSvanisce(browser, url, larghezza, rossi, chiamateCostruite(dati, dich)[0].sal)); // D-271
   if (FERMO_VP[larghezza] && giri.includes('fermo')) { const r = await controllaFermo(browser, url, larghezza, FERMO_VP[larghezza], rossi, dati, dich, pagine); male.push(...r.male); ris.push(r.ris); }
   return { ris, male };
@@ -232,7 +234,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, epi
       { const lo = (await lontananze(p)).filter((z) => z.px > (VICINANZA_MAX[larghezza] ?? Infinity)); if (lo.length) male.push(`${vp} ${ep} ${c.id} ${dove}: pastiglie lontane dal proprio disco: ${lo.map((z) => `${z.k} ${z.px} px`).join(', ')} (soglia ${VICINANZA_MAX[larghezza]}, D-272 vicinanza)`); }
       if (x.fuoriMappa.length) male.push(`${vp} ${ep} ${c.id} ${dove}: unità fuori dalla mappa, non si vede né si tocca: ${x.fuoriMappa.join(', ')} (D-271, C271U01)`);
       // D-271: niente tratteggio, anello pieno a ≥ 3:1 coi colori accanto (misurato sui pixel), anelli dei settori separati (rosso C271T01)
-      const an = await misuraAnelli(p); if (an.minimo !== null) conto.contrastoMin = Math.min(conto.contrastoMin, an.minimo); conto.latiVisti += an.lati[0]; conto.latiProvati += an.lati[1]; if (an.copia) conto.anelliCopia++; if (dove.includes('in mano')) conto.anelliDove++;
+      const an = await misuraAnelli(p); if (an.minimo !== null) conto.contrastoMin = Math.min(conto.contrastoMin, an.minimo); conto.latiVisti += an.lati[0]; conto.latiProvati += an.lati[1]; conto.ripreseAnelli = (conto.ripreseAnelli ?? 0) + an.riprese; if (an.copia) conto.anelliCopia++; if (dove.includes('in mano')) conto.anelliDove++;
       if (an.tratteggi.length) male.push(`${vp} ${ep} ${c.id} ${dove}: tratteggio nella mossa su ${an.tratteggi.join(', ')} (D-271)`);
       if (an.sotto.length) male.push(`${vp} ${ep} ${c.id} ${dove}: anello sotto 3:1 o assente: ${an.sotto.join(', ')} (D-271)`);
       if (an.sovrapposti.length) male.push(`${vp} ${ep} ${c.id} ${dove}: anelli dei settori sovrapposti ${an.sovrapposti.join(', ')} (D-271)`);
@@ -278,7 +280,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, epi
     conto.episodi++; await p.close(); break;
   } };
   await insieme([...new Set(tutte.map((c) => c.ep))].filter((e) => !episodi || episodi.includes(e)).map((ep) => () => uno(ep)), pagine);
-  console.log(`radio della mossa ${vp}: ${conto.episodi} episodi (D-269 c: segni ▲/▼ visti a riquadro fermo in ${conto.conSegni}, no in ${conto.senzaSegni}), ${conto.stati} stati, rapporto al solo lettore in ${conto.stretti}, riquadro al solo lettore in ${conto.muti}; con costo ${conto.conCosto}, costo non visibile in ${conto.senzaCosto}; scorrimento massimo ${conto.scorreMax} px (soglia ${soglia}); costo sotto la mappa in ${conto.sotto}, mappa alta da ${conto.mappaMin} a ${conto.mappaMax} px; «Home» nella testata in ${conto.casaFuori}; anelli: contrasto minimo ${conto.contrastoMin.toFixed(2)}:1, lati visti ${conto.latiVisti} su ${conto.latiProvati}, stati con la copia sotto la mappa ${conto.anelliCopia}, con un'unità in mano ${conto.anelliDove}`);
+  console.log(`radio della mossa ${vp}: ${conto.episodi} episodi (D-269 c: segni ▲/▼ visti a riquadro fermo in ${conto.conSegni}, no in ${conto.senzaSegni}), ${conto.stati} stati, rapporto al solo lettore in ${conto.stretti}, riquadro al solo lettore in ${conto.muti}; con costo ${conto.conCosto}, costo non visibile in ${conto.senzaCosto}; scorrimento massimo ${conto.scorreMax} px (soglia ${soglia}); costo sotto la mappa in ${conto.sotto}, mappa alta da ${conto.mappaMin} a ${conto.mappaMax} px; «Home» nella testata in ${conto.casaFuori}; anelli: contrasto minimo ${conto.contrastoMin.toFixed(2)}:1, lati visti ${conto.latiVisti} su ${conto.latiProvati} (foto riprese a pagina non ferma ${conto.ripreseAnelli ?? 0}), stati con la copia sotto la mappa ${conto.anelliCopia}, con un'unità in mano ${conto.anelliDove}`);
   if (conto.episodi < (episodi ? episodi.length : 30)) male.push(`${vp}: radio della mossa provata solo in ${conto.episodi} episodi${episodi ? ` su ${episodi.length} del braccio` : ''} (D-255)`);
   return { ris: conto, male };
 }

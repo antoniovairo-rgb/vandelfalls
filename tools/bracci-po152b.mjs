@@ -37,8 +37,19 @@ export const BRACCI_PO152B = {
   C271V01: { giri: ['versione'], segno: 'la versione non svanisce (D-271)', almeno: 2 }, // movimento e movimento ridotto
   // D-272 passo 2, giro «salti» (e03, 24 mosse): senza posto vuoto (C272V01) 28 / 28 / 16 problemi a 360 / 375 / 412; senza costo di
   // spostamento (C272W01) 0 / 0 / 9: a 360 il salto massimo resta 42 px, sotto la soglia di 44, quindi quel braccio gira a 412×760
-  C272V01: { giri: ['salti'], segno: '(soglia 44, D-272 salti)', almeno: 20 },
-  C272W01: { giri: ['salti'], segno: '(soglia 44, D-272 salti)', almeno: 6 },
+  C272V01: { giri: ['salti'], episodi: ['e03'], segno: '(soglia 44, D-272 salti)', almeno: 20 },
+  // D-272 (8/11): coi due rossi, il comportamento di 553c26fa, e05 ed e26 superano il loro tetto (EPISODI_SALTI, TETTO_EPISODIO)
+  'C272V01,C272W01': { giri: ['salti'], episodi: ['e05', 'e26'], segno: '(D-272 salti, tetto episodio)', almeno: 2 }, // e05 12 > 4, e26 14 > 6 a 360; gli stessi del verde in CI (decisione 8/11, tempi)
+  // D-272 passo 4, giro «segno» (e03, tutte le mosse: 24): senza «−1» / «+1» (C272D01) 24 problemi a 360 (prima 6 su 6 con la sola prima mossa), verde 0
+  // strumento degli anelli (sonda 8/11): posizioni coi segni ▲/▼, foto dopo che spariscono, senza rilettura (C272A01): e28 voce_magazzino
+  // a 360 dà «senza anello pieno» su steward e mediatore@curva_cinderwick, il caso del 7/11 (e21 a 375 quello di CI 1374), 3 su 3
+  C272A01: { giri: ['radio'], episodi: ['e28'], segno: 'senza anello pieno', almeno: 1 },
+  C272D01: { giri: ['segno'], episodi: ['e03'], segno: '(D-272 segno)', almeno: 20 },
+  // e col segno a fianco del disco e sopra tutto (C272D02) 24 mosse su 24 coprono nomi o dischi altrui a 360
+  C272D02: { giri: ['segno'], episodi: ['e03'], segno: 'il segno copre', almeno: 20 },
+  // e col segno fermo al centro del disco (C272D03) i casi della verifica del principale: e02 «+1» sopra curva_ospiti, e04 «−1» sopra una pastiglia
+  C272D03: { giri: ['segno'], episodi: ['e02', 'e04'], segno: 'il segno copre', almeno: 22 }, // 28 a 360 su 40 mosse, verde 0
+  C272W01: { giri: ['salti'], episodi: ['e03'], segno: '(soglia 44, D-272 salti)', almeno: 6 },
   // D-272 passo 2, vicinanza (giro radio, soglia 95 / 93 / 93): senza i posti e la larghezza di C28-14 (C94N01) le pastiglie di Magazzino
   // in e16 magazzino_sette finiscono a 108-110 px dal disco, in 6 stati a 360; unico episodio col segno su 36
   C94N01: { giri: ['radio'], episodi: ['e16'], segno: 'D-272 vicinanza)', almeno: 5 },
