@@ -7,7 +7,7 @@
 import { spento } from '../../interruttori.ts';
 
 export interface Posto { nome: string | null; unita: string | null; largo: string; ndx: string; ndy: string; udx: string; udy: string }
-export interface Prima { firma: string; posti: Map<string, Posto>; centri: Map<string, readonly [number, number]> }
+export interface Prima { firma: string; posti: Map<string, Posto>; centri: Map<string, readonly [number, number]>; ancora?: Pick<Prima, 'posti' | 'centri'> }
 const memo = new WeakMap<HTMLElement, Prima>();
 
 /** Tutto ciò che decide la disposizione, in una stringa. */
@@ -77,7 +77,8 @@ export function metti(s: HTMLElement, p: Posto) {
 // rosso C272W02: il «prima» anche fuori dalla mossa e a un'altra larghezza, com'era su 8329ef4b.
 export function primaDi(mappa: HTMLElement, firma: string): Prima | null {
   const f = memo.get(mappa);
-  return !f || f.firma === firma || spento('C272W01') || (!spento('C272W02') && (!mappa.querySelector('.radio-mappa [data-mossa]') || f.firma.split('#')[0] !== firma.split('#')[0])) ? null : f;
+  const no = !f || f.firma === firma || spento('C272W01') || (!spento('C272W02') && (!mappa.querySelector('.radio-mappa [data-mossa]') || f.firma.split('#')[0] !== firma.split('#')[0]));
+  return no ? null : f.ancora && !spento('C272W04') ? { ...f, ...f.ancora } : f;
 }
 
 const centriDi = (mappa: HTMLElement) => {
@@ -92,4 +93,11 @@ const centriDi = (mappa: HTMLElement) => {
 export const chiaveUnita = (u: Element) => { const d = (u as HTMLElement).dataset, k = d.presenza ?? d.fissa; return k ? `unità ${k}` : null; };
 
 /** Tiene il risultato appena calcolato, con la firma degli ingressi presa prima del calcolo. */
-export function tieni(mappa: HTMLElement, firma: string) { memo.set(mappa, { firma, posti: leggi(mappa), centri: centriDi(mappa) }); }
+// D-272 salti residui: nella mossa («dove», «fatta») il costo di spostamento si conta dalla disposizione di «puoi» (l'àncora),
+// non dall'ultima: da un ricalcolo all'altro lo spostamento si sommava (e06 a 375, mediatore@piazza_concerto 149,157 → 127,157 al
+// tocco → 105,179 dopo la mossa: 49 px dal posto di partenza). Rosso C272W04: dall'ultima, come su 0.70.0.
+export function tieni(mappa: HTMLElement, firma: string) {
+  const f = memo.get(mappa), fase = mappa.querySelector<HTMLElement>('.radio-mappa [data-mossa]')?.dataset.mossa;
+  const ancora = f && (fase === 'dove' || fase === 'fatta') && f.firma.split('#')[0] === firma.split('#')[0] ? f.ancora ?? { posti: f.posti, centri: f.centri } : undefined;
+  memo.set(mappa, { firma, posti: leggi(mappa), centri: centriDi(mappa), ancora });
+}
