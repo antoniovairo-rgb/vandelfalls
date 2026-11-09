@@ -33,7 +33,9 @@ export const BRACCI_PO152B = {
   // i casi (un rosso D-272 alla volta, giro ristretto): C261H01 1 in tutto (e35) → 7 con C272S01; C269A01 2 in radio+fermo+e01, 0 in
   // previsione → 24 con C272S01; C269C01 0 → 3 con C272N01. Perché nel README di d187 (D-272). Conteggi invariati.
   C271T01: { giri: ['radio'], episodi: ['e01', 'e02'], segno: 'tratteggio nella mossa', almeno: 11 }, // e01 6 + e02 5 stati con tratteggio
-  C271U01: { giri: ['radio'], episodi: ['e03', 'e04'], segno: '(D-271, C271U01)', almeno: 13 }, // e03 8 + e04 arance 7 (D-272 passo 2: e16 magazzino_sette da 6 a 0 col costo di spostamento)
+  // D-272 salti residui (CI 1386): col «prima» fermo alla sparizione dei segni ▲/▼ i casi di e03 non nascono più (7 su 13, solo e04); con
+  // C272W03 (il «prima» di 0.70.0) 15 a 360 su 2305e014: gira con C272W03, conteggio invariato
+  'C271U01,C272W03': { giri: ['radio'], episodi: ['e03', 'e04'], segno: '(D-271, C271U01)', almeno: 13 }, // e03 8 + e04 arance 7 (D-272 passo 2: e16 magazzino_sette da 6 a 0 col costo di spostamento)
   C271V01: { giri: ['versione'], segno: 'la versione non svanisce (D-271)', almeno: 2 }, // movimento e movimento ridotto
   // D-272 passo 2, giro «salti» (e03, 24 mosse): senza posto vuoto (C272V01) 28 / 28 / 16 problemi a 360 / 375 / 412; senza costo di
   // spostamento (C272W01) 0 / 0 / 9: a 360 il salto massimo resta 42 px, sotto la soglia di 44, quindi quel braccio gira a 412×760
@@ -46,7 +48,8 @@ export const BRACCI_PO152B = {
   // D-272 salti residui: col «prima» sempre la disposizione corrente (C272W03, come 0.70.0) alla sparizione dei segni ▲/▼ si spostano
   // tre pastiglie in e28 voce_magazzino a 360 (e due di 132 px in e21 a 375); verde 0
   C272W03: { giri: ['sparizione'], episodi: ['e28'], segno: '(D-272 sparizione)', almeno: 3 },
-  C272A01: { giri: ['radio'], episodi: ['e28'], segno: 'senza anello pieno', almeno: 1 },
+  // e il caso dell'anello nasceva dallo stesso spostamento (CI 1386: 0 su 1; con C272W03 1 su 2305e014): gira con C272W03, conteggio invariato
+  'C272A01,C272W03': { giri: ['radio'], episodi: ['e28'], segno: 'senza anello pieno', almeno: 1 },
   C272D01: { giri: ['segno'], episodi: ['e03'], segno: '(D-272 segno)', almeno: 20 },
   // e col segno a fianco del disco e sopra tutto (C272D02) 24 mosse su 24 coprono nomi o dischi altrui a 360
   C272D02: { giri: ['segno'], episodi: ['e03'], segno: 'il segno copre', almeno: 20 },
