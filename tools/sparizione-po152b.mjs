@@ -26,12 +26,14 @@ export async function controllaSparizione(browser, url, larghezza, h, rossi, dat
       if (!(await p.waitForSelector(`[data-messaggio="chiamata-${id}"]`, { timeout: 15000 }).then(() => true, () => false))) return false;
       await p.click(`[data-opzione="${ch.opzioni[0].id}"]`); await p.click('[data-conferma]').catch(() => {});
       if (!(await p.waitForSelector('.mappa [data-mossa="puoi"]', { timeout: 15000, state: 'attached' }).then(() => true, () => false))) return false;
-      await p.waitForTimeout(300); const a = await posti(p);
+      // «coi segni» = l'ultima lettura coi segni presenti, ogni 50 ms fino alla sparizione: a 300 ms fissi la lettura cadeva a volte prima
+      // del cambio di misura della mappa (375 e21: alta 343 → 200 a 453 ms, segni via a 1738 ms) e contava quello
+      let a = await posti(p); for (let t = Date.now(); a.segni && Date.now() - t < 10000;) { await p.waitForTimeout(50); const b = await posti(p); if (!b.segni) break; a = b; }
       // segni già spariti (1,8 s veri: sotto carico si arriva tardi; CI 1386, braccio C272W03 «nessun episodio coi segni», a CPU 4× 3 su 3): si rifà
       if (!a.segni) { if (prova < 2) { conto.riprese++; return 'rifai'; } conto.episodi++; male.push(`${vp} ${ep} ${id}: segni ▲/▼ già spariti alla prima lettura in 3 aperture, niente confronto ${D}`); return true; }
       conto.episodi++;
       conto.conSegni++;
-      await p.waitForFunction(() => !document.querySelector('.mappa [data-segno]'), null, { timeout: 10000 }).catch(() => {}); await p.waitForTimeout(500);
+      await p.waitForTimeout(500);
       const z = await posti(p), mossi = Object.entries(a.u).filter(([k]) => z.u[k]).map(([k, [x, y]]) => [k, Math.round(Math.hypot(z.u[k][0] - x, z.u[k][1] - y))]);
       conto.pastiglie += mossi.length;
       for (const [k, px] of mossi) { conto.max = Math.max(conto.max, px); if (px > 0) { conto.mosse++; male.push(`${vp} ${ep} ${id}: alla sparizione dei segni ▲/▼ ${k} si sposta di ${px} px ${D}`); } }

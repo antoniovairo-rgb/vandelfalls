@@ -7,7 +7,7 @@
 import { spento } from '../../interruttori.ts';
 
 export interface Posto { nome: string | null; unita: string | null; largo: string; ndx: string; ndy: string; udx: string; udy: string }
-export interface Prima { firma: string; posti: Map<string, Posto>; centri: Map<string, readonly [number, number]>; rif?: Prima | null }
+export interface Prima { firma: string; posti: Map<string, Posto>; centri: Map<string, readonly [number, number]> }
 const memo = new WeakMap<HTMLElement, Prima>();
 
 /** Tutto ciò che decide la disposizione, in una stringa. */
@@ -42,6 +42,24 @@ export function rimettiUguale(mappa: HTMLElement): boolean {
   return true;
 }
 
+// D-272 (salti residui, 9/11): i segni ▲/▼ della risposta spariscono dopo 1,8 s e la firma cambia; il ricalcolo, col «prima» fatto
+// coi segni come ostacoli, spostava pastiglie (e21 a 375 squadre e steward@piazza_fonderie 132 px, e28 a 360 tre pastiglie; 0 su
+// 0.67.0 e 0.68.0, presente da 0.69.0, sparisce col rosso C272W01: tools/zz-anello.mjs). Se cambiano solo i segni e spariscono
+// (nessun segno nuovo), non si ridispone: si rimettono i posti di prima, validi anche senza gli ostacoli. Rosso C272W03: si
+// ridispone, come su 0.70.0.
+const pezzi = (firma: string) => { const p = firma.split('#'), i = (s: string) => s.lastIndexOf('|');
+  return { resto: [...p.slice(0, 6), ...p.slice(6).map((s) => s.slice(0, i(s)))].join('#'), segni: p.slice(6).map((s) => s.slice(i(s) + 1)) }; };
+/** Alla sola sparizione dei segni rimette i posti di prima e tiene la firma nuova; true se l'ha fatto. */
+export function tieniAllaSparizione(mappa: HTMLElement): boolean {
+  const f = memo.get(mappa);
+  if (!f || spento('C272W03')) return false;
+  const ora = firmaDi(mappa), a = pezzi(f.firma), b = pezzi(ora);
+  if (a.resto !== b.resto || !b.segni.every((s, k) => !s || s === a.segni[k])) return false;
+  for (const s of mappa.querySelectorAll<HTMLElement>('[data-settore]')) { const p = f.posti.get(s.dataset.settore ?? ''); if (!p) return false; metti(s, p); }
+  memo.set(mappa, { ...f, firma: ora });
+  return true;
+}
+
 /** Rimette in un settore il posto di nome e unità tenuto prima. */
 export function metti(s: HTMLElement, p: Posto) {
   if (p.nome) s.setAttribute('data-nome', p.nome); if (p.unita) s.setAttribute('data-unita', p.unita);
@@ -57,17 +75,9 @@ export function metti(s: HTMLElement, p: Posto) {
 // mossa e alla stessa larghezza: fuori (schieramento, cambio di misura) la disposizione non dipende dallo stato di prima
 // (C33-04; CI 1355 rossa su 8329ef4b, «la disposizione cambia ripartendo da un altro stato» in e02-e06). Rosso C272W01: nessun prima;
 // rosso C272W02: il «prima» anche fuori dalla mossa e a un'altra larghezza, com'era su 8329ef4b.
-// D-272 (salti residui, 9/11): nello stato «puoi» i segni ▲/▼ della risposta spariscono dopo 1,8 s e la firma cambia; il ricalcolo
-// partiva dalla disposizione fatta coi segni e le pastiglie saltavano (e21 a 375 squadre e steward@piazza_fonderie 132 px, e28 a
-// 360 tre pastiglie; 0 su 0.67.0 e 0.68.0, presente da 0.69.0, sparisce col rosso C272W01: tools/zz-anello.mjs). Ora il «prima»
-// diventa la disposizione corrente solo quando cambiano le unità (la mossa, l'unità in mano); se cambia altro (segni, riquadro)
-// si riparte dallo stesso riferimento del ricalcolo precedente: prima della mossa nessuno, dopo la mossa quello di prima della mossa.
-// Rosso C272W03: il «prima» è sempre la disposizione corrente, come su 0.70.0.
-const unitaDi = (firma: string) => firma.split('#').slice(6).map((s) => s.split('|')[4] ?? '').join('#');
 export function primaDi(mappa: HTMLElement, firma: string): Prima | null {
   const f = memo.get(mappa);
-  if (!f || f.firma === firma || spento('C272W01') || (!spento('C272W02') && (!mappa.querySelector('.radio-mappa [data-mossa]') || f.firma.split('#')[0] !== firma.split('#')[0]))) return null;
-  return spento('C272W03') || unitaDi(f.firma) !== unitaDi(firma) ? f : f.rif ?? null;
+  return !f || f.firma === firma || spento('C272W01') || (!spento('C272W02') && (!mappa.querySelector('.radio-mappa [data-mossa]') || f.firma.split('#')[0] !== firma.split('#')[0])) ? null : f;
 }
 
 const centriDi = (mappa: HTMLElement) => {
@@ -82,5 +92,4 @@ const centriDi = (mappa: HTMLElement) => {
 export const chiaveUnita = (u: Element) => { const d = (u as HTMLElement).dataset, k = d.presenza ?? d.fissa; return k ? `unità ${k}` : null; };
 
 /** Tiene il risultato appena calcolato, con la firma degli ingressi presa prima del calcolo. */
-export function tieni(mappa: HTMLElement, firma: string, rif: Prima | null = null) { // rif: il «prima» usato (senza il suo, niente catene)
-  memo.set(mappa, { firma, posti: leggi(mappa), centri: centriDi(mappa), rif: rif && { firma: rif.firma, posti: rif.posti, centri: rif.centri } }); }
+export function tieni(mappa: HTMLElement, firma: string) { memo.set(mappa, { firma, posti: leggi(mappa), centri: centriDi(mappa) }); }
