@@ -72,6 +72,7 @@ La più recente in alto. Hash = commit di main dopo la promozione (catena comple
 
 | Versione | Data (UTC) | Hash main | Contenuto | Misura principale | Stato |
 |---|---|---|---|---|---|
+| 0.70.0 | 2026-11-09 | c86fb95a | Mappa: segno «−1 / +1» dopo la mossa (PO-160, D-272 passo 4) | 108/108 mosse senza sovrapposizioni né tocchi presi; governo+logica 3/3 su 14a263d3 (S-11), CI 10/10 completa (run 1377); provini approvati dal PO | sul ramo, rituali in corsa |
 | 0.69.0 | 2026-11-07 | 5bdf0515 | Mappa: le pastiglie rimaste non saltano più dopo la mossa (PO-160, D-272 passo 2) | partenza 133/110/98 → 6/0/0 px; nomi 96/124/88 (compromesso accettato dal PO); governo+logica 3/3 su b1f86ea0 (S-11), CI 10/10 completa (run 1358); verifica a mente fresca (D-277) mantenuta; passo email verde | pubblicato |
 | 0.68.0 | 2026-11-06 | 553c26fa | Mappa: nomi dei settori mai coperti, disposizione più leggera, testo sotto la mappa compatto (PO-160, D-272) | nomi coperti 116-148 → 0; 470 ms per risposta (−33%), 2663 ms a CPU ×4 (−39%); governo+logica 3/3 su ad0a275e (S-11), CI 10/10 completa (run 1339); provini approvati dal PO; passo email verde | pubblicato |
 | 0.67.0 | 2026-11-05 | d4663239 | La mossa senza tratteggio (PO-159, D-271): anelli pieni, unità in mano sollevata, versione che svanisce; unità mai fuori dalla mappa | contrasto minimo 3,52:1; unità fuori mappa 0 (rosso 13); governo+logica 3/3 su 4b64efc9 (S-27), CI 10/10 completa (run 1306); provini approvati dal PO; passo email verde | pubblicato |

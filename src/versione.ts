@@ -385,4 +385,10 @@
 //   mossa (C272W01, C272W02 per lo schieramento C33-04): partenza 6/0/0 px; nomi dopo la mossa 96/124/88 (prima 83/75/52), compromesso
 //   accettato dal PO; vicinanza massima invariata 95/93/93; verifica indipendente su e03, e04, e16, e30.
 //   guardiano: salti dopo la mossa ≤ 44 px e vicinanza nel giro po152b; rossi C272V01, C272W01, C272W02.
-export const GAME_VERSION = '0.69.0';
+// 0.70.0 – mappa: segno «−1 / +1» dopo la mossa (PO-160, D-272 passo 4).
+//   causa: dopo la mossa non si vedeva da dove a dove era andata l'unità.
+//   misura: per circa 2 s «−1» sul settore lasciato e «+1» su quello d'arrivo, in un posto libero (segno-mossa.ts): 108 mosse su 108
+//   senza sovrapposizioni né tocchi presi, contrasto verso il proprio fondo ≥ 3,97:1; verifica indipendente: il caso e02/e04 trovato è
+//   corretto (rosso C272D03). Guardiano schieramenti che dichiara gli schieramenti non aperti (142/142); strumento anelli che rilegge.
+//   guardiano: tools/segno-po152b.mjs, salti con tetto per episodio; rossi C272D01, C272D02, C272D03, C272A01.
+export const GAME_VERSION = '0.70.0';
