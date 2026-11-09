@@ -23,7 +23,9 @@ export const BRACCI_PO152B = {
   // cioè secondo il carico (CI 1295 su main: cieco in 2 tentativi su 3). A segni spariti il giro radio non lo mostra in nessuno
   // dei 36 episodi; il giro previsione sì: e16 imp_nebbia, 5 mosse su 24, 5 su 5 in 9 prove (8 insieme a 8 processi)
   'C269A01,C272S01': { giri: ['previsione'], segno: '(D-269 b)', almeno: 5 },
-  'C269C01,C271U01,C272N01': { giri: ['radio'], episodi: ['e08', 'e12', 'e20', 'e25', 'e28'], segno: 'allo sparire dei segni ▲/▼', almeno: 3 }, // 1 per episodio (D-272 passo 2: sul codice nuovo e02 ed e26 a 0; 7 episodi su 35 col segno), il controllo nei fotogrammi (D-270)
+  // D-272 salti residui (CI 1388): senza il ricalcolo alla sparizione dei segni il braccio vede 2 su 3 (e12, e25; 3 tentativi su 3,
+  // e 2 in locale); con C272W03 5 a 360 su 15feaa54 (zz-radio, e08 e12 e20 e25 e28): gira con C272W03, conteggio invariato
+  'C269C01,C271U01,C272N01,C272W03': { giri: ['radio'], episodi: ['e08', 'e12', 'e20', 'e25', 'e28'], segno: 'allo sparire dei segni ▲/▼', almeno: 3 }, // 1 per episodio (D-272 passo 2: sul codice nuovo e02 ed e26 a 0; 7 episodi su 35 col segno), il controllo nei fotogrammi (D-270)
   // D-271 (S-27): misure sul merge della 0.66.0 (360×760, giro ristretto come qui). Lo spostamento piccolo delle unità (C271U01)
   // toglie a C262M01 e C269C01 i casi che li rendevano visibili (CI 74eb83f: 1 su 5 e 2 su 3; spento C271U01: 5 e 3): girano con
   // C271U01, come C215L01 con C241A01. Conteggi invariati.
