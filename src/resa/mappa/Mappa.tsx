@@ -4,12 +4,12 @@
 // La tensione si vede SOLO come colore (D-055): classe liv-0…liv-5, mai il numero.
 import { lazy, Suspense, useEffect, type ReactNode, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { disponiEtichette } from './etichette.ts';
-import { firmaDi, primaDi, rimettiUguale, tieni, tieniAllaSparizione } from './congela.ts'; // D-272 salti residui: alla sparizione dei segni ▲/▼ non si ridispone
+import { firmaDi, primaDi, rimettiUguale, tieni } from './congela.ts';
 import { collocaSegni } from './segno-mossa.ts';
 
 // Interruttore rosso C05S08: nomi e unità restano al posto fisso (difetto C-008).
 // D-272 (passo 3): si ricalcola solo se cambiano gli ingressi (congela.ts)
-const disponi = (el: HTMLElement) => { if (!spento('C05S08') && !rimettiUguale(el) && !tieniAllaSparizione(el)) { const f = firmaDi(el); disponiEtichette(el, primaDi(el, f)); tieni(el, f); } collocaRadio(el); collocaSegni(el); }; // D-255; D-272 passo 4: il segno della mossa dove non copre: il riquadro radio dopo le unità
+const disponi = (el: HTMLElement) => { if (!spento('C05S08') && !rimettiUguale(el)) { const f = firmaDi(el); disponiEtichette(el, primaDi(el, f)); tieni(el, f); } collocaRadio(el); collocaSegni(el); }; // D-255; D-272 passo 4: il segno della mossa dove non copre: il riquadro radio dopo le unità
 import type { Disposizione, Missione } from '../../logica/tipi.ts';
 import { spento } from '../../interruttori.ts';
 import { club, t, quante } from '../dati.ts';

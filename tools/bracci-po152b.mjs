@@ -23,9 +23,7 @@ export const BRACCI_PO152B = {
   // cioè secondo il carico (CI 1295 su main: cieco in 2 tentativi su 3). A segni spariti il giro radio non lo mostra in nessuno
   // dei 36 episodi; il giro previsione sì: e16 imp_nebbia, 5 mosse su 24, 5 su 5 in 9 prove (8 insieme a 8 processi)
   'C269A01,C272S01': { giri: ['previsione'], segno: '(D-269 b)', almeno: 5 },
-  // D-272 salti residui (CI 1388): senza il ricalcolo alla sparizione dei segni il braccio vede 2 su 3 (e12, e25; 3 tentativi su 3,
-  // e 2 in locale); con C272W03 5 a 360 su 15feaa54 (zz-radio, e08 e12 e20 e25 e28): gira con C272W03, conteggio invariato
-  'C269C01,C271U01,C272N01,C272W03': { giri: ['radio'], episodi: ['e08', 'e12', 'e20', 'e25', 'e28'], segno: 'allo sparire dei segni ▲/▼', almeno: 3 }, // 1 per episodio (D-272 passo 2: sul codice nuovo e02 ed e26 a 0; 7 episodi su 35 col segno), il controllo nei fotogrammi (D-270)
+  'C269C01,C271U01,C272N01': { giri: ['radio'], episodi: ['e08', 'e12', 'e20', 'e25', 'e28'], segno: 'allo sparire dei segni ▲/▼', almeno: 3 }, // 1 per episodio (D-272 passo 2: sul codice nuovo e02 ed e26 a 0; 7 episodi su 35 col segno), il controllo nei fotogrammi (D-270)
   // D-271 (S-27): misure sul merge della 0.66.0 (360×760, giro ristretto come qui). Lo spostamento piccolo delle unità (C271U01)
   // toglie a C262M01 e C269C01 i casi che li rendevano visibili (CI 74eb83f: 1 su 5 e 2 su 3; spento C271U01: 5 e 3): girano con
   // C271U01, come C215L01 con C241A01. Conteggi invariati.
@@ -35,9 +33,7 @@ export const BRACCI_PO152B = {
   // i casi (un rosso D-272 alla volta, giro ristretto): C261H01 1 in tutto (e35) → 7 con C272S01; C269A01 2 in radio+fermo+e01, 0 in
   // previsione → 24 con C272S01; C269C01 0 → 3 con C272N01. Perché nel README di d187 (D-272). Conteggi invariati.
   C271T01: { giri: ['radio'], episodi: ['e01', 'e02'], segno: 'tratteggio nella mossa', almeno: 11 }, // e01 6 + e02 5 stati con tratteggio
-  // D-272 salti residui (CI 1386): col «prima» fermo alla sparizione dei segni ▲/▼ i casi di e03 non nascono più (7 su 13, solo e04); con
-  // C272W03 (il «prima» di 0.70.0) 15 a 360 su 2305e014: gira con C272W03, conteggio invariato
-  'C271U01,C272W03': { giri: ['radio'], episodi: ['e03', 'e04'], segno: '(D-271, C271U01)', almeno: 13 }, // e03 8 + e04 arance 7 (D-272 passo 2: e16 magazzino_sette da 6 a 0 col costo di spostamento)
+  C271U01: { giri: ['radio'], episodi: ['e03', 'e04'], segno: '(D-271, C271U01)', almeno: 13 }, // e03 8 + e04 arance 7 (D-272 passo 2: e16 magazzino_sette da 6 a 0 col costo di spostamento)
   C271V01: { giri: ['versione'], segno: 'la versione non svanisce (D-271)', almeno: 2 }, // movimento e movimento ridotto
   // D-272 passo 2, giro «salti» (e03, 24 mosse): senza posto vuoto (C272V01) 28 / 28 / 16 problemi a 360 / 375 / 412; senza costo di
   // spostamento (C272W01) 0 / 0 / 9: a 360 il salto massimo resta 42 px, sotto la soglia di 44, quindi quel braccio gira a 412×760
@@ -47,11 +43,7 @@ export const BRACCI_PO152B = {
   // D-272 passo 4, giro «segno» (e03, tutte le mosse: 24): senza «−1» / «+1» (C272D01) 24 problemi a 360 (prima 6 su 6 con la sola prima mossa), verde 0
   // strumento degli anelli (sonda 8/11): posizioni coi segni ▲/▼, foto dopo che spariscono, senza rilettura (C272A01): e28 voce_magazzino
   // a 360 dà «senza anello pieno» su steward e mediatore@curva_cinderwick, il caso del 7/11 (e21 a 375 quello di CI 1374), 3 su 3
-  // D-272 salti residui: col «prima» sempre la disposizione corrente (C272W03, come 0.70.0) alla sparizione dei segni ▲/▼ si spostano
-  // tre pastiglie in e28 voce_magazzino a 360 (e due di 132 px in e21 a 375); verde 0
-  C272W03: { giri: ['sparizione'], episodi: ['e28'], segno: '(D-272 sparizione)', almeno: 3 },
-  // e il caso dell'anello nasceva dallo stesso spostamento (CI 1386: 0 su 1; con C272W03 1 su 2305e014): gira con C272W03, conteggio invariato
-  'C272A01,C272W03': { giri: ['radio'], episodi: ['e28'], segno: 'senza anello pieno', almeno: 1 },
+  C272A01: { giri: ['radio'], episodi: ['e28'], segno: 'senza anello pieno', almeno: 1 },
   C272D01: { giri: ['segno'], episodi: ['e03'], segno: '(D-272 segno)', almeno: 20 },
   // e col segno a fianco del disco e sopra tutto (C272D02) 24 mosse su 24 coprono nomi o dischi altrui a 360
   C272D02: { giri: ['segno'], episodi: ['e03'], segno: 'il segno copre', almeno: 20 },
