@@ -8,6 +8,14 @@
 import { chiamateCostruite } from './sonda-altezze.mjs';
 
 export const SOGLIA_SPOSTAMENTO = 44; // --tocco-min, come i salti
+// D-278 (principale 10/11): soglie sul massimo di main 1639f163, dalla sparizione alla mossa compresa (l'arrivo della chiamata dopo
+// a parte). Misura: tools/zz-spost, 36 episodi, 4 pagine, 2 prove per larghezza, identiche dalla sparizione alla mossa.
+// - Verde di ogni catena (CI compresa): e21 (sparizione a 375) ed e26 (mossa, 176 px), tetto per episodio [elementi oltre 44 px, massimo].
+// - Catena «completa» (VALMORA_SALTI_TUTTI=1, come il giro salti): tutti i 36, tetto sul totale. Nessuno può peggiorare.
+export const EPISODI_SPOSTAMENTO = ['e21', 'e26'];
+export const TETTO_EPISODIO_SPOSTAMENTO = { 360: { e21: [20, 132], e26: [30, 176] }, 375: { e21: [72, 132], e26: [31, 176] }, 412: { e21: [19, 70], e26: [8, 91] } };
+export const TETTO_SPOSTAMENTO = { 360: 818, 375: 596, 412: 246 }, MAX_SPOSTAMENTO = { 360: 199, 375: 176, 412: 134 };
+export const APERTURE = 5; // sotto carico i segni (1,8 s veri) possono sparire prima della prima lettura: si riapre; se non basta si conta e si dichiara
 export const FASI = ['sparizione', 'tocco', 'mossa', 'dopo'];
 
 const leggi = (p) => p.evaluate(() => {
@@ -21,8 +29,8 @@ const leggi = (p) => p.evaluate(() => {
 /** Giro «spostamento»: problemi e conto alla larghezza data. episodi: se dato, solo quelli. */
 export async function controllaSpostamento(browser, url, larghezza, h, rossi, dati, insieme, pagine = 1, episodi = null) {
   const male = [], vp = `${larghezza}x${h}`, D = '(D-278 spostamento)', dich = new Map(dati['stato.json'].variabili.map((d) => [d.id, d])), tutte = chiamateCostruite(dati, dich);
-  const conto = { vp, giro: 'spostamento', episodi: 0, mosse: 0, oltre: 0, max: 0, fasi: Object.fromEntries(FASI.map((f) => [f, { oltre: 0, max: 0 }])), riprese: 0, senzaChiamata: 0, per: [] };
-  const eps = episodi ?? [...new Set(tutte.map((x) => x.ep))].sort();
+  const conto = { vp, giro: 'spostamento', episodi: 0, mosse: 0, oltre: 0, max: 0, fasi: Object.fromEntries(FASI.map((f) => [f, { oltre: 0, max: 0 }])), riprese: 0, nonMisurate: 0, senzaChiamata: 0, per: [] };
+  const tuttiEp = !!process.env.VALMORA_SALTI_TUTTI && !episodi, eps = tuttiEp ? [...new Set(tutte.map((x) => x.ep))].sort() : [...(episodi ?? EPISODI_SPOSTAMENTO)].sort();
   const apri = async (c, ch) => { const p = await browser.newPage({ viewport: { width: larghezza, height: h }, hasTouch: true, reducedMotion: 'reduce' });
     await p.addInitScript((xs) => { globalThis.__VALMORA_SECONDO_MS = 1; for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi);
     await p.goto(url); await p.evaluate((v) => localStorage.setItem('vandelfalls-salvataggio', v), c.sal); await p.reload(); await p.getByRole('button', { name: 'Riprendi' }).click();
@@ -61,8 +69,8 @@ export async function controllaSpostamento(browser, url, larghezza, h, rossi, da
       const unita = await p0.$$eval('.mappa [data-presenza]:not(:disabled)', (xs) => xs.map((x) => x.dataset.presenza)); await p0.close();
       const r = { ep, id: c.id, mosse: 0, oltre: 0, max: 0, fasi: Object.fromEntries(FASI.map((f) => [f, { oltre: 0, max: 0 }])), peggiore: '' };
       await insieme(unita.map((u) => async () => { for (let j = 0, n = 1; j < n; j++) { try {
-        let x = 'rifai'; for (let k = 0; x === 'rifai' && k < 3; k++) { x = await mossa(c, ch, u, j); if (x === 'rifai') conto.riprese++; }
-        if (x === 'rifai') { male.push(`${vp} ${ep} ${c.id} ${u}: segni ▲/▼ già spariti alla prima lettura in 3 aperture ${D}`); break; }
+        let x = 'rifai'; for (let k = 0; x === 'rifai' && k < APERTURE; k++) { x = await mossa(c, ch, u, j); if (x === 'rifai') conto.riprese++; }
+        if (x === 'rifai') { conto.nonMisurate++; male.push(`${vp} ${ep} ${c.id} ${u}: non misurata, segni ▲/▼ già spariti alla prima lettura in ${APERTURE} aperture ${D}`); break; }
         if (!x || x.fuori) break; n = x.n; r.mosse++;
         for (const [k, [px, fase]] of Object.entries(x.max)) { r.max = Math.max(r.max, px); r.fasi[fase].max = Math.max(r.fasi[fase].max, px);
           if (px > SOGLIA_SPOSTAMENTO) { r.oltre++; r.fasi[fase].oltre++; if (!r.peggiore || px > Number(r.peggiore.split(' ')[0])) r.peggiore = `${px} px ${k} (${fase}, ${u} → ${x.sett})`; } }
@@ -71,11 +79,17 @@ export async function controllaSpostamento(browser, url, larghezza, h, rossi, da
       if (!r.mosse) continue;
       conto.episodi++; conto.mosse += r.mosse; conto.oltre += r.oltre; conto.max = Math.max(conto.max, r.max);
       for (const f of FASI) { conto.fasi[f].oltre += r.fasi[f].oltre; conto.fasi[f].max = Math.max(conto.fasi[f].max, r.fasi[f].max); }
-      conto.per.push(r); fatto = true; break;
+      conto.per.push(r); fatto = true;
+      const te = !tuttiEp && TETTO_EPISODIO_SPOSTAMENTO[larghezza]?.[ep];
+      if (te && (r.oltre > te[0] || r.max > te[1])) male.push(`${vp} ${ep} ${c.id}: elementi oltre ${SOGLIA_SPOSTAMENTO} px ${r.oltre} (tetto ${te[0]}), massimo ${r.max} px (tetto ${te[1]}); peggiore ${r.peggiore} (D-278 spostamento, tetto episodio)`);
+      break;
     }
     if (!fatto) male.push(`${vp} ${ep}: nessuna chiamata con la mossa fra le prime 4 ${D}`);
   }
+  const tetto = tuttiEp ? TETTO_SPOSTAMENTO[larghezza] : undefined, tmax = tuttiEp ? MAX_SPOSTAMENTO[larghezza] : undefined;
+  if (tetto !== undefined && (conto.oltre > tetto || conto.max > tmax)) male.push(`${vp}: spostamento su ${conto.episodi} episodi, elementi oltre ${SOGLIA_SPOSTAMENTO} px ${conto.oltre} (tetto ${tetto}), massimo ${conto.max} px (tetto ${tmax}); peggiori ${[...conto.per].sort((a, b) => b.max - a.max).slice(0, 4).map((x) => `${x.ep} ${x.peggiore}`).join('; ')} (D-278 spostamento, tetto)`);
+  if (!conto.mosse) male.push(`${vp}: nessuna mossa provata ${D}`);
   const fasi = FASI.map((f) => `${f} ${conto.fasi[f].oltre}/${conto.fasi[f].max} px`).join(', ');
-  console.log(`spostamento lungo la risposta ${vp}: ${conto.episodi} episodi, ${conto.mosse} mosse, elementi oltre ${SOGLIA_SPOSTAMENTO} px ${conto.oltre}, massimo ${conto.max} px (fino all'«Avanti»); per fase (oltre/massimo) ${fasi}; riaperti ${conto.riprese}, senza chiamata dopo ${conto.senzaChiamata}`);
+  console.log(`spostamento lungo la risposta ${vp}: ${conto.episodi} episodi, ${conto.mosse} mosse, elementi oltre ${SOGLIA_SPOSTAMENTO} px ${conto.oltre}, massimo ${conto.max} px (fino all'«Avanti»); per fase (oltre/massimo) ${fasi}; riaperti ${conto.riprese}, unità non misurate ${conto.nonMisurate}, senza chiamata dopo ${conto.senzaChiamata}; ${tuttiEp ? 'tutti gli episodi' : eps.join(' ')}${tetto !== undefined ? `, tetto ${tetto} / ${tmax} px` : ''}`);
   return { ris: conto, male };
 }
