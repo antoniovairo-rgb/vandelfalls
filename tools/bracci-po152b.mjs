@@ -53,6 +53,10 @@ export const BRACCI_PO152B = {
   // D-272 passo 2, vicinanza (giro radio, soglia 95 / 93 / 93): senza i posti e la larghezza di C28-14 (C94N01) le pastiglie di Magazzino
   // in e16 magazzino_sette finiscono a 108-110 px dal disco, in 6 stati a 360; unico episodio col segno su 36
   C94N01: { giri: ['radio'], episodi: ['e16'], segno: 'D-272 vicinanza)', almeno: 5 },
+  // D-278, giro «spostamento» (e26 pullman_sparsi, 24 mosse, a 360×640 come il verde: il braccio va in passi-grafica a 360x760, l'altezza dove gira po152b; 1 pagina): senza costo di spostamento e posto vuoto (C272W01 e C272V01, il
+  // comportamento di 553c26fa) 58 elementi oltre 44 px contro il tetto 30 (verde 30); C272W01 da solo 48, C272V01 da solo 67. Chiave
+  // con l'ordine W01,V01 perché 'C272V01,C272W01' è già il braccio del giro salti.
+  'C272W01,C272V01': { giri: ['spostamento'], episodi: ['e26'], segno: '(D-278 spostamento, tetto episodio)', almeno: 1 },
 };
 
 // D-274b: i bracci della parte «chiamate» (D-207) misurano solo gli imprevisti: le chiamate normali (498 su 782) non servono.
