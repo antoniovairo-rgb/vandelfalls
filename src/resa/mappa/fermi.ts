@@ -6,7 +6,8 @@
 // va dal lato libero del gruppo (in testa o in coda, con `order`), chi parte lascia il posto vuoto di C272V01. Il gruppo così
 // fermato (data-fermo) è un ostacolo e il ricalcolo si rifà intorno a lui (nomi e altri gruppi). Alla fine un gruppo fermo con
 // qualcosa di vietato (pastiglie o nome fuori dalla mappa, un centro di tocco sotto un disco o sul nome di un altro, il proprio disco
-// coperto) o con più sovrapposizioni (px²) del ricalcolo libero e di quelle già viste, per sé o in tutto, si scioglie e resta il ricalcolo: è un caso
+// coperto) o con più sovrapposizioni (px²) del ricalcolo libero e di quelle già viste, per sé o in tutto, o che fa saltare le
+// pastiglie rimaste o il nome di un altro settore più che nel ricalcolo libero, si scioglie e resta il ricalcolo: è un caso
 // geometrico, contato dal guardiano spostamento-po152b. Rosso C279F01: niente, come prima.
 import { spento } from '../../interruttori.ts';
 import { chiaveUnita, type Prima } from './congela.ts';
@@ -79,6 +80,12 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: () => voi
   if (!prima || spento('C279F01')) return;
   const m = mappa.getBoundingClientRect(), settori = [...mappa.querySelectorAll<HTMLElement>('[data-settore]')], fermi: HTMLElement[] = [];
   // le sovrapposizioni del ricalcolo libero o, se più, quelle già viste: coi gruppi fermi non devono crescere (né per fermo né in tutto)
+  // e quanto si spostano le rimaste e il nome di ogni settore nel ricalcolo libero: un gruppo fermo non deve farne saltare un altro
+  // (e31 a 360: pastiglie di Piazzale, 138 px; e32: nome di Strada Larkspire, 79 px)
+  const nomeVia = (s: HTMLElement) => { const q = prima.centri.get(`nome ${s.dataset.settore}`), n = s.querySelector('.settore-nome'); if (!q || !n) return 0;
+    const [x, y] = centro(n.getBoundingClientRect()); return Math.hypot(x - m.left - q[0], y - m.top - q[1]); };
+  const via = (s: HTMLElement) => Math.max(scarto(s, prima, m)?.max ?? 0, nomeVia(s)), larghe = (s: HTMLElement) => s.querySelector('.settore-unita')?.firstElementChild?.getBoundingClientRect().width ?? 0;
+  const via0 = new Map(settori.map((s) => [s, Math.max(via(s), larghe(s))]));
   const pena0 = new Map(settori.map((s) => [s, Math.max(pena(s, settori), prima ? prime?.get(s.dataset.settore ?? '') ?? 0 : 0)])), tutta = (f: (s: HTMLElement) => number) => settori.reduce((t, s) => t + f(s), 0);
   for (const s of settori) {
     const g = s.querySelector<HTMLElement>('.settore-unita'), pp = prima.posti.get(s.dataset.settore ?? ''), ora = g && pp?.unita ? scarto(s, prima, m) : null;
@@ -105,6 +112,10 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: () => voi
     const male = settori.filter((s) => s.hasAttribute('data-fermo') && (divieto(s, settori, m) || cresce(s) > 0.5));
     if (!male.length && tutta((s) => ora.get(s)!) > tutta((s) => pena0.get(s)!) + 0.5) // in tutto peggio: si scioglie il fermo che pesa di più
       male.push(settori.filter((s) => s.hasAttribute('data-fermo')).sort((a, b) => cresce(b) - cresce(a))[0]!);
+    const saltati = male.length ? [] : settori.filter((s) => (!s.hasAttribute('data-fermo') ? via(s) : nomeVia(s)) > via0.get(s)! + 0.5);
+    if (saltati.length) { // si scioglie il fermo più vicino al primo settore saltato
+      const [x, y] = centro(saltati[0]!.querySelector('.settore-punto')!.getBoundingClientRect()), d = (s: HTMLElement) => { const [a, b] = centro(s.querySelector('.settore-punto')!.getBoundingClientRect()); return Math.hypot(a - x, b - y); };
+      male.push(settori.filter((s) => s.hasAttribute('data-fermo')).sort((a, b) => d(a) - d(b))[0]!); }
     if (!male.length) return;
     for (const s of male) { s.removeAttribute('data-fermo'); for (const c of figli(s)) c.style.removeProperty('order'); }
   }
