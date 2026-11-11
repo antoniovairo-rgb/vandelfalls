@@ -77,8 +77,14 @@ export function disponiFermi(mappa: HTMLElement, prima: Prima | null, disponi: (
 
 function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: () => void, prime: Map<string, number> | undefined) {
   sciogli(mappa); disponi();
-  if (!prima || spento('C279F01')) return;
-  const m = mappa.getBoundingClientRect(), settori = [...mappa.querySelectorAll<HTMLElement>('[data-settore]')], fermi: HTMLElement[] = [];
+  // solo dopo la mossa (data-mossa «fatta»): prima della mossa la disposizione resta quella di sempre (e36 a 360: tenere i gruppi già
+  // all'arrivo della risposta cambiava la disposizione di partenza e la mossa poi saltava di più)
+  if (!prima || spento('C279F01') || mappa.querySelector('.radio-mappa [data-mossa]')?.getAttribute('data-mossa') !== 'fatta') return;
+  // solo a mappa della stessa misura: se cambia l'altezza (riquadro radio, costo) i dischi si spostano e tenere i pixel di prima
+  // inchioderebbe le pastiglie lontano dal loro disco, che poi saltano di più alla mossa (e03, e07, e19 a 375; e36 a 360)
+  const [lw, lh] = prima.firma.split('#'), mm = mappa.getBoundingClientRect();
+  if (Number(lw) !== Math.round(mm.width) || Number(lh) !== Math.round(mm.height)) return;
+  const m = mm, settori = [...mappa.querySelectorAll<HTMLElement>('[data-settore]')], fermi: HTMLElement[] = [];
   // le sovrapposizioni del ricalcolo libero o, se più, quelle già viste: coi gruppi fermi non devono crescere (né per fermo né in tutto)
   // e quanto si spostano le rimaste e il nome di ogni settore nel ricalcolo libero: un gruppo fermo non deve farne saltare un altro
   // (e31 a 360: pastiglie di Piazzale, 138 px; e32: nome di Strada Larkspire, 79 px)
