@@ -13,7 +13,9 @@ export const SOGLIA_SPOSTAMENTO = 44; // --tocco-min, come i salti
 // - Verde di ogni catena (CI compresa): e21 (sparizione a 375) ed e26 (mossa, 176 px), tetto per episodio [elementi oltre 44 px, massimo].
 // - Catena «completa» (VALMORA_SALTI_TUTTI=1, come il giro salti): tutti i 36, tetto sul totale. Nessuno può peggiorare.
 export const EPISODI_SPOSTAMENTO = ['e21', 'e26'];
-export const TETTO_EPISODIO_SPOSTAMENTO = { 360: { e21: [20, 132], e26: [30, 176] }, 375: { e21: [72, 132], e26: [31, 176] }, 412: { e21: [19, 70], e26: [8, 91] } };
+// D-279: e26 stretto al verde coi gruppi fermi (fermi.ts; prima 30/176, 31/176, 8/91 di main 834bea62), così il braccio C279F01 vede il
+// ritorno a main; e21 non cambia a 360 e 375 (a 412 13/70, il tetto resta quello di main)
+export const TETTO_EPISODIO_SPOSTAMENTO = { 360: { e21: [20, 132], e26: [1, 67] }, 375: { e21: [72, 132], e26: [9, 79] }, 412: { e21: [19, 70], e26: [0, 22] } };
 export const TETTO_SPOSTAMENTO = { 360: 818, 375: 596, 412: 246 }, MAX_SPOSTAMENTO = { 360: 199, 375: 176, 412: 134 };
 export const APERTURE = 5; // sotto carico i segni (1,8 s veri) possono sparire prima della prima lettura: si riapre; se non basta si conta e si dichiara
 export const FASI = ['sparizione', 'tocco', 'mossa', 'dopo'];

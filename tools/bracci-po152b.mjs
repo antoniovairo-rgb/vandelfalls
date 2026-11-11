@@ -57,6 +57,9 @@ export const BRACCI_PO152B = {
   // comportamento di 553c26fa) 58 elementi oltre 44 px contro il tetto 30 (verde 30); C272W01 da solo 48, C272V01 da solo 67. Chiave
   // con l'ordine W01,V01 perché 'C272V01,C272W01' è già il braccio del giro salti.
   'C272W01,C272V01': { giri: ['spostamento'], episodi: ['e26'], segno: '(D-278 spostamento, tetto episodio)', almeno: 1 },
+  // D-279 (strada A, fermi.ts): senza gruppi fermi (C279F01) e26 a 360 torna al comportamento di main 834bea62, 30 elementi oltre 44 px e
+  // massimo 176 px, contro il tetto dell'episodio stretto al verde nuovo; stessa altezza del braccio sopra (po152b gira a 360x760).
+  C279F01: { giri: ['spostamento'], episodi: ['e26'], segno: '(D-278 spostamento, tetto episodio)', almeno: 1 },
 };
 
 // D-274b: i bracci della parte «chiamate» (D-207) misurano solo gli imprevisti: le chiamate normali (498 su 782) non servono.
