@@ -56,7 +56,7 @@ export function disponiEtichette(contenitore: HTMLElement, prima: Prima | null =
   const settori = [...contenitore.querySelectorAll<HTMLElement>('[data-settore]')];
   // C33-04: si riparte sempre dallo stesso stato (posto delle unità e larghezza dei nomi del giro prima pesavano sul
   // risultato, che cambiava col numero di giri: 2/426 ondate fra due giri uguali). Rosso C102D01: dallo stato di prima.
-  if (!spento('C102D01')) for (const s of settori) { s.setAttribute('data-unita', UNITA[0]); s.querySelector<HTMLElement>('.settore-nome')?.style.removeProperty('max-width'); }
+  if (!spento('C102D01')) for (const s of settori) { if (!s.hasAttribute('data-fermo')) s.setAttribute('data-unita', UNITA[0]); s.querySelector<HTMLElement>('.settore-nome')?.style.removeProperty('max-width'); }
   for (const s of settori) { const n = s.querySelector<HTMLElement>('.settore-nome'); n?.style.removeProperty('--nome-dx'); n?.style.removeProperty('--nome-dy'); } // C128-02
   const punti = settori.map((s) => s.querySelector('.settore-punto')!.getBoundingClientRect() as Rett);
   // D-191: con la mappa abbassata (fino a 160 px) i nomi in alto finivano sotto il pulsante «Home» dell'angolo: per i nomi
@@ -85,7 +85,7 @@ export function disponiEtichette(contenitore: HTMLElement, prima: Prima | null =
   // per i nomi sono ostacoli. Rosso C187S01: no, come prima.
   // D-269 c: nella risposta con la mossa anche quelli già spariti (segni-visti.ts), così i nomi non si ridispongono senza input
   // D-272 (passo 2): si parte dalla disposizione di prima, così anche il primo giro vede i vicini dove erano
-  if (prima) for (const s of settori) { const p = prima.posti.get(s.dataset.settore ?? ''); if (p) metti(s, p); }
+  if (prima) for (const s of settori) { const p = prima.posti.get(s.dataset.settore ?? ''); if (p) metti(s, s.hasAttribute('data-fermo') ? { ...p, unita: null, udx: s.querySelector<HTMLElement>('.settore-unita')?.style.getPropertyValue('--unita-dx') ?? '', udy: s.querySelector<HTMLElement>('.settore-unita')?.style.getPropertyValue('--unita-dy') ?? '' } : p); }
   const segni = spento('C187S01') ? [] : segniVisti(contenitore, 'nomi', [...contenitore.querySelectorAll('.settore .segni-effetto')].map((e) => e.getBoundingClientRect() as Rett));
   // 2) nome e unità insieme (6 × 6 combinazioni; solo il nome per i settori senza unità), si tiene quella che costa meno
   //    (due passate, così anche i primi settori vedono dove sono finiti gli ultimi).
@@ -93,10 +93,11 @@ export function disponiEtichette(contenitore: HTMLElement, prima: Prima | null =
   //    nomi e unità degli altri, il proprio nome. I bordi pesano 10 volte.
   for (let passata = 0; passata < 2; passata++) for (const [i, s] of settori.entries()) {
     if (!s.querySelector('.settore-nome')) continue;
-    const conUnita = !!s.querySelector('.settore-unita');
+    // D-279: un gruppo fermo (fermi.ts) non si sposta: conta per gli altri e per il proprio nome, come un ostacolo
+    const fermo = s.hasAttribute('data-fermo'), conUnita = !fermo && !!s.querySelector('.settore-unita');
     const altri = settori.filter((x) => x !== s);
     const presenti = (rs: (Rett | null)[]) => rs.filter((r): r is Rett => !!r);
-    const perNome = [...punti.filter((_, j) => j !== i).map((r) => ostacolo(r)), ...presenti(altri.map(nomeDi)).map((n) => ostacolo(n, STACCO)), ...presenti(altri.map(unitaDi)).map((r) => ostacolo(r)), ...segni.map((r) => ostacolo(r))];
+    const perNome = [...punti.filter((_, j) => j !== i).map((r) => ostacolo(r)), ...presenti(altri.map(nomeDi)).map((n) => ostacolo(n, STACCO)), ...presenti([...altri.map(unitaDi), fermo ? unitaDi(s) : null]).map((r) => ostacolo(r)), ...segni.map((r) => ostacolo(r))];
     const perUnita = [...punti, ...presenti(altri.map(nomeDi)), ...presenti(altri.map(unitaDi))].map((r) => ostacolo(r));
     const costoDi = (r: Rett, os: Ostacolo[]) => os.reduce((a, o) => a + VERA * area(r, o.vero) + area(r, o.largo) - area(r, o.vero), 0);
     // C26-11: una pastiglia col centro sotto il disco di un altro settore non si può toccare (e06 a 360), e due nomi
@@ -180,7 +181,7 @@ export function disponiEtichette(contenitore: HTMLElement, prima: Prima | null =
       spingi(dx, dy); return [dx, dy] as const; };
     const costoUnita = (n: Rett, u: Rett) => sottoDisco() + costoDi(u, perUnita) + VERA * area(n, u) + bordoUnita(u) + pastiglieFuori() + suNomi(pastiglie() ?? u, n) * (c33 ? 20 : 1) + lontano(pastiglie() ?? u) + ruba() + viaUnita();
     const gruppo = s.querySelector<HTMLElement>('.settore-unita'), muovi = (dx: number, dy: number) => { gruppo?.style.setProperty('--unita-dx', `${dx}px`); gruppo?.style.setProperty('--unita-dy', `${dy}px`); };
-    gruppo?.style.removeProperty('--unita-dx'); gruppo?.style.removeProperty('--unita-dy');
+    if (!fermo) { gruppo?.style.removeProperty('--unita-dx'); gruppo?.style.removeProperty('--unita-dy'); }
     let migliore = { nome: NOMI[0] as string, unita: UNITA[0] as string, costo: Infinity, largo: '', dx: 0, dy: 0, ux: 0, uy: 0 };
     // D-272 (passo 2): nel posto di prima il gruppo si ricentra quando un'unità parte o arriva, e i tocchi rimasti cambiano
     // posto (e03 a 360, squadre@quartiere → parcheggi: con 3 pastiglie il centro di una cade sotto un disco, 2e8, e il gruppo
@@ -196,7 +197,7 @@ export function disponiEtichette(contenitore: HTMLElement, prima: Prima | null =
     if (el) el.style.maxWidth = largo;
     if (largo && el && el.scrollWidth > el.clientWidth + 1 && !spento('C100N01')) continue; // C33-01: il testo non ci sta
     for (const nome of primoIl(NOMI, pp?.nome)) for (const unita of conUnita ? primoIl(posti, pp?.unita) : [UNITA[0]]) {
-      s.setAttribute('data-nome', nome); s.setAttribute('data-unita', unita);
+      s.setAttribute('data-nome', nome); if (!fermo) s.setAttribute('data-unita', unita);
       const [dx, dy] = sposta();
       const n = nomeDi(s), u = conUnita ? unitaDi(s) : null;
       if (!n || (conUnita && !u)) continue;
@@ -209,8 +210,8 @@ export function disponiEtichette(contenitore: HTMLElement, prima: Prima | null =
     }
     }
     if (el) el.style.maxWidth = migliore.largo;
-    s.setAttribute('data-nome', migliore.nome); s.setAttribute('data-unita', migliore.unita); if (c128) spingi(migliore.dx, migliore.dy);
-    muovi(migliore.ux, migliore.uy);
+    s.setAttribute('data-nome', migliore.nome); if (!fermo) s.setAttribute('data-unita', migliore.unita); if (c128) spingi(migliore.dx, migliore.dy);
+    if (!fermo) muovi(migliore.ux, migliore.uy);
     // D-271 (C271U01): con la mappa bassa della risposta può non esserci un posto pulito per le unità (e04 arance a 360: ogni
     // posto dentro la mappa ha il centro di un tocco sotto il disco di un altro settore). Come per i nomi (C128-02), si prova
     // a spostare le unità di poco, a passi di un ottavo di disco fino a mezzo tocco, e si tiene lo spostamento che costa meno.
