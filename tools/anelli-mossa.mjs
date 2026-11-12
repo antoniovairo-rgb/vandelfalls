@@ -51,8 +51,12 @@ const leggiPagina = (p) => p.evaluate(() => {
 
 /** Rosso C272A01: registra nella pagina, a ogni fotogramma coi segni ▲/▼, dove stanno le pastiglie delle unità (non dipende dal carico). */
 export const registraConSegni = (p) => p.evaluate(() => { if (!globalThis.__NO_C272A01) return;
-  const reg = () => { if (document.querySelector('.mappa.mossa [data-segno]')) globalThis.__conSegni = [...document.querySelectorAll('.mappa.mossa [data-presenza]:not(:disabled) .pastiglia')]
-    .map((e) => { const r = e.getBoundingClientRect(); return { id: e.closest('[data-presenza]').dataset.presenza, l: r.left, t: r.top, r: r.right, b: r.bottom }; });
+  // lo stato della mossa e l'unità in mano: le posizioni valgono solo nello stato in cui sono state registrate (controllo D-280: senza,
+  // i 5 stati «in mano» di e28 usavano quelle del «puoi» e davano 5 problemi falsi)
+  globalThis.__statoMossa = () => `${document.querySelector('.mappa [data-mossa]')?.dataset.mossa}|${document.querySelector('.mappa .mossa-in-mano')?.dataset.presenza}`;
+  const reg = () => { if (document.querySelector('.mappa.mossa [data-segno]')) globalThis.__conSegni = {
+    stato: globalThis.__statoMossa(), pos: [...document.querySelectorAll('.mappa.mossa [data-presenza]:not(:disabled) .pastiglia')]
+    .map((e) => { const r = e.getBoundingClientRect(); return { id: e.closest('[data-presenza]').dataset.presenza, l: r.left, t: r.top, r: r.right, b: r.bottom }; }) };
     requestAnimationFrame(reg); }; reg(); });
 
 /** Misura in uno stato: { copia (la copia sotto la mappa si vede), tratteggi, sotto (bersagli con un lato sotto 3:1, o senza anello su nessun lato), minimo (contrasto
@@ -72,7 +76,7 @@ export async function misuraAnelli(p) {
   if (rosso) { await p.waitForFunction(() => !document.querySelector('.mappa [data-segno]'), null, { timeout: 5000 }).catch(() => {}); await p.waitForTimeout(300);
     // D-280 (CI 1419, cieco 3 su 3; da solo vede, 6 in parallelo 2-3 su 6): sotto carico i segni (1,8 s veri) sparivano prima della
     // lettura e le due letture coincidevano. Ora le unità «coi segni» sono quelle dell'ultimo fotogramma coi segni, registrate nella pagina
-    const cs = await p.evaluate(() => globalThis.__conSegni ?? null).catch(() => null);
+    const cs = await p.evaluate(() => (globalThis.__conSegni?.stato === globalThis.__statoMossa?.() ? globalThis.__conSegni.pos : null)).catch(() => null);
     if (cs) g = { ...g, bersagli: g.bersagli.map((x) => (x.tipo === 'unità' ? { ...x, ...(cs.find((y) => y.id === x.id) ?? {}) } : x)) }; }
   let img = leggiPng(await p.screenshot());
   if (!rosso) for (let dopo = await leggiPagina(p); JSON.stringify(dopo.bersagli) !== JSON.stringify(g.bersagli) && riprese < 5; dopo = await leggiPagina(p)) { riprese++; await p.waitForTimeout(100); g = await leggiPagina(p); img = leggiPng(await p.screenshot()); }
