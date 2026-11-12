@@ -16,7 +16,9 @@ export const EPISODI_SPOSTAMENTO = ['e21', 'e26'];
 // D-279: e26 stretto al verde coi gruppi fermi (fermi.ts; prima 30/176, 31/176, 8/91 di main 834bea62), così il braccio C279F01 vede il
 // ritorno a main; e21 non cambia a 360 e 375 (a 412 13/70, il tetto resta quello di main)
 export const TETTO_EPISODIO_SPOSTAMENTO = { 360: { e21: [20, 132], e26: [1, 67] }, 375: { e21: [72, 132], e26: [9, 79] }, 412: { e21: [19, 70], e26: [0, 22] } };
-export const TETTO_SPOSTAMENTO = { 360: 818, 375: 596, 412: 246 }, MAX_SPOSTAMENTO = { 360: 199, 375: 176, 412: 134 };
+// D-279: totali stretti al verde coi gruppi fermi (prima 818/199, 596/176, 246/134 di main). 360: catena «completa» su 5cf1c59e,
+// 385/176 (zz-spost 384/176); 375 e 412: zz-spost su a8f146bb, 1 prova (e10 a 375 rifatta da sola, 4 prove 19/134), 408/134 e 64/134
+export const TETTO_SPOSTAMENTO = { 360: 385, 375: 408, 412: 64 }, MAX_SPOSTAMENTO = { 360: 176, 375: 134, 412: 134 };
 export const APERTURE = 5; // sotto carico i segni (1,8 s veri) possono sparire prima della prima lettura: si riapre; se non basta si conta e si dichiara
 export const FASI = ['sparizione', 'tocco', 'mossa', 'dopo'];
 
