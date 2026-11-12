@@ -58,7 +58,9 @@ export const BRACCI_PO152B = {
   // con l'ordine W01,V01 perché 'C272V01,C272W01' è già il braccio del giro salti.
   'C272W01,C272V01': { giri: ['spostamento'], episodi: ['e26'], segno: '(D-278 spostamento, tetto episodio)', almeno: 1 },
   // D-279 (strada A, fermi.ts): senza gruppi fermi (C279F01) e26 a 360 torna al comportamento di main 834bea62, 30 elementi oltre 44 px e
-  // massimo 176 px, contro il tetto dell'episodio stretto al verde nuovo; stessa altezza del braccio sopra (po152b gira a 360x760).
+  // massimo 176 px, contro il tetto dell'episodio stretto al verde nuovo. Dove gira (D-280, rilievo 5): passi-grafica lo chiama con
+  // 360x760, ma il giro «spostamento» misura all'altezza più bassa della larghezza (RADIO_VP di foto-po152-b.mjs, 360 → 640): a
+  // 360×640 il rosso dà 30/176 (completa su 92a666ab, tentativi 1 e 2) contro il verde 1/67 (92a666ab e a8f146bb); a 760 non gira.
   C279F01: { giri: ['spostamento'], episodi: ['e26'], segno: '(D-278 spostamento, tetto episodio)', almeno: 1 },
 };
 
