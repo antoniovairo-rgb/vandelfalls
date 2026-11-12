@@ -7,8 +7,8 @@ import { spento } from '../../interruttori.ts';
 import { segniVisti } from './segni-visti.ts';
 import { chiaveUnita, metti, type Prima } from './congela.ts';
 
-type Rett = { left: number; top: number; right: number; bottom: number };
-const MARGINE = 5; // distanza minima dal bordo della mappa (controllo R06 di tools/foto.mjs)
+export type Rett = { left: number; top: number; right: number; bottom: number };
+export const MARGINE = 5; // distanza minima dal bordo della mappa (controllo R06 di tools/foto.mjs)
 const STACCO = 6;  // distacco minimo fra due nomi: attaccati sembrerebbero un nome solo
 const largo = (r: Rett, d: number): Rett => ({ left: r.left - d, top: r.top - d, right: r.right + d, bottom: r.bottom + d });
 const VERA = 100; // una sovrapposizione vera pesa molto più di un distacco mancante fra due nomi
@@ -21,13 +21,13 @@ const UNITA_PIU = ['destra-basso', 'sinistra-basso'] as const; // C28-14 / D-136
 const SPOSTO = 0.1;
 const primoIl = <T,>(xs: readonly T[], x: T | null | undefined): readonly T[] => (x != null && xs.includes(x) ? [x, ...xs.filter((y) => y !== x)] : xs);
 
-const area = (a: Rett, b: Rett) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+export const area = (a: Rett, b: Rett) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
 const fuori = (r: Rett, m: Rett) => {
   const dentro = { left: m.left + MARGINE, top: m.top + MARGINE, right: m.right - MARGINE, bottom: m.bottom - MARGINE };
   return (r.right - r.left) * (r.bottom - r.top) - area(r, dentro);
 };
 const unione = (els: Element[]): Rett | null => unisci(els.map((e) => e.getBoundingClientRect()));
-const unisci = (tutti: DOMRect[]): Rett | null => {
+export const unisci = (tutti: DOMRect[]): Rett | null => {
   const rs = tutti.filter((r) => r.width && r.height);
   if (!rs.length) return null;
   return { left: Math.min(...rs.map((r) => r.left)), top: Math.min(...rs.map((r) => r.top)), right: Math.max(...rs.map((r) => r.right)), bottom: Math.max(...rs.map((r) => r.bottom)) };
