@@ -30,6 +30,8 @@ const centri = (p) => p.evaluate(() => { const m = document.querySelector('.mapp
 // - Verde di ogni catena (CI compresa): e03 stretto; a 360 anche e05 ed e26 (EPISODI_SALTI), con un tetto per episodio
 //   (elementi oltre 44 px e salto massimo, misurati su a66978a8, tools/zz-salti-tutti.mjs) e uno sul totale.
 // - Catena «completa» (VALMORA_SALTI_TUTTI=1, la mette catena.mjs): tutti i 36 episodi, tetto sul totale (TETTO_SALTI, MAX_SALTI).
+//   I bracci (episodi dati, BRACCI_PO152B) restano sui loro episodi anche nella «completa», come spostamento-po152b: prima giravano su
+//   tutti i 36 senza tetto per episodio e C272V01,C272W01 era cieco (completa a 360 su 92a666ab, 2 tentativi su 2, 8670 s ciascuno).
 // Rosso: C272V01,C272W01 (il comportamento di 553c26fa).
 // Decisione del principale 8/11 (CI 1373: job 375 +22 min, 412 +17 rispetto a 1366): nel verde, solo a 360, e03 più e05 ed e26
 // (salti oggi a tutte e 3 le larghezze); a 375 e 412 solo e03. Tutti i 36 nella catena «completa».
@@ -78,7 +80,7 @@ export async function controllaSalti(browser, url, larghezza, h, rossi, dati, in
   for (const [ep, id] of CASI_SALTI.filter(([e]) => !episodi || episodi.includes(e))) { const r = await caso(ep, id, true); if (r) { male.push(...r.righe); fatti.set(`${ep} ${id}`, r); } }
   // tutti gli episodi: la prima delle prime 4 chiamate dove il «puoi spostare» compare (come il giro radio)
   const per = [];
-  const tuttiEp = !!process.env.VALMORA_SALTI_TUTTI, eps = tuttiEp ? [...new Set(tutte.map((x) => x.ep))].sort() : episodi ? [...episodi].sort() : [...new Set([...CASI_SALTI.map(([e]) => e), ...(EPISODI_SALTI[larghezza] ?? [])])].sort();
+  const tuttiEp = !!process.env.VALMORA_SALTI_TUTTI && !episodi, eps = tuttiEp ? [...new Set(tutte.map((x) => x.ep))].sort() : episodi ? [...episodi].sort() : [...new Set([...CASI_SALTI.map(([e]) => e), ...(EPISODI_SALTI[larghezza] ?? [])])].sort();
   for (const ep of eps) {
     let r = null, quale = '';
     for (const c of tutte.filter((x) => x.ep === ep).slice(0, 4)) { quale = c.id; r = fatti.get(`${ep} ${c.id}`) ?? await caso(ep, c.id, false); if (r) break; }
