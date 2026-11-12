@@ -78,6 +78,23 @@ export function disponiFermi(mappa: HTMLElement, prima: Prima | null, disponi: (
   viste.set(mappa, new Map(settori.map((s) => [s.dataset.settore ?? '', pena(s, settori)])));
 }
 
+// D-280 (revisione 2, A): ogni ricalcolo di etichette.ts costa (e12 a 360, CPU ×4: circa 2 s l'uno; erano fino a 5 per mossa, 10,9 s
+// contro 3,4 di main). RICALCOLI: quanti ricalcoli intorno ai gruppi fermi, oltre a quello libero; finiti con qualcosa di male si
+// torna al ricalcolo libero fotografato, senza rifarlo
+const RICALCOLI = 1;
+type Foto = { s: HTMLElement; attr: (string | null)[]; nome: string[]; stretto: boolean; gruppo: string[]; ordini: string[] };
+const ATTR = ['data-unita', 'data-nome', 'data-fermo'], NOME = ['max-width', '--nome-dx', '--nome-dy'], GRUPPO = ['--unita-dx', '--unita-dy'];
+const fotografa = (settori: HTMLElement[]): Foto[] => settori.map((s) => { const n = s.querySelector<HTMLElement>('.settore-nome'), g = s.querySelector<HTMLElement>('.settore-unita');
+  return { s, attr: ATTR.map((a) => s.getAttribute(a)), nome: NOME.map((k) => n?.style.getPropertyValue(k) ?? ''), stretto: !!n?.classList.contains('stretto'),
+    gruppo: GRUPPO.map((k) => g?.style.getPropertyValue(k) ?? ''), ordini: figli(s).map((c) => c.style.getPropertyValue('order')) }; });
+const metti = (e: HTMLElement | null, k: string, v = '') => { if (!e) return; if (v) e.style.setProperty(k, v); else e.style.removeProperty(k); };
+function ripristina(fs: Foto[]) {
+  for (const f of fs) { const n = f.s.querySelector<HTMLElement>('.settore-nome'), g = f.s.querySelector<HTMLElement>('.settore-unita');
+    ATTR.forEach((a, i) => { const v = f.attr[i]; if (v == null) f.s.removeAttribute(a); else f.s.setAttribute(a, v); });
+    NOME.forEach((k, i) => metti(n, k, f.nome[i])); n?.classList.toggle('stretto', f.stretto); GRUPPO.forEach((k, i) => metti(g, k, f.gruppo[i]));
+    figli(f.s).forEach((c, i) => metti(c, 'order', f.ordini[i] ?? '')); }
+}
+
 type Posto = { max: number; ordine: number; dx: number; dy: number };
 type Gruppo = { g: HTMLElement; unita: string; resto: Posto[] };
 
@@ -85,7 +102,8 @@ type Gruppo = { g: HTMLElement; unita: string; resto: Posto[] };
 function candidati(s: HTMLElement, gr: Omit<Gruppo, 'resto'>, prima: Prima, m: DOMRect, settori: HTMLElement[], larga: number): Posto[] {
   const nuovi = figli(s).filter((c) => { const k = chiaveUnita(c); return k && !prima.centri.has(k); }), tutti: Posto[] = [];
   const passi = [larga / 4, larga / 2], versi = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]] as const;
-  for (const ordine of nuovi.length ? [0, -1, 1] : [0]) { // ordine del DOM, chi arriva in testa, in coda
+  // ordine del DOM (chi arriva è già in coda: Mappa.tsx inFila) e chi arriva in testa; «in coda» era un doppione (D-280 revisione 2, B)
+  for (const ordine of nuovi.length ? [0, -1] : [0]) {
     s.setAttribute('data-unita', gr.unita); muovi(gr.g, 0, 0); for (const c of nuovi) c.style.setProperty('order', String(ordine));
     const d = scarto(s, prima, m); if (!d) continue;
     const prima0 = tutti.length, prova = (dx: number, dy: number) => { muovi(gr.g, dx, dy); const dopo = scarto(s, prima, m);
@@ -129,7 +147,7 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: () => voi
   const via = (s: HTMLElement) => Math.max(scarto(s, prima, m)?.max ?? 0, nomeVia(s));
   const via0 = new Map(settori.map((s) => [s, Math.max(via(s), larga)]));
   const pena0 = new Map(settori.map((s) => [s, Math.max(pena(s, settori), prime?.get(s.dataset.settore ?? '') ?? 0)]));
-  const tutta = (f: (s: HTMLElement) => number) => settori.reduce((t, s) => t + f(s), 0);
+  const tutta = (f: (s: HTMLElement) => number) => settori.reduce((t, s) => t + f(s), 0), libera = fotografa(settori);
   for (const s of settori) {
     const g = s.querySelector<HTMLElement>('.settore-unita'), pp = prima.posti.get(s.dataset.settore ?? ''), ora = g && pp?.unita ? scarto(s, prima, m) : null;
     if (!g || !pp?.unita || !ora || ora.max <= larga) continue;
@@ -139,11 +157,11 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: () => voi
     if (prove.unita) s.setAttribute('data-unita', prove.unita); g.style.setProperty('--unita-dx', prove.dx); g.style.setProperty('--unita-dy', prove.dy);
   }
   if (!gruppi.size) return;
-  // il ricalcolo intorno ai gruppi fermi; chi resta con un divieto prova il suo candidato dopo o si scioglie. Un giro per posto e uno
-  // in più: all'ultimo giro chi è male si scioglie soltanto, così nessun posto resta senza controllo
-  const giri = [...gruppi.values()].reduce((t, r) => t + 1 + r.resto.length, 1), fermi = () => settori.filter((s) => s.hasAttribute('data-fermo'));
-  for (let giro = 0; giro < giri; giro++) {
-    disponi();
+  // il ricalcolo intorno ai gruppi fermi (al più RICALCOLI); chi resta con un divieto prova il suo candidato dopo o si scioglie. Con 0
+  // i gruppi si provano sopra il ricalcolo libero (nomi e altri gruppi restano dove sono) e chi è male torna al suo posto libero
+  const fermi = () => settori.filter((s) => s.hasAttribute('data-fermo'));
+  for (let fatti = 0; ; ) {
+    if (RICALCOLI) { disponi(); fatti++; }
     const ora = new Map(settori.map((s) => [s, pena(s, settori)])), cresce = (s: HTMLElement) => (ora.get(s) ?? 0) - (pena0.get(s) ?? 0);
     const male = fermi().filter((s) => divieto(s, settori, m) || cresce(s) > 0.5);
     if (!male.length && tutta((s) => ora.get(s) ?? 0) > tutta((s) => pena0.get(s) ?? 0) + 0.5) { // in tutto peggio: il fermo che pesa di più
@@ -155,10 +173,10 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: () => voi
         const [a, b] = centro(r.getBoundingClientRect()); return Math.hypot(a - x, b - y); };
       const f = fermi().sort((a, b) => d(a) - d(b))[0]; if (f) male.push(f); }
     if (!male.length) return;
-    for (const s of male) { const gr = gruppi.get(s), dopo = giro < giri - 1 ? gr?.resto.shift() : undefined;
+    if (RICALCOLI && fatti >= RICALCOLI) { ripristina(libera); return; } // tetto: il ricalcolo libero, senza rifarlo
+    for (const s of male) { const gr = gruppi.get(s), dopo = gr?.resto.shift();
       if (gr && dopo) { fissa(s, gr, dopo, prima); continue; }
-      s.removeAttribute('data-fermo'); for (const c of figli(s)) c.style.removeProperty('order'); }
-    if (!fermi().length) break;
+      if (RICALCOLI) { s.removeAttribute('data-fermo'); for (const c of figli(s)) c.style.removeProperty('order'); } else ripristina(libera.filter((f) => f.s === s)); }
+    if (!fermi().length) { if (RICALCOLI) ripristina(libera); return; }
   }
-  disponi();
 }
