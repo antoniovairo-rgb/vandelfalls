@@ -30,7 +30,7 @@
 import { join } from 'node:path';
 import { chiamateCostruite, SOGLIE } from './sonda-altezze.mjs';
 import { effettoMossa } from '../src/logica/previsione.ts';
-import { misuraAnelli } from './anelli-mossa.mjs';
+import { misuraAnelli, registraConSegni } from './anelli-mossa.mjs';
 import { controllaSalti, lontananze, VICINANZA_MAX } from './salti-po152b.mjs';
 import { controllaSegno } from './segno-po152b.mjs';
 
@@ -213,6 +213,7 @@ async function controllaRadio(browser, url, larghezza, h, rossi, dati, dich, epi
     if (ok) await p.evaluate(() => { const t = globalThis.__posti = []; const reg = () => { const r = document.querySelector('.radio-mappa');
       if (r && document.querySelector('[data-messaggio="risposta"]')) { const k = `${r.className} ${r.style.getPropertyValue('--radio-y')}`, s = !!document.querySelector('.mappa [data-segno]');
         if (t.at(-1)?.k !== k || t.at(-1)?.s !== s) t.push({ t: performance.now(), k, s }); } requestAnimationFrame(reg); }; reg(); });
+    if (ok) await registraConSegni(p); // rosso C272A01 (D-280)
     if (ok) { await p.click(`[data-opzione="${ch.opzioni[0].id}"]`); await p.click('[data-conferma]').catch(() => {}); }
     const pronta = ok && await puoi(p);
     if (!pronta) { await p.close(); continue; } // nessuna mossa dopo questa chiamata (ultima dell'ondata): la prossima

@@ -49,6 +49,12 @@ const leggiPagina = (p) => p.evaluate(() => {
   return { mappa, copia, tratteggi: [...new Set(tratteggi)], bersagli: [...unita.map((x) => ({ ...x, tipo: 'unità' })), ...settori.map((x) => ({ ...x, tipo: 'settore' }))], settori };
 });
 
+/** Rosso C272A01: registra nella pagina, a ogni fotogramma coi segni ▲/▼, dove stanno le pastiglie delle unità (non dipende dal carico). */
+export const registraConSegni = (p) => p.evaluate(() => { if (!globalThis.__NO_C272A01) return;
+  const reg = () => { if (document.querySelector('.mappa.mossa [data-segno]')) globalThis.__conSegni = [...document.querySelectorAll('.mappa.mossa [data-presenza]:not(:disabled) .pastiglia')]
+    .map((e) => { const r = e.getBoundingClientRect(); return { id: e.closest('[data-presenza]').dataset.presenza, l: r.left, t: r.top, r: r.right, b: r.bottom }; });
+    requestAnimationFrame(reg); }; reg(); });
+
 /** Misura in uno stato: { copia (la copia sotto la mappa si vede), tratteggi, sotto (bersagli con un lato sotto 3:1, o senza anello su nessun lato), minimo (contrasto
  *  più basso), lati (visti, provati), sovrapposti, n }. Un lato coperto (da «Home», da un nome, da un'altra pastiglia) non si
  *  misura: l'anello deve vedersi almeno da un lato e ogni lato visto deve stare a ≥ 3:1. */
@@ -63,7 +69,11 @@ export async function misuraAnelli(p) {
   // Rosso C272A01 (strumento, deterministico): posizioni lette coi segni, foto dopo che sono spariti, senza rilettura.
   const rosso = await p.evaluate(() => !!globalThis.__NO_C272A01).catch(() => false);
   let g = await leggiPagina(p), riprese = 0;
-  if (rosso) { await p.waitForFunction(() => !document.querySelector('.mappa [data-segno]'), null, { timeout: 5000 }).catch(() => {}); await p.waitForTimeout(300); }
+  if (rosso) { await p.waitForFunction(() => !document.querySelector('.mappa [data-segno]'), null, { timeout: 5000 }).catch(() => {}); await p.waitForTimeout(300);
+    // D-280 (CI 1419, cieco 3 su 3; da solo vede, 6 in parallelo 2-3 su 6): sotto carico i segni (1,8 s veri) sparivano prima della
+    // lettura e le due letture coincidevano. Ora le unità «coi segni» sono quelle dell'ultimo fotogramma coi segni, registrate nella pagina
+    const cs = await p.evaluate(() => globalThis.__conSegni ?? null).catch(() => null);
+    if (cs) g = { ...g, bersagli: g.bersagli.map((x) => (x.tipo === 'unità' ? { ...x, ...(cs.find((y) => y.id === x.id) ?? {}) } : x)) }; }
   let img = leggiPng(await p.screenshot());
   if (!rosso) for (let dopo = await leggiPagina(p); JSON.stringify(dopo.bersagli) !== JSON.stringify(g.bersagli) && riprese < 5; dopo = await leggiPagina(p)) { riprese++; await p.waitForTimeout(100); g = await leggiPagina(p); img = leggiPng(await p.screenshot()); }
   const sotto = [], sovrapposti = [], lati = [0, 0];
