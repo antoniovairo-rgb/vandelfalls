@@ -82,6 +82,9 @@ export function disponiFermi(mappa: HTMLElement, prima: Prima | null, disponi: (
 // contro 3,4 di main). RICALCOLI: quanti ricalcoli intorno ai gruppi fermi, oltre a quello libero; finiti con qualcosa di male si
 // torna al ricalcolo libero fotografato, senza rifarlo
 const RICALCOLI = 1;
+// D-280 (revisione 2, E): quanto può crescere la sovrapposizione coi gruppi fermi, in frazione dell'area di una pastiglia (era 0,5 px²:
+// e02 squadre@stazione → curva_ospiti si scioglieva per +17 px² e una pastiglia saltava di 79 px)
+const TOLLERANZA = 0;
 type Foto = { s: HTMLElement; attr: (string | null)[]; nome: string[]; stretto: boolean; gruppo: string[]; ordini: string[] };
 const ATTR = ['data-unita', 'data-nome', 'data-fermo'], NOME = ['max-width', '--nome-dx', '--nome-dy'], GRUPPO = ['--unita-dx', '--unita-dy'];
 const fotografa = (settori: HTMLElement[]): Foto[] => settori.map((s) => { const n = s.querySelector<HTMLElement>('.settore-nome'), g = s.querySelector<HTMLElement>('.settore-unita');
@@ -169,12 +172,13 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: (soli?: R
   if (!gruppi.size) return;
   // il ricalcolo intorno ai gruppi fermi (al più RICALCOLI); chi resta con un divieto prova il suo candidato dopo o si scioglie. Con 0
   // i gruppi si provano sopra il ricalcolo libero (nomi e altri gruppi restano dove sono) e chi è male torna al suo posto libero
-  const fermi = () => settori.filter((s) => s.hasAttribute('data-fermo'));
+  const fermi = () => settori.filter((s) => s.hasAttribute('data-fermo')), pa = mappa.querySelector('.settore-unita .pastiglia')?.getBoundingClientRect();
+  const toll = Math.max(0.5, TOLLERANZA * (pa ? pa.width * pa.height : 0));
   for (let fatti = 0; ; ) {
     if (RICALCOLI) { disponi(vicini(settori, fermi(), larga)); fatti++; }
     const ora = new Map(settori.map((s) => [s, pena(s, settori)])), cresce = (s: HTMLElement) => (ora.get(s) ?? 0) - (pena0.get(s) ?? 0);
-    const male = fermi().filter((s) => divieto(s, settori, m) || cresce(s) > 0.5);
-    if (!male.length && tutta((s) => ora.get(s) ?? 0) > tutta((s) => pena0.get(s) ?? 0) + 0.5) { // in tutto peggio: il fermo che pesa di più
+    const male = fermi().filter((s) => divieto(s, settori, m) || cresce(s) > toll);
+    if (!male.length && tutta((s) => ora.get(s) ?? 0) > tutta((s) => pena0.get(s) ?? 0) + toll) { // in tutto peggio: il fermo che pesa di più
       const f = fermi().sort((a, b) => cresce(b) - cresce(a))[0]; if (f) male.push(f); }
     const saltati = male.length ? [] : settori.filter((s) => (!s.hasAttribute('data-fermo') ? via(s) : nomeVia(s)) > (via0.get(s) ?? 0) + 0.5);
     const punto = saltati[0]?.querySelector('.settore-punto');
