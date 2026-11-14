@@ -71,7 +71,7 @@ function pena(s: HTMLElement, settori: HTMLElement[]): number {
 const viste = new WeakMap<HTMLElement, Map<string, number>>();
 
 /** Ricalcolo della mossa con le pastiglie rimaste ferme dove si può (vedi sopra). `disponi` è il ricalcolo di etichette.ts. */
-export function disponiFermi(mappa: HTMLElement, prima: Prima | null, disponi: () => void) {
+export function disponiFermi(mappa: HTMLElement, prima: Prima | null, disponi: (soli?: ReadonlySet<HTMLElement>) => void) {
   const prime = viste.get(mappa);
   fermiDentro(mappa, prima, disponi, prime);
   const settori = [...mappa.querySelectorAll<HTMLElement>('[data-settore]')];
@@ -93,6 +93,16 @@ function ripristina(fs: Foto[]) {
     ATTR.forEach((a, i) => { const v = f.attr[i]; if (v == null) f.s.removeAttribute(a); else f.s.setAttribute(a, v); });
     NOME.forEach((k, i) => metti(n, k, f.nome[i])); n?.classList.toggle('stretto', f.stretto); GRUPPO.forEach((k, i) => metti(g, k, f.gruppo[i]));
     figli(f.s).forEach((c, i) => metti(c, 'order', f.ordini[i] ?? '')); }
+}
+
+// i settori da rifare intorno ai gruppi fermi: loro stessi e chi ha nome o pastiglie (a una larghezza) dove può finire il gruppo fermo o
+// il suo nome, che si rifà negli 8 posti intorno al disco (e26 a 360, steward@tribuna_autorita → curva_larkspire: col solo gruppo il nome
+// della tribuna finiva su Piazzale, 358 px², e il gruppo si scioglieva: 30/176 come senza fermi)
+function vicini(settori: HTMLElement[], fermi: HTMLElement[], larga: number): Set<HTMLElement> {
+  const largo = (r: Rett, x: number, y: number) => ({ left: r.left - x, top: r.top - y, right: r.right + x, bottom: r.bottom + y });
+  const zone = fermi.flatMap((s) => { const u = unisci(vis(s)), n = nomeDi(s), d = s.querySelector('.settore-punto')?.getBoundingClientRect();
+    return [...(u ? [largo(u, larga, larga)] : []), ...(n && d ? [largo(d, n.right - n.left + larga, n.bottom - n.top + larga)] : [])]; });
+  return new Set([...fermi, ...settori.filter((s) => [nomeDi(s), ...vis(s)].some((r) => r && zone.some((z) => area(r, z) > 0)))]);
 }
 
 type Posto = { max: number; ordine: number; dx: number; dy: number };
@@ -126,7 +136,7 @@ function fissa(s: HTMLElement, gr: Omit<Gruppo, 'resto'>, p: Posto, prima: Prima
   for (const c of figli(s)) { const k = chiaveUnita(c); if (k && !prima.centri.has(k)) c.style.setProperty('order', String(p.ordine)); else c.style.removeProperty('order'); }
 }
 
-function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: () => void, prime: Map<string, number> | undefined) {
+function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: (soli?: ReadonlySet<HTMLElement>) => void, prime: Map<string, number> | undefined) {
   sciogli(mappa); disponi();
   // solo dopo la mossa (data-mossa «fatta»): prima della mossa la disposizione resta quella di sempre (e36 a 360: tenere i gruppi già
   // all'arrivo della risposta cambiava la disposizione di partenza e la mossa poi saltava di più)
@@ -161,7 +171,7 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: () => voi
   // i gruppi si provano sopra il ricalcolo libero (nomi e altri gruppi restano dove sono) e chi è male torna al suo posto libero
   const fermi = () => settori.filter((s) => s.hasAttribute('data-fermo'));
   for (let fatti = 0; ; ) {
-    if (RICALCOLI) { disponi(); fatti++; }
+    if (RICALCOLI) { disponi(vicini(settori, fermi(), larga)); fatti++; }
     const ora = new Map(settori.map((s) => [s, pena(s, settori)])), cresce = (s: HTMLElement) => (ora.get(s) ?? 0) - (pena0.get(s) ?? 0);
     const male = fermi().filter((s) => divieto(s, settori, m) || cresce(s) > 0.5);
     if (!male.length && tutta((s) => ora.get(s) ?? 0) > tutta((s) => pena0.get(s) ?? 0) + 0.5) { // in tutto peggio: il fermo che pesa di più
