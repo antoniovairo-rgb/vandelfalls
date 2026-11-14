@@ -81,7 +81,7 @@ export function disponiFermi(mappa: HTMLElement, prima: Prima | null, disponi: (
 // D-280 (revisione 2, A): ogni ricalcolo di etichette.ts costa (e12 a 360, CPU ×4: circa 2 s l'uno; erano fino a 5 per mossa, 10,9 s
 // contro 3,4 di main). RICALCOLI: quanti ricalcoli intorno ai gruppi fermi, oltre a quello libero; finiti con qualcosa di male si
 // torna al ricalcolo libero fotografato, senza rifarlo
-const RICALCOLI = 2;
+const RICALCOLI = 1;
 type Foto = { s: HTMLElement; attr: (string | null)[]; nome: string[]; stretto: boolean; gruppo: string[]; ordini: string[] };
 const ATTR = ['data-unita', 'data-nome', 'data-fermo'], NOME = ['max-width', '--nome-dx', '--nome-dy'], GRUPPO = ['--unita-dx', '--unita-dy'];
 const fotografa = (settori: HTMLElement[]): Foto[] => settori.map((s) => { const n = s.querySelector<HTMLElement>('.settore-nome'), g = s.querySelector<HTMLElement>('.settore-unita');
@@ -95,9 +95,13 @@ function ripristina(fs: Foto[]) {
     figli(f.s).forEach((c, i) => metti(c, 'order', f.ordini[i] ?? '')); }
 }
 
-// i settori da rifare intorno ai gruppi fermi: loro stessi e chi ha nome o pastiglie entro una larghezza da un gruppo fermo
+// i settori da rifare intorno ai gruppi fermi: loro stessi e chi ha nome o pastiglie (a una larghezza) dove può finire il gruppo fermo o
+// il suo nome, che si rifà negli 8 posti intorno al disco (e26 a 360, steward@tribuna_autorita → curva_larkspire: col solo gruppo il nome
+// della tribuna finiva su Piazzale, 358 px², e il gruppo si scioglieva: 30/176 come senza fermi)
 function vicini(settori: HTMLElement[], fermi: HTMLElement[], larga: number): Set<HTMLElement> {
-  const zone = fermi.flatMap((s) => { const u = unisci(vis(s)); return u ? [{ left: u.left - larga, top: u.top - larga, right: u.right + larga, bottom: u.bottom + larga }] : []; });
+  const largo = (r: Rett, x: number, y: number) => ({ left: r.left - x, top: r.top - y, right: r.right + x, bottom: r.bottom + y });
+  const zone = fermi.flatMap((s) => { const u = unisci(vis(s)), n = nomeDi(s), d = s.querySelector('.settore-punto')?.getBoundingClientRect();
+    return [...(u ? [largo(u, larga, larga)] : []), ...(n && d ? [largo(d, n.right - n.left + larga, n.bottom - n.top + larga)] : [])]; });
   return new Set([...fermi, ...settori.filter((s) => [nomeDi(s), ...vis(s)].some((r) => r && zone.some((z) => area(r, z) > 0)))]);
 }
 
