@@ -10,7 +10,7 @@ import { disponiFermi } from './fermi.ts'; // D-279: le pastiglie rimaste ferme 
 
 // Interruttore rosso C05S08: nomi e unità restano al posto fisso (difetto C-008).
 // D-272 (passo 3): si ricalcola solo se cambiano gli ingressi (congela.ts)
-const disponi = (el: HTMLElement) => { if (!spento('C05S08') && !rimettiUguale(el)) { const f = firmaDi(el), p = primaDi(el, f); disponiFermi(el, p, () => disponiEtichette(el, p)); tieni(el, f); } collocaRadio(el); collocaSegni(el); }; // D-255; D-272 passo 4: il segno della mossa dove non copre: il riquadro radio dopo le unità
+const disponi = (el: HTMLElement) => { if (!spento('C05S08') && !rimettiUguale(el)) { const f = firmaDi(el), p = primaDi(el, f); disponiFermi(el, p, (soli) => disponiEtichette(el, p, soli)); tieni(el, f); } collocaRadio(el); collocaSegni(el); }; // D-255; D-272 passo 4: il segno della mossa dove non copre: il riquadro radio dopo le unità
 import type { Disposizione, Missione } from '../../logica/tipi.ts';
 import { spento } from '../../interruttori.ts';
 import { club, t, quante } from '../dati.ts';

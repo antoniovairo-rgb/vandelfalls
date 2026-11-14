@@ -71,7 +71,7 @@ function pena(s: HTMLElement, settori: HTMLElement[]): number {
 const viste = new WeakMap<HTMLElement, Map<string, number>>();
 
 /** Ricalcolo della mossa con le pastiglie rimaste ferme dove si può (vedi sopra). `disponi` è il ricalcolo di etichette.ts. */
-export function disponiFermi(mappa: HTMLElement, prima: Prima | null, disponi: () => void) {
+export function disponiFermi(mappa: HTMLElement, prima: Prima | null, disponi: (soli?: ReadonlySet<HTMLElement>) => void) {
   const prime = viste.get(mappa);
   fermiDentro(mappa, prima, disponi, prime);
   const settori = [...mappa.querySelectorAll<HTMLElement>('[data-settore]')];
@@ -81,7 +81,7 @@ export function disponiFermi(mappa: HTMLElement, prima: Prima | null, disponi: (
 // D-280 (revisione 2, A): ogni ricalcolo di etichette.ts costa (e12 a 360, CPU ×4: circa 2 s l'uno; erano fino a 5 per mossa, 10,9 s
 // contro 3,4 di main). RICALCOLI: quanti ricalcoli intorno ai gruppi fermi, oltre a quello libero; finiti con qualcosa di male si
 // torna al ricalcolo libero fotografato, senza rifarlo
-const RICALCOLI = 1;
+const RICALCOLI = 2;
 type Foto = { s: HTMLElement; attr: (string | null)[]; nome: string[]; stretto: boolean; gruppo: string[]; ordini: string[] };
 const ATTR = ['data-unita', 'data-nome', 'data-fermo'], NOME = ['max-width', '--nome-dx', '--nome-dy'], GRUPPO = ['--unita-dx', '--unita-dy'];
 const fotografa = (settori: HTMLElement[]): Foto[] => settori.map((s) => { const n = s.querySelector<HTMLElement>('.settore-nome'), g = s.querySelector<HTMLElement>('.settore-unita');
@@ -93,6 +93,12 @@ function ripristina(fs: Foto[]) {
     ATTR.forEach((a, i) => { const v = f.attr[i]; if (v == null) f.s.removeAttribute(a); else f.s.setAttribute(a, v); });
     NOME.forEach((k, i) => metti(n, k, f.nome[i])); n?.classList.toggle('stretto', f.stretto); GRUPPO.forEach((k, i) => metti(g, k, f.gruppo[i]));
     figli(f.s).forEach((c, i) => metti(c, 'order', f.ordini[i] ?? '')); }
+}
+
+// i settori da rifare intorno ai gruppi fermi: loro stessi e chi ha nome o pastiglie entro una larghezza da un gruppo fermo
+function vicini(settori: HTMLElement[], fermi: HTMLElement[], larga: number): Set<HTMLElement> {
+  const zone = fermi.flatMap((s) => { const u = unisci(vis(s)); return u ? [{ left: u.left - larga, top: u.top - larga, right: u.right + larga, bottom: u.bottom + larga }] : []; });
+  return new Set([...fermi, ...settori.filter((s) => [nomeDi(s), ...vis(s)].some((r) => r && zone.some((z) => area(r, z) > 0)))]);
 }
 
 type Posto = { max: number; ordine: number; dx: number; dy: number };
@@ -126,7 +132,7 @@ function fissa(s: HTMLElement, gr: Omit<Gruppo, 'resto'>, p: Posto, prima: Prima
   for (const c of figli(s)) { const k = chiaveUnita(c); if (k && !prima.centri.has(k)) c.style.setProperty('order', String(p.ordine)); else c.style.removeProperty('order'); }
 }
 
-function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: () => void, prime: Map<string, number> | undefined) {
+function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: (soli?: ReadonlySet<HTMLElement>) => void, prime: Map<string, number> | undefined) {
   sciogli(mappa); disponi();
   // solo dopo la mossa (data-mossa «fatta»): prima della mossa la disposizione resta quella di sempre (e36 a 360: tenere i gruppi già
   // all'arrivo della risposta cambiava la disposizione di partenza e la mossa poi saltava di più)
@@ -161,7 +167,7 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: () => voi
   // i gruppi si provano sopra il ricalcolo libero (nomi e altri gruppi restano dove sono) e chi è male torna al suo posto libero
   const fermi = () => settori.filter((s) => s.hasAttribute('data-fermo'));
   for (let fatti = 0; ; ) {
-    if (RICALCOLI) { disponi(); fatti++; }
+    if (RICALCOLI) { disponi(vicini(settori, fermi(), larga)); fatti++; }
     const ora = new Map(settori.map((s) => [s, pena(s, settori)])), cresce = (s: HTMLElement) => (ora.get(s) ?? 0) - (pena0.get(s) ?? 0);
     const male = fermi().filter((s) => divieto(s, settori, m) || cresce(s) > 0.5);
     if (!male.length && tutta((s) => ora.get(s) ?? 0) > tutta((s) => pena0.get(s) ?? 0) + 0.5) { // in tutto peggio: il fermo che pesa di più
