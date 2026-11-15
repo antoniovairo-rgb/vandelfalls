@@ -63,7 +63,10 @@ async function premuto(p, sel) {
   if (!nodeId) { await cdp.detach(); return null; }
   const vista = () => p.evaluate((sel) => { const e = document.querySelector(sel), dentro = e.querySelector('.pastiglia') ?? e, cs = getComputedStyle(e), cd = getComputedStyle(dentro), dopo = getComputedStyle(e, '::after'), r = e.getBoundingClientRect();
     return { aspetto: [cs.transform, cs.boxShadow, cs.backgroundColor, cd.backgroundColor, dopo.backgroundColor].join('|'), x: r.left, y: r.top }; }, sel);
-  const prima = await vista(); await cdp.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: ['active'] });
+  // N4 (revisione): si legge a transizioni finite (anche ::after), non subito dopo il cambio di stato
+  const ferma = () => p.evaluate((sel) => Promise.all(document.querySelector(sel).getAnimations({ subtree: true }).map((a) => a.finished.catch(() => {}))), sel);
+  await ferma(); const prima = await vista(); await cdp.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: ['active'] });
+  await p.evaluate(() => new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)))); await ferma();
   const sotto = await vista(); await cdp.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: [] }); await cdp.detach();
   return { cambia: prima.aspetto !== sotto.aspetto, sposta: Math.round(Math.hypot(sotto.x - prima.x, sotto.y - prima.y) * 10) / 10 };
 }
@@ -81,6 +84,17 @@ export async function controllaD283(browser, url, larghezza, rossi = [], cartell
   const male = [], mis = { larghezza };
   if (cartella) mkdirSync(cartella, { recursive: true });
   const foto = async (p, nome, clip) => { if (cartella) await p.screenshot({ path: join(cartella, `${larghezza}-${nome}.png`), ...(clip ? { clip } : {}) }); };
+  // R1 (revisione): vassoio e barra «Conferma» restano dove sono quando tutte le unità sono finite (stato «tutte finite»)
+  const posa = (p) => p.evaluate(() => ({ vassoio: Math.round(document.querySelector('.vassoio').getBoundingClientRect().height * 10) / 10, barra: Math.round(document.querySelector('[data-barra]').getBoundingClientRect().top * 10) / 10 }));
+  const tutteFinite = async (p, dove, posa0, nome) => {
+    for (let k = 0; k < 80; k++) { const u = p.locator('.vassoio [data-risorsa]:not(:disabled)').first(); if (!(await u.count())) break;
+      await u.click(); await p.locator('.mappa:not(.citta) [data-settore] .settore-punto').first().click({ force: true }); await p.waitForTimeout(60); }
+    await quieta(p); const posa1 = await posa(p), restano = await p.locator('.vassoio [data-risorsa]:not(:disabled)').count();
+    mis[`tutteFinite ${dove}`] = { prima: posa0, dopo: posa1, restano };
+    if (restano) male.push(`${dove}: ${restano} unità non finite dopo il giro «tutte finite» (D-283 R1)`);
+    if (Math.abs(posa1.vassoio - posa0.vassoio) > 0.5) male.push(`${dove}: con tutte le unità finite il vassoio passa da ${posa0.vassoio} a ${posa1.vassoio} px (D-283 R1)`);
+    if (Math.abs(posa1.barra - posa0.barra) > 0.5) male.push(`${dove}: con tutte le unità finite la barra «Conferma» si sposta da y ${posa0.barra} a ${posa1.barra} (D-283 R1)`);
+    await foto(p, `schieramento-${nome}`); await foto(p, `schieramento-${nome}-vassoio`, await p.locator('.vassoio').boundingBox()); };
   // --- schieramento (D-12, D-13, D-09), 760 di altezza come il giro degli schieramenti
   { const st = conRiposo(), p = await nuova(browser, larghezza, 760, rossi), dove = `${larghezza}x760 ${st?.m.id} ondata ${st?.n} schieramento`;
     await p.goto(url); await p.evaluate(([k, v]) => localStorage.setItem(k, v), [CHIAVE, JSON.stringify({ ...base, in_corso: st.s })]); await p.reload();
@@ -89,11 +103,12 @@ export async function controllaD283(browser, url, larghezza, rossi = [], cartell
     else {
       await quieta(p);
       const b = await p.evaluate(() => { const barra = document.querySelector('[data-barra]'), r = barra.getBoundingClientRect(), cs = getComputedStyle(barra);
-        const ps = [...barra.querySelectorAll('button')].map((x) => ({ azione: x.dataset.azione, parola: [...x.childNodes].filter((n) => n.nodeType === 3 || n.matches?.('span')).map((n) => n.textContent.trim()).join(''), w: x.getBoundingClientRect().width, l: x.getBoundingClientRect().left, d: x.getBoundingClientRect().right, taglio: x.scrollWidth > x.clientWidth + 1 || [...x.querySelectorAll('span')].some((s) => s.scrollWidth > s.clientWidth + 1) }));
-        return { larga: Math.round(r.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)), alta: Math.round(r.height), occupa: Math.round(Math.max(...ps.map((x) => x.d)) - Math.min(...ps.map((x) => x.l))), ps };
+        const ps = [...barra.querySelectorAll('button')].map((x) => ({ azione: x.dataset.azione, parola: [...x.childNodes].filter((n) => n.nodeType === 3 || n.matches?.('span')).map((n) => n.textContent.trim()).join(''), w: x.getBoundingClientRect().width, l: x.getBoundingClientRect().left, d: x.getBoundingClientRect().right, t: Math.round(x.getBoundingClientRect().top), taglio: x.scrollWidth > x.clientWidth + 1 || [...x.querySelectorAll('span')].some((s) => s.scrollWidth > s.clientWidth + 1) }));
+        return { larga: Math.round(r.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)), alta: Math.round(r.height), occupa: Math.round(Math.max(...ps.map((x) => x.d)) - Math.min(...ps.map((x) => x.l))), righe: new Set(ps.map((x) => x.t)).size, ps };
       });
       mis.barra = { larga: b.larga, alta: b.alta, occupa: b.occupa, pulsanti: b.ps.map((x) => `${x.azione}:${Math.round(x.w)}«${x.parola}»`) };
       for (const a of ['annulla', 'aiuto', 'azzera']) { const x = b.ps.find((y) => y.azione === a); if (x && !x.parola) male.push(`${dove}: «${a}» con la sola icona, nessuna parola a schermo (D-283 D-12)`); }
+      if (b.righe !== 1) male.push(`${dove}: al testo normale la barra va su ${b.righe} righe, deve restarne una (D-283 N1)`);
       if (b.occupa > b.larga + 0.5) male.push(`${dove}: i pulsanti della barra occupano ${b.occupa} px su ${b.larga} (D-283 D-12)`);
       for (const x of b.ps.filter((y) => y.taglio)) male.push(`${dove}: testo tagliato in «${x.azione}» (D-283 D-12)`);
       await foto(p, 'schieramento-barra', await p.locator('[data-barra]').boundingBox());
@@ -104,6 +119,8 @@ export async function controllaD283(browser, url, larghezza, rossi = [], cartell
       // D-13: Home, «i» e «?» (quello della barra è un .pulsante: lo era già)
       mis.premuto = {};
       for (const [nome, sel] of [['home', '[data-azione="home"]'], ['i', '.info'], ['aiuto', '[data-azione="aiuto"]']]) mis.premuto[nome] = await premuto(p, sel);
+      // R1 (revisione): vassoio e barra «Conferma» prima di finire le unità; poi devono restare dove sono in ogni stato
+      const posa0 = await posa(p);
       // D-09: si finisce l'unità con meno pezzi (la si mette tutta su un settore)
       const r = await p.evaluate(() => [...document.querySelectorAll('.vassoio [data-risorsa]:not(:disabled)')].map((x) => [x.dataset.risorsa, Number(x.querySelector('strong')?.textContent)]).sort((a, c) => a[1] - c[1])[0]?.[0]);
       for (let k = 0; k < 12 && r && !(await p.locator(`.vassoio [data-risorsa="${r}"]`).isDisabled()); k++) {
@@ -113,7 +130,7 @@ export async function controllaD283(browser, url, larghezza, rossi = [], cartell
         if (!x) { male.push(`${dove}: manca ${nome} da premere (D-283 D-13)`); continue; } // anche la «i»: se l'ondata scelta non l'ha, il giro va cambiato, non saltato
         if (!x.cambia) male.push(`${dove}: ${nome} premuto senza nessun segno (D-283 D-13)`);
       }
-      const finita = await contrasto(p, `.vassoio [data-risorsa="${r}"]:disabled :is(.unita-nome, strong)`); mis.finita = finita;
+      const finita = await contrasto(p, `.vassoio [data-risorsa="${r}"]:disabled :is(.unita-nome, strong:not(.posto))`); mis.finita = finita;
       if (!finita.length) male.push(`${dove}: nessuna unità finita da misurare (D-283 D-09)`);
       for (const x of finita.filter((y) => !(y.rapporto >= SOGLIA))) male.push(`${dove}: unità finita «${x.testo}» a ${x.rapporto}:1, serve ${SOGLIA} (D-283 D-09)`);
       if (finita.length && !(await p.locator(`.vassoio [data-risorsa="${r}"] [data-tutte]`).count())) male.push(`${dove}: l'unità finita non dice «✓ tutte» (D-283 D-09)`);
@@ -122,8 +139,6 @@ export async function controllaD283(browser, url, larghezza, rossi = [], cartell
         fuori: [...document.querySelectorAll('.vassoio .unita')].flatMap((u) => { const b = u.getBoundingClientRect(), bordo = parseFloat(getComputedStyle(u).borderTopWidth);
           return [...u.querySelectorAll(':scope > :not(.unita-fissa)')].filter((c) => { const r = c.getBoundingClientRect(); return r.top < b.top + bordo - 0.5 || r.bottom > b.bottom - bordo + 0.5 || r.left < b.left + bordo - 0.5 || r.right > b.right - bordo + 0.5; })
             .map((c) => `${u.dataset.risorsa}: «${c.textContent.trim()}»`); }),
-        sottoLucchetto: [...document.querySelectorAll('.vassoio .unita')].filter((u) => { const l = u.querySelector('.unita-fissa')?.getBoundingClientRect(), c = u.querySelector('[data-tutte]')?.getBoundingClientRect();
-          return l && c && Math.min(l.right, c.right) - Math.max(l.left, c.left) > 0.5 && Math.min(l.bottom, c.bottom) - Math.max(l.top, c.top) > 0.5; }).map((u) => u.dataset.risorsa),
         // il contenuto vero di «tutte» (icona e testo, con un Range: il riquadro del badge può stare dentro e il testo uscire) sta dentro
         // il bordo dell'unità e dentro il badge, e non tocca il lucchetto (nessun pixel in comune)
         tutte: [...document.querySelectorAll('.vassoio .unita [data-tutte]')].map((t) => { const u = t.closest('.unita'), b = u.getBoundingClientRect(), bordo = parseFloat(getComputedStyle(u).borderTopWidth);
@@ -141,7 +156,33 @@ export async function controllaD283(browser, url, larghezza, rossi = [], cartell
       for (const x of v.tutte.filter((y) => y.distanza !== null && !(y.distanza >= staccato))) male.push(`${dove}: «tutte» di ${x.r} a ${x.distanza} px dal lucchetto, ne servono ${staccato} (D-283 D-09)`);
       await foto(p, 'schieramento-vassoio', await p.locator('.vassoio').boundingBox());
       await foto(p, 'schieramento');
+      await tutteFinite(p, dove, posa0, 'tutte');
     }
+    await p.close(); }
+  // --- N1 (revisione): testo al 130% (token --testo-* × 1,3, i caratteri sono in px e lo zoom non li tocca): nella barra nessun
+  // pulsante esce né taglia il proprio testo (su main 0; col lotto «Conferma» usciva di 50,5 px a 360 e 35,5 a 375)
+  { const st = partenzeAttente('data')[0], p = await nuova(browser, larghezza, 760, rossi), dove = `${larghezza}x760 ${st.m.id} ondata ${st.n} testo 130%`;
+    await p.addInitScript(() => document.addEventListener('DOMContentLoaded', () => { const s = document.createElement('style'), r = getComputedStyle(document.documentElement);
+      s.textContent = `:root:root { ${['mini', 'piccolo', 'base', 'grande', 'titolo', 'numero', 'logo'].map((a) => `--testo-${a}: calc(1.3 * ${r.getPropertyValue(`--testo-${a}`).trim() || '0px'});`).join(' ')} }`; document.head.append(s); }));
+    await p.goto(url); await p.evaluate(([k, v]) => localStorage.setItem(k, v), [CHIAVE, JSON.stringify({ ...base, in_corso: st.s })]); await p.reload();
+    await p.getByRole('button', { name: 'Riprendi' }).click();
+    if (!(await p.waitForSelector('[data-barra]', { timeout: 15000 }).then(() => true, () => false))) male.push(`${dove}: lo schieramento non si apre (D-283)`);
+    else { await quieta(p);
+      const r = await p.evaluate(() => { const bar = document.querySelector('[data-barra]'), br = bar.getBoundingClientRect(), cs = getComputedStyle(bar), sx = br.left + parseFloat(cs.paddingLeft), dx = br.right - parseFloat(cs.paddingRight);
+        const mini = parseFloat(getComputedStyle(bar.querySelector('.parola-icona') ?? document.body).fontSize); // 12 px al 100%
+        return { mini, ps: [...bar.querySelectorAll('button')].map((x) => { const q = x.getBoundingClientRect(), rg = document.createRange(); rg.selectNodeContents(x); const c = rg.getBoundingClientRect();
+          return { a: x.dataset.azione, fuori: Math.round(Math.max(0, q.right - dx, sx - q.left, c.right - q.right, q.left - c.left, x.scrollWidth - x.clientWidth, c.right - dx) * 10) / 10 }; }) }; });
+      mis.testo130 = r;
+      if (!(r.mini > 15)) male.push(`${dove}: il testo non è ingrandito (--testo-mini ${r.mini} px): misura non valida (D-283 N1)`);
+      for (const x of r.ps.filter((y) => y.fuori > 0)) male.push(`${dove}: «${x.a}» esce dalla barra o taglia il testo di ${x.fuori} px (D-283 N1)`);
+      await foto(p, 'schieramento-130', await p.locator('[data-barra]').boundingBox()); }
+    await p.close(); }
+  // --- R1 su e01 ondata 1: nessuna unità «a riposo» né montata, quindi nessuna terza riga che tenga alto il vassoio
+  { const st = partenzeAttente('data')[0], p = await nuova(browser, larghezza, 760, rossi), dove = `${larghezza}x760 ${st.m.id} ondata ${st.n} tutte finite`;
+    await p.goto(url); await p.evaluate(([k, v]) => localStorage.setItem(k, v), [CHIAVE, JSON.stringify({ ...base, in_corso: st.s })]); await p.reload();
+    await p.getByRole('button', { name: 'Riprendi' }).click();
+    if (!(await p.waitForSelector('[data-barra]', { timeout: 15000 }).then(() => true, () => false))) male.push(`${dove}: lo schieramento non si apre (D-283)`);
+    else { await quieta(p); await tutteFinite(p, dove, await posa(p), 'e01-tutte'); }
     await p.close(); }
   // --- verbale (D-10): ultimo passo a 640 e 667 (dove la nota finiva sotto la barra) e alla larghezza a 760
   { const sal = JSON.stringify(verbaleSuperato());
@@ -183,11 +224,10 @@ export async function controllaD283(browser, url, larghezza, rossi = [], cartell
     // a più posizioni di scorrimento (un quarto di finestra alla volta): la versione è fissa, le schede passano
     const s0 = [], fine = await p.evaluate(() => document.scrollingElement.scrollHeight - innerHeight);
     for (let y = 0; ; y = Math.min(fine, y + Math.round(h / 4))) { await p.evaluate((y) => scrollTo(0, y), y); await p.waitForTimeout(60); s0.push(...await sopra()); if (y >= fine) break; }
-    const s1 = [];
     const fondo = await p.evaluate(() => { const v = document.querySelector('.scena [data-versione]'); if (!v) return null; const ultimo = [...document.querySelectorAll('.scena *')].filter((e) => e.getClientRects().length).reduce((m, e) => Math.max(m, e.getBoundingClientRect().bottom), 0);
       return { testo: v.textContent, inFondo: v.getBoundingClientRect().bottom >= ultimo - 0.5 }; });
-    mis[`crediti${h}`] = { sopra: [...s0, ...s1], fondo };
-    if (s0.length || s1.length) male.push(`${dove}: la versione nell'angolo sta sul bordo di ${s0.length + s1.length} schede o pulsanti (a ${[...s0, ...s1].join(', ')} px, serve ≥ --spazio-1, D-283 D-15)`);
+    mis[`crediti${h}`] = { sopra: s0, fondo };
+    if (s0.length) male.push(`${dove}: la versione nell'angolo sta sul bordo di ${s0.length} schede o pulsanti (a ${s0.join(', ')} px, serve ≥ --spazio-1, D-283 D-15)`);
     if (!fondo?.inFondo) male.push(`${dove}: manca la versione in fondo alla pagina (D-283 D-15)`);
     await foto(p, `crediti-${h}-fondo`); await p.close(); }
   return { male, mis };
@@ -200,6 +240,8 @@ export const BRACCI_D283 = {
   C283A01: { segno: '(D-283 D-13)', almeno: 2 }, // Home e «i» senza segno («?» della barra è un .pulsante: già premuto)
   C283E01: { segno: '(D-283 D-09)', almeno: 4 }, // riposo 4,17:1, nome 1,91:1, «0» 2,48:1, niente «✓ tutte»
   C283E02: { segno: '«tutte» di ', almeno: 2 }, // transenne fissa: con la spunta tagliata di 3,2 px e a 0 px dal lucchetto
+  C283E04: { segno: '(D-283 R1)', almeno: 2 }, // tutte finite senza segnaposto: vassoio 70 → 50 px e barra 20 px più su
+  C283N01: { segno: '(D-283 N1)', almeno: 1 }, // 130%: «Conferma» fuori dalla barra di 50,5 px a 360
   C283E03: { segno: 'al lettore (D-283 D-09)', almeno: 3 }, // «0 libere» al lettore: squadre, mediatore, transenne
   C283V01: { segno: 'la nota «Mappa: rigioca…» non si vede', almeno: 1 }, // 360×640, titolo su due righe
   C283V02: { segno: 'la fiducia sta sopra la testata', almeno: 3 }, // 640, 667, 760

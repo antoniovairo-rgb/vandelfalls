@@ -5,6 +5,10 @@
    (Schieramento.tsx): solo l'icona. La parola è in minuscolo con l'iniziale grande, per stare nei 328 px della barra a 360. */
 .barra-schieramento.con-parole .pulsante.secondario { flex: 0 0 auto; flex-direction: column; gap: 0; width: auto; min-width: var(--tocco-min); padding: 0 var(--spazio-1); }
 .barra-schieramento.con-parole .parola-icona { font: 700 var(--testo-mini) / 1 var(--font-titoli); text-transform: none; white-space: nowrap; }
+/* N1 (revisione): col testo grande (130%) le parole allargano i tre pulsanti e «Conferma» usciva dalla barra (50,5 px a 360):
+   la barra va a capo e «Conferma» prende la riga sotto, intera. Al 100% resta su una riga. Rosso C283N01: niente a capo. */
+main:not(.rosso-c283n01) .barra-schieramento.con-parole { flex-wrap: wrap; }
+main:not(.rosso-c283n01) .barra-schieramento.con-parole [data-azione="conferma"] { flex: 1 1 0; min-width: min-content; } /* va a capo solo se non ci sta nemmeno il minimo */
 
 /* D-13: stato «premuto» anche su Home, «i» e «?» d'aiuto, con la stessa spinta dei pulsanti (stile.css: .pulsante:active).
    Pastiglie e dischi della mappa restano alla sessione della mappa (D-283). Rosso C283A01: nessun segno al tocco, come prima. */
@@ -39,3 +43,5 @@ main:not(.rosso-c283e01):not(.rosso-c283e02) .unita:has(.unita-fissa) strong.tut
    a 360×640 il verbale fallito di e18 ed e21 scorreva di 3 px (D-187, sonda-altezze). Qui il passo sotto la fiducia sale
    di 4 px e il verbale torna alto come su main. */
 .scena[data-scena="verbale"] > .fiducia + .passi { margin-top: var(--spazio-1); }
+/* R1: segnaposto dello «0» sull'unità finita (Schieramento.tsx): occupa la riga del numero, non si vede. */
+.unita strong.posto { visibility: hidden; }

@@ -131,9 +131,11 @@ export function Schieramento(p: {
               {fisse.includes(r) && <span className="unita-fissa" data-fissa-chip={r}><Icona di={Lock} /></span>}
               {/* D-283 (D-09): l'unità finita dice «tutte» con la spunta (icona: «✓» non è nei caratteri inclusi, D-257) al posto dell'icona (la riga del numero ha già i contatori: lì andava a
                   capo e il vassoio cresceva di 20 px a 360) e non ha lo «0»; il nome per il lettore dice «tutte schierate», come a schermo (WCAG 2.5.3, rosso C283E03: «0 libere»).
+                  Al posto dello «0» resta un segnaposto invisibile: senza, con tutte le unità finite il vassoio scendeva da 70 a
+                  50 px e «Conferma» saliva sotto il dito (revisione R1; rosso C283E04: niente segnaposto).
                   Rosso C283E01: icona e «0», sbiadita come prima */}
               {libere <= 0 && !spento('C283E01') ? <strong className="tutte" data-tutte={r}><Icona di={Check} />tutte</strong> : <Icona di={iconaRisorsa(r)} />}
-              <span className="unita-nome">{t(`risorsa.${r}`)}</span>{(libere > 0 || spento('C283E01')) && <strong>{libere}</strong>}
+              <span className="unita-nome">{t(`risorsa.${r}`)}</span>{(libere > 0 || spento('C283E01')) ? <strong>{libere}</strong> : !spento('C283E04') && <strong className="posto" aria-hidden="true">0</strong>}
               {riposo > 0 && <span className="unita-extra" data-riposo={r}><Icona di={Moon} />{riposo}</span>}
               {montate > 0 && <span className="unita-extra" data-montate={r}><Icona di={Lock} />{montate}</span>}
             </button>
