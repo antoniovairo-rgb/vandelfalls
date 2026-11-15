@@ -32,3 +32,7 @@ main:not(.rosso-c283e01) .unita:has(.unita-fissa) strong.tutte { margin-left: va
 /* D-10 (M-8): nel verbale la nota «Mappa: …» sta sopra i pulsanti (Verbale.tsx); il margine negativo che la avvicinava ai
    pulsanti, da sopra, la portava sull'ombra dell'ultima scheda: qui il margine va sotto, verso i pulsanti. Rosso C283V01 */
 .verbale-fine > [data-spiega]:first-child { margin: var(--spazio-2) 0 calc(-1 * var(--spazio-2)); line-height: 1; } /* riga stretta: a 360×640 «Prossimo episodio» resta toccabile per intero (≥ --tocco-min) */
+/* D-10: la fiducia sotto la testata del verbale costava 4 px in più che sopra (scena da 16 px invece di 12 + fiducia + 4):
+   a 360×640 il verbale fallito di e18 ed e21 scorreva di 3 px (D-187, sonda-altezze). Qui il passo sotto la fiducia sale
+   di 4 px e il verbale torna alto come su main. */
+.scena[data-scena="verbale"] > .fiducia + .passi { margin-top: var(--spazio-1); }

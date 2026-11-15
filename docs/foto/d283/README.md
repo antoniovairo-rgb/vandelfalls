@@ -14,13 +14,13 @@ ingrandite 2×. Strumenti: `node tools/foto-d283.mjs <build> <cartella> 360,375,
 | D-13 stato premuto | `stile-d283.css` | Home e «i»: nessun cambio con `:active` (forzato con CDP) | spinta 3 px + ombra corta, come `.pulsante`; il «?» della barra è un `.pulsante` e lo era già. Pastiglie e dischi: alla sessione della mappa (indicazione della principale) | C283A01: 2 problemi |
 | D-09/M-3 unità finite e a riposo | `Schieramento.tsx`, `stile-d283.css`, `token.css` (`--righe-esaurita`) | a riposo «2» 4,17:1; finita: nome 1,91:1, «0» 2,48:1 (colori composti con le opacità) | a riposo 18,88:1; finita: nome 14,36:1, «✓ tutte» 13,19:1 (contro la riga più scura); vassoio alto 70 px prima e dopo; «tutte» con la spunta (icona: «✓» non è nei caratteri inclusi, D-257) al posto dell'icona dell'unità | C283E01: 4 problemi |
 | D-07/M-5 scheda «fallito» | `stile-d283.css` | scheda 22 px sotto e «Rigioca» a −18,2 px dal riquadro interno, a 760 e 915 per 360/375/412 | nessun taglio, margine ≥ 4 px; mappa allo stesso posto in tutti gli stati (279 px dall'alto a 760/915) | C283F01: 4 problemi a 360 |
-| D-10/M-8 verbale | `Verbale.tsx`, `App.tsx`, `stile-d283.css` | 360×640 e01 «Contenuto a fatica»: nota a 628-647 su 640 (fuori), fiducia sopra la testata a 640/667/760 | nota a 581-594, sopra i pulsanti, senza toccare l'ombra della scheda; fiducia sotto la testata; «Prossimo episodio» visibile 46 px su 51 a scorrimento zero (prima 51) | C283V01: 1; C283V02: 3 |
+| D-10/M-8 verbale | `Verbale.tsx`, `App.tsx`, `stile-d283.css` | 360×640 e01 «Contenuto a fatica»: nota a 628-647 su 640 (fuori), fiducia sopra la testata a 640/667/760 | nota a 577-590, sopra i pulsanti, senza toccare l'ombra della scheda; fiducia sotto la testata; «Prossimo episodio» visibile 50 px su 51 a scorrimento zero (prima 51); verbali falliti di e18/e21 alti come su main (D-187: 640 a 360×640, prima della correzione 643) | C283V01: 1; C283V02: 3 |
 | D-15 versione nei Crediti | `Crediti.tsx`, `stile-d283.css` | versione nell'angolo a 0 px dal bordo di 3 schede (640) e 2 (915) | nell'angolo non c'è; «Versione 0.70.0» in fondo alla pagina | C283C01: 4 problemi |
 | D-16 costo in radio | — | uscito dal lotto (scelta della principale): accorciare il testo sposta le pastiglie della mappa; misure in `d16/APPUNTI.md` | — | — |
 
 ## Limiti dichiarati
-- Il verbale a 360×640 scorre di 45 px (prima 47); con la nota sopra, «Prossimo episodio» è tagliato di 5 px in basso a
-  scorrimento zero (46 su 51 visibili, sopra i 44 del tocco minimo).
+- Il verbale a 360×640 scorre di 41 px (prima 47); a scorrimento zero «Prossimo episodio» è visibile per 50 px su 51
+  (sopra i 44 del tocco minimo).
 - Lo stato premuto è misurato forzando `:active` con CDP, non con un dito vero.
 - Il controllo «tutte» sotto il lucchetto delle unità fisse è stato visto rosso solo sulla foto della prima versione, non con
   un interruttore.
