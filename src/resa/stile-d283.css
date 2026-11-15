@@ -1,0 +1,36 @@
+/* D-283: correzioni grafiche piccole fuori dalla mappa (rapporto del collaudo grafico, codici D-xx). Ogni regola ha il suo
+   interruttore rosso (classe rosso-c283xx su main, App.tsx ROSSI_CSS; guardiano tools/foto-d283.mjs). */
+
+/* D-12 (M-2, idea 5): nella barra dello schieramento la parola sotto l'icona di «Annulla», «Aiuto» e «Azzera». Rosso C283P01
+   (Schieramento.tsx): solo l'icona. La parola è in minuscolo con l'iniziale grande, per stare nei 328 px della barra a 360. */
+.barra-schieramento.con-parole .pulsante.secondario { flex: 0 0 auto; flex-direction: column; gap: 0; width: auto; min-width: var(--tocco-min); padding: 0 var(--spazio-1); }
+.barra-schieramento.con-parole .parola-icona { font: 700 var(--testo-mini) / 1 var(--font-titoli); text-transform: none; white-space: nowrap; }
+
+/* D-13: stato «premuto» anche su Home, «i», pastiglie e dischi. Home e «i» hanno la stessa spinta dei pulsanti
+   (stile.css: .pulsante:active); pastiglie e dischi della mappa cambiano solo fondo, senza muoversi (le loro posizioni le
+   misurano i giri della mossa). Rosso C283A01: nessun segno al tocco, come prima. */
+main:not(.rosso-c283a01) :is(.tasto-home, .info):active { transform: translate(var(--spinta), var(--spinta)); box-shadow: var(--ombra-premuto); }
+main:not(.rosso-c283a01) .tocco-pastiglia:not(:disabled):active .pastiglia { background: var(--ciano); }
+main:not(.rosso-c283a01) .settore-punto:not(:disabled):active::after { background: var(--ciano); }
+
+/* D-09 (M-3, idea 5): l'unità finita non è più sbiadita (opacità 0,4: nome a 2,33-2,62:1) ma a righe, a pieno contrasto,
+   con «✓ tutte» (Schieramento.tsx); il contatore «a riposo» a colore pieno (era opacità 0,55: 3,39-4,17:1). Rosso C283E01. */
+main:not(.rosso-c283e01) .unita:disabled { opacity: 1; background: var(--righe-esaurita); }
+main:not(.rosso-c283e01) .unita-extra { opacity: 1; }
+
+/* D-15: nei Crediti la versione nell'angolo (fissa, 16 × 55 px) stava sopra il bordo delle schede: lì si toglie e la versione
+   va in fondo alla pagina (Crediti.tsx). Rosso C283C01: nell'angolo, come prima. */
+main:not(.rosso-c283c01)[data-schermata="crediti"] .versione-angolo { display: none; }
+
+/* D-07 (M-5): nella scheda compatta della città la riga «Fallito: va rigiocato…» (.avviso, magenta) aveva padding e bordo in
+   più (22 px): con l'altezza fissa di D-243 il contenuto (193 px in 171 a 412) tagliava il bordo basso di «Rigioca». Qui la
+   riga è alta come quella degli altri stati; la scheda resta di --citta-scheda-altezza, la mappa non si muove (D-243).
+   Rosso C283F01: la riga con padding e bordo, come prima. */
+main:not(.rosso-c283f01):not(.rosso-c242m01)[data-schermata="citta"] .scena .scheda.compatta > p.avviso { padding-block: 0; border-block-width: 0; font-size: var(--testo-piccolo); } /* alta come la riga .tenue degli altri stati */
+/* «✓ tutte» sta dove c'è l'icona dell'unità: alta come l'icona, testo minuscolo */
+main:not(.rosso-c283e01) .unita strong.tutte { min-width: 0; height: var(--icona); padding: 0 var(--spazio-1); font-size: var(--testo-mini); text-transform: none; white-space: nowrap; }
+main:not(.rosso-c283e01) .unita:has(.unita-fissa) strong.tutte { margin-left: var(--spazio-3); } /* non sotto il lucchetto delle unità fisse */
+
+/* D-10 (M-8): nel verbale la nota «Mappa: …» sta sopra i pulsanti (Verbale.tsx); il margine negativo che la avvicinava ai
+   pulsanti, da sopra, la portava sull'ombra dell'ultima scheda: qui il margine va sotto, verso i pulsanti. Rosso C283V01 */
+.verbale-fine > [data-spiega]:first-child { margin: var(--spazio-2) 0 calc(-1 * var(--spazio-2)); line-height: 1; } /* riga stretta: a 360×640 «Prossimo episodio» resta toccabile per intero (≥ --tocco-min) */

@@ -180,6 +180,7 @@
   --spaziatura-etichetta: 0.04em;
   --spazio-px: 1px;
   --opaco: 0.4;
+  --righe-esaurita: repeating-linear-gradient(135deg, transparent 0 var(--spazio-1), var(--retino-punto) var(--spazio-1) var(--spazio-2)) var(--bianco); /* D-283 (D-09): unità finita a righe, testo nero a pieno contrasto */
   /* D-271 (PO-159): segno di «toccabile» nella mossa, a tinta piena (niente tratteggio). L'anello magenta sta fra il bordo nero
      della pastiglia (o del punto del settore) e una fascia bianca: confina solo con nero (3,97:1) e bianco (4,76:1, misure sui pixel, anelli-mossa.mjs), su qualunque
      mappa (WCAG 1.4.11). L'alone che pulsa è solo un richiamo in più, fermo con la riduzione del movimento. */

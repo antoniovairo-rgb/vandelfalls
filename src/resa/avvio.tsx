@@ -7,6 +7,7 @@ import './stile-schermate.css';
 import './stile-c18.css';
 import './stile-home.css';
 import './stile-idee.css';
+import './stile-d283.css';
 import { App } from './App.tsx';
 import { Contenitore } from './errore.tsx';
 

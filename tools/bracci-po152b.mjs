@@ -35,6 +35,13 @@ export const BRACCI_PO152B = {
   C271T01: { giri: ['radio'], episodi: ['e01', 'e02'], segno: 'tratteggio nella mossa', almeno: 11 }, // e01 6 + e02 5 stati con tratteggio
   C271U01: { giri: ['radio'], episodi: ['e03', 'e04'], segno: '(D-271, C271U01)', almeno: 13 }, // e03 8 + e04 arance 7 (D-272 passo 2: e16 magazzino_sette da 6 a 0 col costo di spostamento)
   C271V01: { giri: ['versione'], segno: 'la versione non svanisce (D-271)', almeno: 2 }, // movimento e movimento ridotto
+  // D-283 (S-28), giro «d283» (foto-d283.mjs), conteggi dalla misura del 15/11 a 360 sul codice di questo lotto, rosso per rosso
+  C283P01: { giri: ['d283'], segno: '(D-283 D-12)', almeno: 3 }, // annulla, aiuto, azzera con la sola icona
+  C283A01: { giri: ['d283'], segno: '(D-283 D-13)', almeno: 3 }, // home, disco e pastiglia senza segno (la «i» c'è se l'ondata ha la riga «i»)
+  C283E01: { giri: ['d283'], segno: '(D-283 D-09)', almeno: 4 }, // riposo 4,17:1, nome 1,91:1, «0» 2,48:1, niente «✓ tutte»
+  C283V01: { giri: ['d283'], segno: 'la nota «Mappa: rigioca…» non si vede', almeno: 1 }, // 360×640, titolo su due righe
+  C283V02: { giri: ['d283'], segno: 'la fiducia sta sopra la testata', almeno: 3 }, // 640, 667, 760
+  C283C01: { giri: ['d283'], segno: '(D-283 D-15)', almeno: 4 }, // 640 e 915: sul bordo delle schede e niente versione in fondo
   // D-272 passo 2, giro «salti» (e03, 24 mosse): senza posto vuoto (C272V01) 28 / 28 / 16 problemi a 360 / 375 / 412; senza costo di
   // spostamento (C272W01) 0 / 0 / 9: a 360 il salto massimo resta 42 px, sotto la soglia di 44, quindi quel braccio gira a 412×760
   C272V01: { giri: ['salti'], episodi: ['e03'], segno: '(soglia 44, D-272 salti)', almeno: 20 },

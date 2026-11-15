@@ -34,7 +34,7 @@ export function servi(dir) {
 }
 export const SEME_FOTO = 1; // D-241: seme di partita delle foto (resa: __VALMORA_SEME_PARTITA); e01 ha varianti e una carta nuova
 // Una partita sulla prima missione, calcolata dal motore col seme delle foto: schieramenti, risposte, esito.
-function gioca(m, dich, g, iniziali = variabiliIniziali(dich.values())) {
+export function gioca(m, dich, g, iniziali = variabiliIniziali(dich.values())) {
   let s = iniziaMissione(m, iniziali, dich, SEME_FOTO);
   const ondate = [];
   while (!missioneFinita(m, s)) {

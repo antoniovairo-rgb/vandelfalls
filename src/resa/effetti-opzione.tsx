@@ -47,3 +47,14 @@ export function quandoCosta(o: Opzione, ultima = false): string | null {
   if (ultima && !spento('C42U01')) return t('costo.fine_serata');
   return `${t('costo.ti_costa')} ${u.map((e) => quante(-e.valore, e.riserva)).join(', ')} ${t('costo.dalla_prossima')}`;
 }
+
+/** D-283 (D-16): nella radio dopo «Conferma» il testo del costo (dati) nomina già l'unità che si impegna («ma ti costa una
+ *  squadra»: tutte le 237 risposte con costo in unità, misura del 15/11): la regola non la ripete e dice solo da quando vale.
+ *  Se il testo non nomina un'unità impegnata resta la frase intera. Rosso C283R01: sempre la frase intera, come prima. */
+export function quandoRadio(o: Opzione, ultima = false): string | null {
+  const q = quandoCosta(o, ultima);
+  if (!q || ultima || !o.costo || spento('C283R01')) return q;
+  const testo = t(o.costo), parola = (f: string) => new RegExp(`(^|[^\\p{L}])${f}([^\\p{L}]|$)`, 'iu').test(testo);
+  const detta = o.effetti.every((e) => !('riserva' in e) || e.valore >= 0 || [quante(1, e.riserva), quante(2, e.riserva)].some((x) => parola(x.replace(/^\d+ /, ''))));
+  return detta ? t('costo.da_quando') : q;
+}
