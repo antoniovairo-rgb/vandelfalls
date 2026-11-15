@@ -3,7 +3,7 @@
 //   (rosso C283P01);
 // - D-13 stato «premuto» (forzato con CDP, senza toccare): Home, «i» e «?» cambiano aspetto (rosso C283A01); pastiglie e
 //   dischi sono della sessione della mappa;
-// - D-09 unità finita e contatore «a riposo»: contrasto ≥ 4,5:1 (colori composti con l'opacità vera), «✓ tutte» (rosso C283E01);
+// - D-09 unità finita e contatore «a riposo»: contrasto ≥ 4,5:1 (colori composti con l'opacità vera), «tutte» con la spunta (rosso C283E01), dentro l'unità e staccato dal lucchetto (C283E02), «tutte» anche al lettore (C283E03);
 // - D-10 verbale a 640/667 di altezza: la nota «Mappa: …» si vede a scorrimento zero, la fiducia sta sotto la testata
 //   (rossi C283V01, C283V02);
 // - D-15 Crediti: la versione non sta sopra le schede ed è in fondo alla pagina (rosso C283C01).
@@ -110,7 +110,7 @@ export async function controllaD283(browser, url, larghezza, rossi = [], cartell
         await p.click(`.vassoio [data-risorsa="${r}"]`); await p.locator('.mappa:not(.citta) [data-settore] .settore-punto').first().click({ force: true }); await p.waitForTimeout(80); }
       await quieta(p);
       for (const [nome, x] of Object.entries(mis.premuto)) {
-        if (!x) { if (nome !== 'i') male.push(`${dove}: manca ${nome} da premere (D-283 D-13)`); continue; } // la «i» c'è solo nelle ondate con la riga «i»
+        if (!x) { male.push(`${dove}: manca ${nome} da premere (D-283 D-13)`); continue; } // anche la «i»: se l'ondata scelta non l'ha, il giro va cambiato, non saltato
         if (!x.cambia) male.push(`${dove}: ${nome} premuto senza nessun segno (D-283 D-13)`);
       }
       const finita = await contrasto(p, `.vassoio [data-risorsa="${r}"]:disabled :is(.unita-nome, strong)`); mis.finita = finita;
@@ -123,10 +123,22 @@ export async function controllaD283(browser, url, larghezza, rossi = [], cartell
           return [...u.querySelectorAll(':scope > :not(.unita-fissa)')].filter((c) => { const r = c.getBoundingClientRect(); return r.top < b.top + bordo - 0.5 || r.bottom > b.bottom - bordo + 0.5 || r.left < b.left + bordo - 0.5 || r.right > b.right - bordo + 0.5; })
             .map((c) => `${u.dataset.risorsa}: «${c.textContent.trim()}»`); }),
         sottoLucchetto: [...document.querySelectorAll('.vassoio .unita')].filter((u) => { const l = u.querySelector('.unita-fissa')?.getBoundingClientRect(), c = u.querySelector('[data-tutte]')?.getBoundingClientRect();
-          return l && c && Math.min(l.right, c.right) - Math.max(l.left, c.left) > 0.5 && Math.min(l.bottom, c.bottom) - Math.max(l.top, c.top) > 0.5; }).map((u) => u.dataset.risorsa) }));
+          return l && c && Math.min(l.right, c.right) - Math.max(l.left, c.left) > 0.5 && Math.min(l.bottom, c.bottom) - Math.max(l.top, c.top) > 0.5; }).map((u) => u.dataset.risorsa),
+        // il contenuto vero di «tutte» (icona e testo, con un Range: il riquadro del badge può stare dentro e il testo uscire) sta dentro
+        // il bordo dell'unità e dentro il badge, e non tocca il lucchetto (nessun pixel in comune)
+        tutte: [...document.querySelectorAll('.vassoio .unita [data-tutte]')].map((t) => { const u = t.closest('.unita'), b = u.getBoundingClientRect(), bordo = parseFloat(getComputedStyle(u).borderTopWidth);
+          const rg = document.createRange(); rg.selectNodeContents(t); const c = rg.getBoundingClientRect(), s = t.getBoundingClientRect(), l = u.querySelector('.unita-fissa')?.getBoundingClientRect();
+          return { r: u.dataset.risorsa, taglio: Math.round(Math.max(b.left + bordo - c.left, c.right - (b.right - bordo), s.left - c.left, c.right - s.right, t.scrollWidth - t.clientWidth, 0) * 10) / 10,
+            distanza: l ? Math.round(Math.max(s.left - l.right, l.left - s.right, s.top - l.bottom, l.top - s.bottom) * 10) / 10 : null,
+            interno: Math.round(b.width - 2 * bordo), badge: Math.round(s.width), contenuto: Math.round(c.width), da: Math.round((s.left - b.left) * 10) / 10, fineLucchetto: l ? Math.round((l.right - b.left) * 10) / 10 : null }; }) }));
       mis.vassoio = v.alto;
       for (const x of v.fuori) male.push(`${dove}: nel vassoio esce dall'unità ${x} (D-283 D-09)`);
-      for (const x of v.sottoLucchetto) male.push(`${dove}: «✓ tutte» di ${x} sotto il lucchetto (D-283 D-09)`);
+      mis.tutte = v.tutte;
+      // WCAG 2.5.3: il nome per il lettore contiene la parola a schermo
+      for (const x of await p.$$eval('.vassoio .unita:has([data-tutte])', (us) => us.map((u) => [u.dataset.risorsa, u.getAttribute('aria-label') ?? '']))) if (!x[1].includes('tutte')) male.push(`${dove}: l'unità finita ${x[0]} dice «tutte» a schermo ma «${x[1]}» al lettore (D-283 D-09)`);
+      for (const x of v.tutte.filter((y) => y.taglio > 0)) male.push(`${dove}: «tutte» di ${x.r} tagliato di ${x.taglio} px (D-283 D-09)`);
+      const staccato = await p.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--spazio-1'))); // distanza minima dal lucchetto
+      for (const x of v.tutte.filter((y) => y.distanza !== null && !(y.distanza >= staccato))) male.push(`${dove}: «tutte» di ${x.r} a ${x.distanza} px dal lucchetto, ne servono ${staccato} (D-283 D-09)`);
       await foto(p, 'schieramento-vassoio', await p.locator('.vassoio').boundingBox());
       await foto(p, 'schieramento');
     }
@@ -187,6 +199,8 @@ export const BRACCI_D283 = {
   C283P01: { segno: '(D-283 D-12)', almeno: 3 }, // annulla, aiuto, azzera con la sola icona
   C283A01: { segno: '(D-283 D-13)', almeno: 2 }, // Home e «i» senza segno («?» della barra è un .pulsante: già premuto)
   C283E01: { segno: '(D-283 D-09)', almeno: 4 }, // riposo 4,17:1, nome 1,91:1, «0» 2,48:1, niente «✓ tutte»
+  C283E02: { segno: '«tutte» di ', almeno: 2 }, // transenne fissa: con la spunta tagliata di 3,2 px e a 0 px dal lucchetto
+  C283E03: { segno: 'al lettore (D-283 D-09)', almeno: 3 }, // «0 libere» al lettore: squadre, mediatore, transenne
   C283V01: { segno: 'la nota «Mappa: rigioca…» non si vede', almeno: 1 }, // 360×640, titolo su due righe
   C283V02: { segno: 'la fiducia sta sopra la testata', almeno: 3 }, // 640, 667, 760
   C283C01: { segno: 'D-283 D-15)', almeno: 4 }, // 640 e 915: sul bordo delle schede e niente versione in fondo

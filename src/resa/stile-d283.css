@@ -28,6 +28,9 @@ main:not(.rosso-c283f01):not(.rosso-c242m01)[data-schermata="citta"] .scena .sch
 main:not(.rosso-c283e01) .unita strong.tutte { min-width: 0; height: var(--icona); padding: 0 var(--spazio-1); font-size: var(--testo-mini); text-transform: none; white-space: nowrap; display: inline-flex; align-items: center; gap: var(--spazio-1); }
 main:not(.rosso-c283e01) .unita strong.tutte svg { width: var(--icona-piccola); height: var(--icona-piccola); flex: none; } /* la spunta è un'icona: «✓» non è nei caratteri inclusi (D-257) */
 main:not(.rosso-c283e01) .unita:has(.unita-fissa) strong.tutte { margin-left: var(--spazio-3); } /* non sotto il lucchetto delle unità fisse */
+/* accanto al lucchetto la spunta non ci sta: a 360 il badge con l'icona (57 px) usciva di 3,2 px e toccava il lucchetto (0 px; a 412
+   2,9 px). Nelle unità fisse resta la sola parola, staccata dal lucchetto di almeno --spazio-1 (guardiano in foto-d283.mjs). */
+main:not(.rosso-c283e01):not(.rosso-c283e02) .unita:has(.unita-fissa) strong.tutte svg { display: none; }
 
 /* D-10 (M-8): nel verbale la nota «Mappa: …» sta sopra i pulsanti (Verbale.tsx); il margine negativo che la avvicinava ai
    pulsanti, da sopra, la portava sull'ombra dell'ultima scheda: qui il margine va sotto, verso i pulsanti. Rosso C283V01 */
