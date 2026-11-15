@@ -14,11 +14,13 @@ export const SOGLIA_SPOSTAMENTO = 44; // --tocco-min, come i salti
 // - Catena «completa» (VALMORA_SALTI_TUTTI=1, come il giro salti): tutti i 36, tetto sul totale. Nessuno può peggiorare.
 export const EPISODI_SPOSTAMENTO = ['e21', 'e26'];
 // D-279: e26 stretto al verde coi gruppi fermi (fermi.ts; prima 30/176, 31/176, 8/91 di main 834bea62), così il braccio C279F01 vede il
-// ritorno a main; e21 non cambia a 360 e 375 (a 412 13/70, il tetto resta quello di main)
-export const TETTO_EPISODIO_SPOSTAMENTO = { 360: { e21: [20, 132], e26: [1, 67] }, 375: { e21: [72, 132], e26: [9, 79] }, 412: { e21: [19, 70], e26: [0, 22] } };
+// ritorno a main. D-281 (main d561f76, ricalcolo leggero l1 + tolleranza 0,5 di fermi.ts): e21 stretto alla misura (prima 20/132, 72/132, 19/70)
+export const TETTO_EPISODIO_SPOSTAMENTO = { 360: { e21: [4, 47], e26: [1, 67] }, 375: { e21: [56, 132], e26: [9, 79] }, 412: { e21: [0, 22], e26: [0, 22] } };
 // D-279: totali stretti al verde coi gruppi fermi (prima 818/199, 596/176, 246/134 di main). 360: catena «completa» su 5cf1c59e,
 // 385/176 (zz-spost 384/176); 375 e 412: zz-spost su a8f146bb, 1 prova (e10 a 375 rifatta da sola, 4 prove 19/134), 408/134 e 64/134
-export const TETTO_SPOSTAMENTO = { 360: 385, 375: 408, 412: 64 }, MAX_SPOSTAMENTO = { 360: 176, 375: 134, 412: 134 };
+// D-281 (main d561f76): da 385/408/64 (ramo, mai su main) a 352/370/92; contro main 818/596/246. zz-spost su 00999ec5, 36 episodi,
+// 4 pagine, 2 prove per larghezza identiche (360 anche su dist-e0.5); 412 sale da 64 perché il ricalcolo leggero sostituisce il pieno
+export const TETTO_SPOSTAMENTO = { 360: 352, 375: 370, 412: 92 }, MAX_SPOSTAMENTO = { 360: 176, 375: 134, 412: 134 };
 export const APERTURE = 5; // sotto carico i segni (1,8 s veri) possono sparire prima della prima lettura: si riapre; se non basta si conta e si dichiara
 export const FASI = ['sparizione', 'tocco', 'mossa', 'dopo'];
 
