@@ -157152,6 +157152,37 @@
         }
       ],
       "esito": "verde"
+    },
+    {
+      "catena": "grafica",
+      "data": "2026-11-15T13:28:30.260Z",
+      "commit": "bd6d1b3",
+      "modifiche_non_committate": false,
+      "larghezze": "360",
+      "passi": [
+        {
+          "passo": "token",
+          "esito": "rosso",
+          "tentativi": 3,
+          "secondi": [
+            0,
+            0,
+            0
+          ],
+          "problemi": [
+            "src/resa/stile-d283.css:21: misura scritta a mano fuori dai token («main:not(.rosso-c283e01) .unita strong.tutte svg { width: 1e»)"
+          ],
+          "precedenti": [
+            [
+              "src/resa/stile-d283.css:21: misura scritta a mano fuori dai token («main:not(.rosso-c283e01) .unita strong.tutte svg { width: 1e»)"
+            ],
+            [
+              "src/resa/stile-d283.css:21: misura scritta a mano fuori dai token («main:not(.rosso-c283e01) .unita strong.tutte svg { width: 1e»)"
+            ]
+          ]
+        }
+      ],
+      "esito": "rosso"
     }
   ]
 }
