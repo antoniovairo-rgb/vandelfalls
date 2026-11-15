@@ -157224,6 +157224,62 @@
         }
       ],
       "esito": "rosso"
+    },
+    {
+      "catena": "grafica",
+      "data": "2026-11-15T15:43:42.035Z",
+      "commit": "6f6b7f0",
+      "modifiche_non_committate": false,
+      "larghezze": "360",
+      "passi_scelti": "build,schieramenti,offline,caratteri,altezze",
+      "passi": [
+        {
+          "passo": "build",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            1.4
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "schieramenti",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            662.4
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "offline",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            10.7
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "caratteri",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            1
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "altezze",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            2865.3
+          ],
+          "problemi": []
+        }
+      ],
+      "esito": "verde"
     }
   ]
 }
