@@ -66,7 +66,7 @@ export const BRACCI_PO152B = {
   // 4 pagine, 2 prove) contro il tetto dell'episodio stretto al verde 4/47 (00999ec5, 2 prove)
   C281T01: { giri: ['spostamento'], episodi: ['e21'], segno: '(D-278 spostamento, tetto episodio)', almeno: 1 },
   // D-281 (CI 1449): senza «le pastiglie ferme nel ricalcolo libero restano ferme» (C281S01) in e03 a 375×667 le 3 rimaste in Quartiere
-  // si spostano di 6 px nel ricalcolo leggero, contro il tetto 0 (verde 0; zz-salti su dist-s, 1 prova verde e 1 rossa)
+  // si spostano di 6 px nel ricalcolo leggero, contro il tetto 0 (verde 0; zz-salti su b5293c47, 1 prova verde e 1 rossa)
   C281S01: { giri: ['salti'], episodi: ['e03'], segno: '(D-272 salti, tetto episodio)', almeno: 1 },
 };
 

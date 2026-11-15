@@ -20,7 +20,9 @@ export const TETTO_EPISODIO_SPOSTAMENTO = { 360: { e21: [4, 47], e26: [1, 67] },
 // 385/176 (zz-spost 384/176); 375 e 412: zz-spost su a8f146bb, 1 prova (e10 a 375 rifatta da sola, 4 prove 19/134), 408/134 e 64/134
 // D-281 (main d561f76): da 385/408/64 (ramo, mai su main) a 352/370/92; contro main 818/596/246. zz-spost su 00999ec5, 36 episodi,
 // 4 pagine, 2 prove per larghezza identiche (360 anche su dist-e0.5); 412 sale da 64 perché il ricalcolo leggero sostituisce il pieno
-export const TETTO_SPOSTAMENTO = { 360: 352, 375: 370, 412: 92 }, MAX_SPOSTAMENTO = { 360: 176, 375: 134, 412: 134 };
+// D-281 (CI 1449, C281S01 ristretto b5293c47): da 352/370/92 a 329/347/90; zz-spost-f su b5293c47, 36 episodi, 4 pagine, 2 prove per
+// larghezza identiche; nessun episodio peggiore di 00999ec5 (360: e01 9→3, e12, e20 9→1, e28, e31; 375: e01, e10, e11, e12, e18)
+export const TETTO_SPOSTAMENTO = { 360: 329, 375: 347, 412: 90 }, MAX_SPOSTAMENTO = { 360: 176, 375: 134, 412: 134 };
 export const APERTURE = 5; // sotto carico i segni (1,8 s veri) possono sparire prima della prima lettura: si riapre; se non basta si conta e si dichiara
 export const FASI = ['sparizione', 'tocco', 'mossa', 'dopo'];
 
