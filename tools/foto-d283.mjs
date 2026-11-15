@@ -7,7 +7,7 @@
 // - D-10 verbale a 640/667 di altezza: la nota «Mappa: …» si vede a scorrimento zero, la fiducia sta sotto la testata
 //   (rossi C283V01, C283V02);
 // - D-15 Crediti: la versione non sta sopra le schede ed è in fondo alla pagina (rosso C283C01).
-// D-07 (scheda «fallito» della città) lo guarda tools/foto-po149.mjs; D-16 (radio) tests/costo-radio-d283.test.ts.
+// D-07 (scheda «fallito» della città) lo guarda tools/foto-po149.mjs. D-16 (radio) è uscito dal lotto: docs/foto/d283/d16/APPUNTI.md.
 // Uso a mano: node tools/foto-d283.mjs <build> <cartella-foto> [larghezze] (stampa le misure in JSON). Rossi: VALMORA_ROSSI.
 import { join } from 'node:path';
 import { existsSync, mkdirSync } from 'node:fs';

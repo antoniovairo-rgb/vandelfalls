@@ -15,7 +15,7 @@ import { Messaggio } from './Scena.tsx';
 import { iconaChi, VignettaChiamata } from '../vignette-chiamata.tsx';
 import { urgente } from '../vignette-evento.tsx';
 import { altoNellaPagina, scorriPerIntero } from '../vista.ts';
-import { EffettiOpzione, quandoCosta, quandoRadio } from '../effetti-opzione.tsx';
+import { EffettiOpzione, quandoCosta } from '../effetti-opzione.tsx';
 
 
 /** Durata di un «secondo» delle attese della scena (Scena.tsx, Tono.tsx). Solo per gli strumenti: il giro foto mette
@@ -189,7 +189,7 @@ export const costoMorso = (e: EffettoMissione): string => ('tensione' in e ? `Te
 // non ha posto per il rapporto (stretto, compatto, muto: radio-mappa.tsx), così il costo si vede sempre. Rosso C258S01: niente copia.
 export function RapportoCosto(p: { m: Missione; ic: InCorso; o: Opzione; sotto?: boolean }) {
   if (spento('C241A01') || !p.o.costo || (p.sotto && spento('C258S01'))) return null;
-  const quando = quandoRadio(p.o, p.ic.ondata >= p.m.ondate.length); // D-283 (D-16): senza ripetere l'unità
+  const quando = quandoCosta(p.o, p.ic.ondata >= p.m.ondate.length);
   return (
     <p className={`rapporto-costo${p.sotto ? ' rapporto-sotto' : ''}`} data-rapporto-costo={p.o.id} data-sotto={p.sotto ? '' : undefined}>
       <strong><Icona di={Radio} />{t('radio.costo')}</strong> <span data-costo={p.o.id}>{t(p.o.costo)}</span>
