@@ -175,7 +175,7 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: (soli?: R
   // il ricalcolo intorno ai gruppi fermi (al più RICALCOLI); chi resta con un divieto prova il suo candidato dopo o si scioglie. Con 0
   // i gruppi si provano sopra il ricalcolo libero (nomi e altri gruppi restano dove sono) e chi è male torna al suo posto libero
   const fermi = () => settori.filter((s) => s.hasAttribute('data-fermo')), pa = mappa.querySelector('.settore-unita .pastiglia')?.getBoundingClientRect();
-  const toll = Math.max(0.5, TOLLERANZA * (pa ? pa.width * pa.height : 0));
+  const toll = Math.max(0.5, spento('C281T01') ? 0 : TOLLERANZA * (pa ? pa.width * pa.height : 0)); // rosso C281T01: 0,5 px² come prima
   for (let fatti = 0; ; ) {
     if (RICALCOLI) { disponi(vicini(settori, fermi(), larga)); fatti++; }
     const ora = new Map(settori.map((s) => [s, pena(s, settori)])), cresce = (s: HTMLElement) => (ora.get(s) ?? 0) - (pena0.get(s) ?? 0);

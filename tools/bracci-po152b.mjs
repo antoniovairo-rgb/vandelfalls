@@ -62,6 +62,9 @@ export const BRACCI_PO152B = {
   // 360x760, ma il giro «spostamento» misura all'altezza più bassa della larghezza (RADIO_VP di foto-po152-b.mjs, 360 → 640): a
   // 360×640 il rosso dà 30/176 (completa su 92a666ab, tentativi 1 e 2) contro il verde 1/67 (92a666ab e a8f146bb); a 760 non gira.
   C279F01: { giri: ['spostamento'], episodi: ['e26'], segno: '(D-278 spostamento, tetto episodio)', almeno: 1 },
+  // D-281 (revisione 2, E): con la tolleranza dei fermi di 0,5 px² come prima (C281T01) e21 a 360×640 torna a 20/132 (zz-spost su ac4c4bae,
+  // 4 pagine, 2 prove) contro il tetto dell'episodio stretto al verde 4/47 (00999ec5, 2 prove)
+  C281T01: { giri: ['spostamento'], episodi: ['e21'], segno: '(D-278 spostamento, tetto episodio)', almeno: 1 },
 };
 
 // D-274b: i bracci della parte «chiamate» (D-207) misurano solo gli imprevisti: le chiamate normali (498 su 782) non servono.
