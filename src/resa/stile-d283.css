@@ -26,7 +26,7 @@ main:not(.rosso-c283c01)[data-schermata="crediti"] .versione-angolo { display: n
 main:not(.rosso-c283f01):not(.rosso-c242m01)[data-schermata="citta"] .scena .scheda.compatta > p.avviso { padding-block: 0; border-block-width: 0; font-size: var(--testo-piccolo); } /* alta come la riga .tenue degli altri stati */
 /* «tutte» con la spunta sta dove c'è l'icona dell'unità: alta come l'icona, testo minuscolo */
 main:not(.rosso-c283e01) .unita strong.tutte { min-width: 0; height: var(--icona); padding: 0 var(--spazio-1); font-size: var(--testo-mini); text-transform: none; white-space: nowrap; display: inline-flex; align-items: center; gap: var(--spazio-1); }
-main:not(.rosso-c283e01) .unita strong.tutte svg { width: 1em; height: 1em; flex: none; } /* la spunta è un'icona: «✓» non è nei caratteri inclusi (D-257) */
+main:not(.rosso-c283e01) .unita strong.tutte svg { width: var(--icona-piccola); height: var(--icona-piccola); flex: none; } /* la spunta è un'icona: «✓» non è nei caratteri inclusi (D-257) */
 main:not(.rosso-c283e01) .unita:has(.unita-fissa) strong.tutte { margin-left: var(--spazio-3); } /* non sotto il lucchetto delle unità fisse */
 
 /* D-10 (M-8): nel verbale la nota «Mappa: …» sta sopra i pulsanti (Verbale.tsx); il margine negativo che la avvicinava ai
