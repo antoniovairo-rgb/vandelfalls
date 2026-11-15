@@ -159,8 +159,11 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: (soli?: R
   // (e31 a 360: pastiglie di Piazzale, 138 px; e32: nome di Strada Larkspire, 79 px)
   const nomeVia = (s: HTMLElement) => { const q = prima.centri.get(`nome ${s.dataset.settore}`), n = s.querySelector('.settore-nome'); if (!q || !n) return 0;
     const [x, y] = centro(n.getBoundingClientRect()); return Math.hypot(x - m.left - q[0], y - m.top - q[1]); };
-  const via = (s: HTMLElement) => Math.max(scarto(s, prima, m)?.max ?? 0, nomeVia(s));
+  const ferme = (s: HTMLElement) => scarto(s, prima, m)?.max ?? 0, via = (s: HTMLElement) => Math.max(ferme(s), nomeVia(s));
   const via0 = new Map(settori.map((s) => [s, Math.max(via(s), larga)]));
+  // e le pastiglie che nel ricalcolo libero restano dove sono restano ferme anche coi gruppi fermi (D-281, CI 1449: e03 a 375,
+  // squadre@quartiere → curva_ospiti, le 3 rimaste in Quartiere si spostavano di 6 px nel ricalcolo leggero; rosso C281S01)
+  const immobili = new Set(spento('C281S01') ? [] : settori.filter((s) => ferme(s) <= 0.5));
   const pena0 = new Map(settori.map((s) => [s, Math.max(pena(s, settori), prime?.get(s.dataset.settore ?? '') ?? 0)]));
   const tutta = (f: (s: HTMLElement) => number) => settori.reduce((t, s) => t + f(s), 0), libera = fotografa(settori);
   for (const s of settori) {
@@ -182,7 +185,8 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: (soli?: R
     const male = fermi().filter((s) => divieto(s, settori, m) || cresce(s) > toll);
     if (!male.length && tutta((s) => ora.get(s) ?? 0) > tutta((s) => pena0.get(s) ?? 0) + toll) { // in tutto peggio: il fermo che pesa di più
       const f = fermi().sort((a, b) => cresce(b) - cresce(a))[0]; if (f) male.push(f); }
-    const saltati = male.length ? [] : settori.filter((s) => (!s.hasAttribute('data-fermo') ? via(s) : nomeVia(s)) > (via0.get(s) ?? 0) + 0.5);
+    const saltati = male.length ? [] : settori.filter((s) => (!s.hasAttribute('data-fermo') ? via(s) : nomeVia(s)) > (via0.get(s) ?? 0) + 0.5
+      || (immobili.has(s) && !s.hasAttribute('data-fermo') && ferme(s) > 0.5));
     const punto = saltati[0]?.querySelector('.settore-punto');
     if (punto) { // il fermo più vicino al primo settore saltato
       const [x, y] = centro(punto.getBoundingClientRect()), d = (s: HTMLElement) => { const r = s.querySelector('.settore-punto'); if (!r) return Infinity;
