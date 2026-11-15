@@ -1,8 +1,8 @@
 // D-283: correzioni grafiche piccole fuori dalla mappa (rapporto del collaudo grafico). Un giro per larghezza:
 // - D-12 schieramento: «Annulla», «Aiuto», «Azzera» con la parola a schermo, la barra nei suoi pixel, niente testo tagliato
 //   (rosso C283P01);
-// - D-13 stato «premuto» (forzato con CDP, senza toccare): Home, «i», pastiglia e disco cambiano aspetto; pastiglia e disco
-//   non si muovono (rosso C283A01);
+// - D-13 stato «premuto» (forzato con CDP, senza toccare): Home, «i» e «?» cambiano aspetto (rosso C283A01); pastiglie e
+//   dischi sono della sessione della mappa;
 // - D-09 unità finita e contatore «a riposo»: contrasto ≥ 4,5:1 (colori composti con l'opacità vera), «✓ tutte» (rosso C283E01);
 // - D-10 verbale a 640/667 di altezza: la nota «Mappa: …» si vede a scorrimento zero, la fiducia sta sotto la testata
 //   (rossi C283V01, C283V02);
@@ -71,7 +71,10 @@ async function premuto(p, sel) {
 const nuova = async (browser, w, h, rossi) => { const p = await browser.newPage({ viewport: { width: w, height: h }, hasTouch: true, reducedMotion: 'reduce' });
   await p.addInitScript(() => { globalThis.__VALMORA_SECONDO_MS = 1; });
   if (rossi.length) await p.addInitScript((xs) => { for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi); return p; };
-const quieta = (p) => p.evaluate(() => new Promise((ok) => { scrollTo(0, 0); requestAnimationFrame(() => requestAnimationFrame(ok)); })).then(() => p.waitForTimeout(250));
+// caratteri caricati e scena ferma (opacità 1), poi due fotogrammi: col carattere di riserva le altezze cambiano
+const quieta = async (p) => { await p.evaluate(() => document.fonts.ready);
+  await p.waitForFunction(() => document.querySelectorAll('.scena').length === 1 && getComputedStyle(document.querySelector('.scena')).opacity === '1', null, { timeout: 15000 }).catch(() => {});
+  await p.evaluate(() => new Promise((ok) => { scrollTo(0, 0); requestAnimationFrame(() => requestAnimationFrame(ok)); })); await p.waitForTimeout(250); };
 
 /** Problemi (con «(D-283 …)») e misure alla larghezza data. */
 export async function controllaD283(browser, url, larghezza, rossi = [], cartella = '') {
@@ -98,19 +101,17 @@ export async function controllaD283(browser, url, larghezza, rossi = [], cartell
       const riposo = await contrasto(p, '.unita:not(:disabled) [data-riposo]'); mis.riposo = riposo;
       if (!riposo.length) male.push(`${dove}: nessun contatore «a riposo» da misurare (D-283 D-09)`);
       for (const x of riposo.filter((y) => !(y.rapporto >= SOGLIA))) male.push(`${dove}: contatore a riposo «${x.testo}» a ${x.rapporto}:1, serve ${SOGLIA} (D-283 D-09)`);
-      // D-13: Home, «i», disco (prima di mettere unità) e pastiglia (dopo)
+      // D-13: Home, «i» e «?» (quello della barra è un .pulsante: lo era già)
       mis.premuto = {};
-      for (const [nome, sel] of [['home', '[data-azione="home"]'], ['i', '.info'], ['disco', '.mappa:not(.citta) [data-settore] .settore-punto:not(:disabled)']]) mis.premuto[nome] = await premuto(p, sel);
+      for (const [nome, sel] of [['home', '[data-azione="home"]'], ['i', '.info'], ['aiuto', '[data-azione="aiuto"]']]) mis.premuto[nome] = await premuto(p, sel);
       // D-09: si finisce l'unità con meno pezzi (la si mette tutta su un settore)
       const r = await p.evaluate(() => [...document.querySelectorAll('.vassoio [data-risorsa]:not(:disabled)')].map((x) => [x.dataset.risorsa, Number(x.querySelector('strong')?.textContent)]).sort((a, c) => a[1] - c[1])[0]?.[0]);
       for (let k = 0; k < 12 && r && !(await p.locator(`.vassoio [data-risorsa="${r}"]`).isDisabled()); k++) {
         await p.click(`.vassoio [data-risorsa="${r}"]`); await p.locator('.mappa:not(.citta) [data-settore] .settore-punto').first().click({ force: true }); await p.waitForTimeout(80); }
       await quieta(p);
-      mis.premuto.pastiglia = await premuto(p, '.mappa:not(.citta) .tocco-pastiglia:not(:disabled)');
       for (const [nome, x] of Object.entries(mis.premuto)) {
         if (!x) { if (nome !== 'i') male.push(`${dove}: manca ${nome} da premere (D-283 D-13)`); continue; } // la «i» c'è solo nelle ondate con la riga «i»
         if (!x.cambia) male.push(`${dove}: ${nome} premuto senza nessun segno (D-283 D-13)`);
-        if ((nome === 'disco' || nome === 'pastiglia') && x.sposta > 0.5) male.push(`${dove}: ${nome} premuto si sposta di ${x.sposta} px (D-283 D-13)`);
       }
       const finita = await contrasto(p, `.vassoio [data-risorsa="${r}"]:disabled :is(.unita-nome, strong)`); mis.finita = finita;
       if (!finita.length) male.push(`${dove}: nessuna unità finita da misurare (D-283 D-09)`);
@@ -167,7 +168,10 @@ export async function controllaD283(browser, url, larghezza, rossi = [], cartell
       // distanza fra i riquadri (0 se si toccano o si coprono): sotto --spazio-1 la versione sta sul bordo della scheda (foto 28)
       const d = (A, B) => Math.hypot(Math.max(0, A.left - B.right, B.left - A.right), Math.max(0, A.top - B.bottom, B.top - A.bottom)), min = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--spazio-1'));
       return [...document.querySelectorAll('.scena .scheda, .scena .pulsante')].map((s) => d(r, s.getBoundingClientRect())).filter((x) => x < min).map((x) => Math.round(x * 10) / 10); });
-    const s0 = await sopra(); await p.evaluate(() => scrollTo(0, 1e6)); await p.waitForTimeout(150); const s1 = await sopra();
+    // a più posizioni di scorrimento (un quarto di finestra alla volta): la versione è fissa, le schede passano
+    const s0 = [], fine = await p.evaluate(() => document.scrollingElement.scrollHeight - innerHeight);
+    for (let y = 0; ; y = Math.min(fine, y + Math.round(h / 4))) { await p.evaluate((y) => scrollTo(0, y), y); await p.waitForTimeout(60); s0.push(...await sopra()); if (y >= fine) break; }
+    const s1 = [];
     const fondo = await p.evaluate(() => { const v = document.querySelector('.scena [data-versione]'); if (!v) return null; const ultimo = [...document.querySelectorAll('.scena *')].filter((e) => e.getClientRects().length).reduce((m, e) => Math.max(m, e.getBoundingClientRect().bottom), 0);
       return { testo: v.textContent, inFondo: v.getBoundingClientRect().bottom >= ultimo - 0.5 }; });
     mis[`crediti${h}`] = { sopra: [...s0, ...s1], fondo };
@@ -177,10 +181,34 @@ export async function controllaD283(browser, url, larghezza, rossi = [], cartell
   return { male, mis };
 }
 
-if (process.argv[1]?.endsWith('foto-d283.mjs')) {
-  const [build = 'dist', cartella = '', l] = process.argv.slice(2), { servi } = await import('./foto.mjs'), { chromium } = await import('playwright-core');
-  const srv = await servi(build), url = `http://127.0.0.1:${srv.address().port}/`, rossi = (process.env.VALMORA_ROSSI ?? '').split(',').filter(Boolean);
+// Bracci rossi del giro (passi-grafica.mjs, bracci-rossi-grafica, a 360): rosso → segno da trovare e quante volte almeno.
+// Conteggi dalla misura del 15/11 a 360 sul codice di questo lotto, un rosso alla volta.
+export const BRACCI_D283 = {
+  C283P01: { segno: '(D-283 D-12)', almeno: 3 }, // annulla, aiuto, azzera con la sola icona
+  C283A01: { segno: '(D-283 D-13)', almeno: 2 }, // Home e «i» senza segno («?» della barra è un .pulsante: già premuto)
+  C283E01: { segno: '(D-283 D-09)', almeno: 4 }, // riposo 4,17:1, nome 1,91:1, «0» 2,48:1, niente «✓ tutte»
+  C283V01: { segno: 'la nota «Mappa: rigioca…» non si vede', almeno: 1 }, // 360×640, titolo su due righe
+  C283V02: { segno: 'la fiducia sta sopra la testata', almeno: 3 }, // 640, 667, 760
+  C283C01: { segno: 'D-283 D-15)', almeno: 4 }, // 640 e 915: sul bordo delle schede e niente versione in fondo
+};
+
+/** Giro intero su una build: problemi a ogni larghezza (un browser, una pagina alla volta). */
+export async function giraD283(build = 'dist', larghezze = [360, 375, 412], rossi = [], cartella = '') {
+  const { servi } = await import('./foto.mjs'), { chromium } = await import('playwright-core');
+  const srv = await servi(build), url = `http://127.0.0.1:${srv.address().port}/`;
   const browser = await chromium.launch({ executablePath: process.env.VALMORA_CHROME ?? (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined) });
-  try { for (const w of (l ?? '360,375,412').split(',').map(Number)) console.log(JSON.stringify(await controllaD283(browser, url, w, rossi, cartella), null, 1)); }
-  finally { await browser.close(); srv.close(); }
+  const giri = [];
+  try { for (const w of larghezze) giri.push(await controllaD283(browser, url, w, rossi, cartella)); } finally { await browser.close(); srv.close(); }
+  return giri;
+}
+
+/** '' se il braccio vede il suo rosso, altrimenti la riga «cieco». */
+export async function braccioD283(r, build = 'dist') {
+  const b = BRACCI_D283[r], male = (await giraD283(build, [360], [r])).flatMap((g) => g.male), n = male.filter((x) => x.includes(b.segno)).length;
+  return n >= b.almeno ? '' : `d283/${r} è cieco: ${n} problemi «${b.segno}», ne servono ${b.almeno} (visti: ${male.join(' · ') || 'nessuno'})`;
+}
+
+if (process.argv[1]?.endsWith('foto-d283.mjs')) {
+  const [build = 'dist', cartella = '', l] = process.argv.slice(2), rossi = (process.env.VALMORA_ROSSI ?? '').split(',').filter(Boolean);
+  for (const g of await giraD283(build, (l ?? '360,375,412').split(',').map(Number), rossi, cartella)) console.log(JSON.stringify(g, null, 1));
 }
