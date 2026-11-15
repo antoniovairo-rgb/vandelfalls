@@ -83,8 +83,10 @@ export function disponiFermi(mappa: HTMLElement, prima: Prima | null, disponi: (
 // torna al ricalcolo libero fotografato, senza rifarlo
 const RICALCOLI = 1;
 // D-280 (revisione 2, E): quanto può crescere la sovrapposizione coi gruppi fermi, in frazione dell'area di una pastiglia (era 0,5 px²:
-// e02 squadre@stazione → curva_ospiti si scioglieva per +17 px² e una pastiglia saltava di 79 px)
-const TOLLERANZA = 0;
+// e02 squadre@stazione → curva_ospiti si scioglieva per +17 px² e una pastiglia saltava di 79 px). Misura 36 episodi a 360x640:
+// elementi oltre 44 px 442 (0) → 422 (0,1) → 396 (0,25) → 352 (0,5), nessun episodio peggiore; invarianti dopo ogni mossa
+// pari o migliori (fuori mappa 0, dischi coperti 0, nomi sovrapposti 0). Guardiano: tools/spostamento-po152b.mjs (tetti D-281)
+const TOLLERANZA = 0.5;
 type Foto = { s: HTMLElement; attr: (string | null)[]; nome: string[]; stretto: boolean; gruppo: string[]; ordini: string[] };
 const ATTR = ['data-unita', 'data-nome', 'data-fermo'], NOME = ['max-width', '--nome-dx', '--nome-dy'], GRUPPO = ['--unita-dx', '--unita-dy'];
 const fotografa = (settori: HTMLElement[]): Foto[] => settori.map((s) => { const n = s.querySelector<HTMLElement>('.settore-nome'), g = s.querySelector<HTMLElement>('.settore-unita');
