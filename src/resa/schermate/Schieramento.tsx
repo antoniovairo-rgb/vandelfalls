@@ -129,9 +129,9 @@ export function Schieramento(p: {
               aria-label={`${t(`risorsa.${r}`)}: ${libere} libere${riposo ? `, ${riposo} a riposo` : ''}${montate ? `, ${montate} già montate` : ''}${fisse.includes(r) ? ', restano fino a fine serata' : ''}`}
               {...tr.gestori(r)} onClick={() => { if (!tr.eraTrascinamento()) p.scegli(r); }}>
               {fisse.includes(r) && <span className="unita-fissa" data-fissa-chip={r}><Icona di={Lock} /></span>}
-              {/* D-283 (D-09): l'unità finita dice «✓ tutte» al posto dell'icona (la riga del numero ha già i contatori: lì andava a
+              {/* D-283 (D-09): l'unità finita dice «tutte» con la spunta (icona: «✓» non è nei caratteri inclusi, D-257) al posto dell'icona (la riga del numero ha già i contatori: lì andava a
                   capo e il vassoio cresceva di 20 px a 360) e non ha lo «0». Rosso C283E01: icona e «0», sbiadita come prima */}
-              {libere <= 0 && !spento('C283E01') ? <strong className="tutte" data-tutte={r}>✓ tutte</strong> : <Icona di={iconaRisorsa(r)} />}
+              {libere <= 0 && !spento('C283E01') ? <strong className="tutte" data-tutte={r}><Check aria-hidden strokeWidth={3} />tutte</strong> : <Icona di={iconaRisorsa(r)} />}
               <span className="unita-nome">{t(`risorsa.${r}`)}</span>{(libere > 0 || spento('C283E01')) && <strong>{libere}</strong>}
               {riposo > 0 && <span className="unita-extra" data-riposo={r}><Icona di={Moon} />{riposo}</span>}
               {montate > 0 && <span className="unita-extra" data-montate={r}><Icona di={Lock} />{montate}</span>}
