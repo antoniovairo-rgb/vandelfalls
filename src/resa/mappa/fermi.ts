@@ -179,14 +179,18 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: (soli?: R
   // i gruppi si provano sopra il ricalcolo libero (nomi e altri gruppi restano dove sono) e chi è male torna al suo posto libero
   const fermi = () => settori.filter((s) => s.hasAttribute('data-fermo')), pa = mappa.querySelector('.settore-unita .pastiglia')?.getBoundingClientRect();
   const toll = Math.max(0.5, spento('C281T01') ? 0 : TOLLERANZA * (pa ? pa.width * pa.height : 0)); // rosso C281T01: 0,5 px² come prima
+  // chi era immobile nel ricalcolo libero e il ricalcolo intorno ai fermi ha spostato torna come nel libero, se così niente di vietato
+  // e le sovrapposizioni in tutto non crescono oltre la tolleranza (altrimenti resta il ricalcolo)
+  const riferma = () => { for (const s of immobili) { if (s.hasAttribute('data-fermo') || ferme(s) <= 0.5) continue;
+    const ora = fotografa([s]), prima0 = tutta((x) => pena(x, settori)); ripristina(libera.filter((f) => f.s === s));
+    if ([s, ...fermi()].some((x) => divieto(x, settori, m)) || tutta((x) => pena(x, settori)) > prima0 + toll) ripristina(ora); } };
   for (let fatti = 0; ; ) {
-    if (RICALCOLI) { disponi(vicini(settori, fermi(), larga)); fatti++; }
+    if (RICALCOLI) { disponi(vicini(settori, fermi(), larga)); fatti++; riferma(); }
     const ora = new Map(settori.map((s) => [s, pena(s, settori)])), cresce = (s: HTMLElement) => (ora.get(s) ?? 0) - (pena0.get(s) ?? 0);
     const male = fermi().filter((s) => divieto(s, settori, m) || cresce(s) > toll);
     if (!male.length && tutta((s) => ora.get(s) ?? 0) > tutta((s) => pena0.get(s) ?? 0) + toll) { // in tutto peggio: il fermo che pesa di più
       const f = fermi().sort((a, b) => cresce(b) - cresce(a))[0]; if (f) male.push(f); }
-    const saltati = male.length ? [] : settori.filter((s) => (!s.hasAttribute('data-fermo') ? via(s) : nomeVia(s)) > (via0.get(s) ?? 0) + 0.5
-      || (immobili.has(s) && !s.hasAttribute('data-fermo') && ferme(s) > 0.5));
+    const saltati = male.length ? [] : settori.filter((s) => (!s.hasAttribute('data-fermo') ? via(s) : nomeVia(s)) > (via0.get(s) ?? 0) + 0.5);
     const punto = saltati[0]?.querySelector('.settore-punto');
     if (punto) { // il fermo più vicino al primo settore saltato
       const [x, y] = centro(punto.getBoundingClientRect()), d = (s: HTMLElement) => { const r = s.querySelector('.settore-punto'); if (!r) return Infinity;
