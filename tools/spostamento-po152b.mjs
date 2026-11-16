@@ -81,7 +81,7 @@ export async function controllaSpostamento(browser, url, larghezza, h, rossi, da
   const mossa = async (c, ch, u, j) => {
     const p = await apri(c, ch); if (!p) return null;
     try {
-      let a = await leggi(p); for (let t = Date.now(); a?.segni && Date.now() - t < 10000;) { await p.waitForTimeout(50); const b = await leggi(p); if (!b?.segni) break; a = b; }
+      let a = await leggi(p); for (let t = Date.now(); !immediata && a?.segni && Date.now() - t < 10000;) { await p.waitForTimeout(50); const b = await leggi(p); if (!b?.segni) break; a = b; }
       if (!a?.segni) return 'rifai';
       const base = a.e, max = {}, maxDopo = {}; // [px, fase]; l'arrivo della chiamata dopo a parte (ridisposizione voluta, D-272 passo 2)
       const misura = (r, fase) => { if (!r) return; const m = fase === 'dopo' ? maxDopo : max; for (const [k, [x, y]] of Object.entries(r.e)) { const q = base[k]; if (!q) continue; const px = Math.round(Math.hypot(x - q[0], y - q[1]));
