@@ -26,18 +26,34 @@ export const TETTO_SPOSTAMENTO = { 360: 329, 375: 347, 412: 90 }, MAX_SPOSTAMENT
 export const APERTURE = 5; // sotto carico i segni (1,8 s veri) possono sparire prima della prima lettura: si riapre; se non basta si conta e si dichiara
 export const FASI = ['sparizione', 'tocco', 'mossa', 'dopo'];
 
-const leggi = (p) => p.evaluate(() => {
+const LEGGI = () => {
   const m = document.querySelector('.mappa')?.getBoundingClientRect(); if (!m) return null;
   const c = (r) => [Math.round((r.left + r.right) / 2 - m.left), Math.round((r.top + r.bottom) / 2 - m.top)], e = {};
   for (const x of document.querySelectorAll('.mappa [data-presenza], .mappa [data-fissa]')) e[`unità ${x.dataset.presenza ?? x.dataset.fissa}`] = c(x.getBoundingClientRect());
   for (const s of document.querySelectorAll('.mappa [data-settore]')) { const n = s.querySelector('.settore-nome'); if (n) e[`nome ${s.dataset.settore}`] = c(n.getBoundingClientRect()); }
   return { segni: document.querySelectorAll('.mappa [data-segno]').length, alta: Math.round(m.height), e };
-});
+};
+const leggi = (p) => p.evaluate(LEGGI);
+// D-281 (strumento instabile, e33 a 360: 42 in 1 prova su 7, 43 nelle altre): le fasi si chiudevano su millisecondi veri (sparizione
+// 1500, tocco 400, mossa 2500, dopo 600) e sotto carico una ridisposizione cadeva nella fase accanto o fuori. Ora ogni fase finisce su
+// un evento: la sua condizione (segni spariti, stato della mossa) e poi la pagina ferma per FERMA fotogrammi di fila, letta a ogni
+// fotogramma. La condizione può dire «lungo»: allora la fase chiude dopo FERMA_LUNGA fotogrammi fermi (dopo la mossa i segni ▲/▼ a
+// volte restano: e33 a 360, 12 mosse su 24 con un segno ancora lì dopo 1800 fotogrammi fermi). Una fase che in FOTOGRAMMI_MAX non si
+// chiude si conta e si dichiara. Rosso C281F01: le finestre di tempo di prima
+export const FERMA = 30, FERMA_LUNGA = 240, FOTOGRAMMI_MAX = 1800;
+const fase = (p, cond, ferma = FERMA) => p.evaluate(async ([src, cond, n, nl, max]) => {
+  const leggi = (0, eval)(`(${src})`), ok = (0, eval)(`(${cond})`), stati = []; let pari = 0, prima = '';
+  for (let f = 0; f < max; f++) { await new Promise((r) => requestAnimationFrame(r)); const s = leggi(), k = JSON.stringify(s);
+    if (k !== prima) { stati.push(s); prima = k; pari = 0; continue; }
+    const v = ok(); pari++; if ((v === true && pari >= n) || (v === 'lungo' && pari >= nl)) return { stati, chiusa: true }; }
+  return { stati, chiusa: false };
+}, [LEGGI.toString(), cond, ferma, FERMA_LUNGA, FOTOGRAMMI_MAX]);
 
 /** Giro «spostamento»: problemi e conto alla larghezza data. episodi: se dato, solo quelli. */
 export async function controllaSpostamento(browser, url, larghezza, h, rossi, dati, insieme, pagine = 1, episodi = null) {
   const male = [], vp = `${larghezza}x${h}`, D = '(D-278 spostamento)', dich = new Map(dati['stato.json'].variabili.map((d) => [d.id, d])), tutte = chiamateCostruite(dati, dich);
-  const conto = { vp, giro: 'spostamento', episodi: 0, mosse: 0, oltre: 0, max: 0, fasi: Object.fromEntries(FASI.map((f) => [f, { oltre: 0, max: 0 }])), riprese: 0, nonMisurate: 0, senzaChiamata: 0, per: [] };
+  const conto = { vp, giro: 'spostamento', episodi: 0, mosse: 0, oltre: 0, max: 0, fasi: Object.fromEntries(FASI.map((f) => [f, { oltre: 0, max: 0 }])), riprese: 0, nonMisurate: 0, senzaChiamata: 0, aperte: 0, per: [] };
+  const vecchio = rossi.includes('C281F01');
   const tuttiEp = !!process.env.VALMORA_SALTI_TUTTI && !episodi, eps = tuttiEp ? [...new Set(tutte.map((x) => x.ep))].sort() : [...(episodi ?? EPISODI_SPOSTAMENTO)].sort();
   const apri = async (c, ch) => { const p = await browser.newPage({ viewport: { width: larghezza, height: h }, hasTouch: true, reducedMotion: 'reduce' });
     await p.addInitScript((xs) => { globalThis.__VALMORA_SECONDO_MS = 1; for (const x of xs) globalThis[`__NO_${x}`] = true; }, rossi);
@@ -45,6 +61,12 @@ export async function controllaSpostamento(browser, url, larghezza, h, rossi, da
     if (!(await p.waitForSelector(`[data-messaggio="chiamata-${c.id}"]`, { timeout: 15000 }).then(() => true, () => false))) { await p.close(); return null; }
     await p.click(`[data-opzione="${ch.opzioni[0].id}"]`); await p.click('[data-conferma]').catch(() => {});
     if (!(await p.waitForSelector('.mappa [data-mossa="puoi"]', { timeout: 15000, state: 'attached' }).then(() => true, () => false))) { await p.close(); return null; }
+    // la base è la risposta entrata: la scena entra con una molla in tempo vero (Scena.tsx Messaggio, scala 0,6 → 1) e la mappa si
+    // abbassa durante l'ingresso (e33 a 360: 328 → 200 px, viale_stazione 98 px); sotto carico l'ingresso finiva dopo i segni e la
+    // base era la mappa di prima. Qui: «Avanti» c'è, scena e messaggi senza trasformazioni né opacità in corso, pagina ferma per 2
+    // fotogrammi (non FERMA: sotto carico i segni, 1,8 s veri, sparivano prima e 18 mosse su 24 di e33 restavano non misurate)
+    if (!vecchio && !(await fase(p, `() => !!document.querySelector('[data-azione="continua"]') && ![...document.querySelectorAll('main .scena, main .messaggio')]
+      .some((x) => (x.style.transform && x.style.transform !== 'none') || (x.style.opacity && x.style.opacity !== '1'))`, 2)).chiusa) conto.aperte++;
     return p; };
   // una mossa: massimo spostamento per elemento e fase rispetto alla posizione iniziale; 'rifai' se i segni sono già spariti
   const mossa = async (c, ch, u, j) => {
@@ -56,16 +78,24 @@ export async function controllaSpostamento(browser, url, larghezza, h, rossi, da
       const misura = (r, fase) => { if (!r) return; const m = fase === 'dopo' ? maxDopo : max; for (const [k, [x, y]] of Object.entries(r.e)) { const q = base[k]; if (!q) continue; const px = Math.round(Math.hypot(x - q[0], y - q[1]));
         if (!m[k] || px > m[k][0]) m[k] = [px, fase]; } };
       const segui = async (fase, ms, fine = async () => false) => { for (let t = Date.now(); Date.now() - t < ms;) { misura(await leggi(p), fase); if (await fine()) break; await p.waitForTimeout(50); } };
-      await segui('sparizione', 1500); // i segni spariscono a 1,8 s veri dalla risposta: qui si segue fino a pagina ferma dopo
-      await segui('tocco', 0); await p.locator(`.mappa [data-presenza="${u}"]`).click({ force: true }); await segui('tocco', 400);
+      const fino = async (f, cond, ms) => { if (vecchio) return segui(f, ms); const r = await fase(p, cond); for (const x of r.stati) misura(x, f); if (!r.chiusa) conto.aperte++; return r; };
+      const segniVia = `!document.querySelector('.mappa [data-segno]')`, stato = (x) => `document.querySelector('.mappa [data-mossa]')?.getAttribute('data-mossa') === '${x}'`;
+      const sp = await fino('sparizione', `() => ${segniVia}`, 1500);
+      // e la base vale se la mappa ha già l'altezza della risposta ferma: sotto carico la mappa si abbassava anche dopo l'ingresso e
+      // dopo i segni (e33 a 360, 2 prove su 6: base alta 328 px, viale_stazione 98 px alla sparizione o al tocco); se no si riapre
+      if (!vecchio && sp?.stati.length && sp.stati.at(-1).alta !== a.alta) return 'rifai'; // i segni spariscono a 1,8 s veri dalla risposta: fino a segni spariti e pagina ferma
+      misura(await leggi(p), 'tocco'); await p.locator(`.mappa [data-presenza="${u}"]`).click({ force: true });
+      await fino('tocco', `() => ${stato('dove')}`, 400);
       const ss = await p.$$('.mappa .settore-punto:not(:disabled)'); if (!ss[j]) return { n: ss.length, fuori: true };
       const sett = await ss[j].evaluate((e) => e.closest('[data-settore]').dataset.settore); await ss[j].click({ force: true });
-      await segui('mossa', 2500);
+      // dopo la mossa i segni ▲/▼ tornano e di solito spariscono a 1,8 s veri: la fase finisce a mossa fatta e pagina ferma, coi segni
+      // spariti (FERMA) o ancora lì (FERMA_LUNGA)
+      await fino('mossa', `() => !(${stato('fatta')}) ? false : ${segniVia} ? true : 'lungo'`, 2500);
       // la chiamata dopo arriva col tasto «Avanti» (stato «fatta»)
       const altra = `[data-messaggio^="chiamata-"]:not([data-messaggio="chiamata-${c.id}"])`; let arrivata = false;
       await p.getByRole('button', { name: 'Avanti', exact: true }).click({ timeout: 5000 });
       await segui('dopo', 6000, async () => (arrivata = !!(await p.$(altra))));
-      if (arrivata) await segui('dopo', 600); else conto.senzaChiamata++;
+      if (!arrivata) conto.senzaChiamata++; else await fino('dopo', '() => true', 600);
       return { n: ss.length, sett, max, maxDopo };
     } finally { await p.close(); }
   };
@@ -97,7 +127,8 @@ export async function controllaSpostamento(browser, url, larghezza, h, rossi, da
   const tetto = tuttiEp ? TETTO_SPOSTAMENTO[larghezza] : undefined, tmax = tuttiEp ? MAX_SPOSTAMENTO[larghezza] : undefined;
   if (tetto !== undefined && (conto.oltre > tetto || conto.max > tmax)) male.push(`${vp}: spostamento su ${conto.episodi} episodi, elementi oltre ${SOGLIA_SPOSTAMENTO} px ${conto.oltre} (tetto ${tetto}), massimo ${conto.max} px (tetto ${tmax}); peggiori ${[...conto.per].sort((a, b) => b.max - a.max).slice(0, 4).map((x) => `${x.ep} ${x.peggiore}`).join('; ')} (D-278 spostamento, tetto)`);
   if (!conto.mosse) male.push(`${vp}: nessuna mossa provata ${D}`);
+  if (conto.aperte) male.push(`${vp}: ${conto.aperte} fasi non chiuse in ${FOTOGRAMMI_MAX} fotogrammi (condizione e pagina ferma per ${FERMA}) ${D}`);
   const fasi = FASI.map((f) => `${f} ${conto.fasi[f].oltre}/${conto.fasi[f].max} px`).join(', ');
-  console.log(`spostamento lungo la risposta ${vp}: ${conto.episodi} episodi, ${conto.mosse} mosse, elementi oltre ${SOGLIA_SPOSTAMENTO} px ${conto.oltre}, massimo ${conto.max} px (fino all'«Avanti»); per fase (oltre/massimo) ${fasi}; riaperti ${conto.riprese}, unità non misurate ${conto.nonMisurate}, senza chiamata dopo ${conto.senzaChiamata}; ${tuttiEp ? 'tutti gli episodi' : eps.join(' ')}${tetto !== undefined ? `, tetto ${tetto} / ${tmax} px` : ''}`);
+  console.log(`spostamento lungo la risposta ${vp}: ${conto.episodi} episodi, ${conto.mosse} mosse, elementi oltre ${SOGLIA_SPOSTAMENTO} px ${conto.oltre}, massimo ${conto.max} px (fino all'«Avanti»); per fase (oltre/massimo) ${fasi}; riaperti ${conto.riprese}, unità non misurate ${conto.nonMisurate}, senza chiamata dopo ${conto.senzaChiamata}, fasi non chiuse ${conto.aperte}${vecchio ? ' (finestre di tempo, C281F01)' : ''}; ${tuttiEp ? 'tutti gli episodi' : eps.join(' ')}${tetto !== undefined ? `, tetto ${tetto} / ${tmax} px` : ''}`);
   return { ris: conto, male };
 }
