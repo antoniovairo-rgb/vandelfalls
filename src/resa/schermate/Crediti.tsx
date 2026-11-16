@@ -3,6 +3,8 @@ import { ArrowLeft } from 'lucide-react';
 import { CREDITI } from '../crediti.ts';
 import { Icona } from '../icone.tsx';
 import { Testata } from './Fumetto.tsx';
+import { GAME_VERSION } from '../../versione.ts';
+import { spento } from '../../interruttori.ts';
 
 export function Crediti(p: { indietro: () => void }) {
   return (
@@ -17,6 +19,9 @@ export function Crediti(p: { indietro: () => void }) {
         </div>
       ))}
       <button className="pulsante" onClick={p.indietro}><Icona di={ArrowLeft} />Torna al titolo</button>
+      {/* D-283 (D-15): la versione in fondo alla pagina, come nel Titolo; quella nell'angolo stava sopra il bordo delle schede
+          (stile-d283.css la toglie qui). Rosso C283C01: solo quella nell'angolo, come prima. */}
+      {!spento('C283C01') && <p className="tenue" data-versione={GAME_VERSION}>Versione {GAME_VERSION}</p>}
     </>
   );
 }

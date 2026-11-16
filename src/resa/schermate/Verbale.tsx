@@ -2,7 +2,7 @@
 // Sotto l'esito il bilancio (D-085, PO-036). Esito «fallita» (D-059): l'episodio non è superato e il verbale porta a «Riparti dall'ondata N» (S-17) o «Ricomincia l'episodio».
 import { BookOpen, ChevronRight, Map as IconaMappa, RotateCcw, Share2, StepForward } from 'lucide-react';
 import { condividi } from '../collegamenti.ts';
-import { Fragment, useState } from 'react';
+import { Fragment, useState, type ReactNode } from 'react';
 import type { Risultato } from '../../logica/episodi.ts';
 import type { FineStagione } from '../../logica/epilogo.ts';
 import type { EsitoMissione } from '../../logica/missione.ts';
@@ -19,7 +19,7 @@ import { VignettaEsito } from '../vignette-gioco.tsx';
 import { Sfida } from '../stemma.tsx';
 import { due, Testata } from './Fumetto.tsx';
 
-export function Verbale(p: { m: Missione; esito: EsitoMissione; risultato: Risultato; migliore: boolean; rigioca: () => void; citta: () => void; prossimo?: () => void; riparti?: { n: number; vai: () => void } | null; home?: () => void;
+export function Verbale(p: { fiducia?: ReactNode; m: Missione; esito: EsitoMissione; risultato: Risultato; migliore: boolean; rigioca: () => void; citta: () => void; prossimo?: () => void; riparti?: { n: number; vai: () => void } | null; home?: () => void;
   /** D-164: riepilogo della stagione appena chiusa (ultimo episodio di e12, e24); D-161: apre l'epilogo dopo l'ultimo episodio */
   fineStagione?: FineStagione | null; epilogo?: () => void }) {
   const [passo, setPasso] = useState(0);
@@ -84,13 +84,19 @@ export function Verbale(p: { m: Missione; esito: EsitoMissione; risultato: Risul
       </div>
     </div>
   ) : null;
+  const nota = <p className="tenue" data-spiega="mappa">Mappa: rigioca gli episodi passati.</p>;
+  // D-283 (D-10, revisione R2/R3, scelta del PO: opzione A): la frase non sta più sopra i pulsanti (spingeva giù «Prossimo» di 13 px
+  // e lasciava «indietro» più in alto); il pulsante della mappa dice «Mappa» sotto l'icona, come i pulsanti di D-12, e la frase resta
+  // al lettore e nel title (la parola è ora la «riga che spiega la mappa» di PO-072, data-spiega). Rosso C283V03: la nota sopra i pulsanti (com'era in 24b3678). Rosso C283V01: come main, solo icona e nota sotto.
+  const parola = !spento('C283V01') && !spento('C283V03'), frase = 'Mappa della città: rigioca gli episodi passati';
   const fine = epilogo ?? (spento('C18V01') || !p.prossimo || p.risultato.fallita ? mappa : (
     <div className="verbale-fine">
+      {spento('C283V03') && nota}
       <div className="verbale-riga">
-        <button className="pulsante secondario icona" data-azione="citta" aria-label="Mappa della città" title="Mappa della città" onClick={p.citta}><Icona di={IconaMappa} /></button>
+        <button className={`pulsante secondario icona${parola ? ' con-parola' : ''}`} data-azione="citta" aria-label={parola ? frase : 'Mappa della città'} title={parola ? frase : 'Mappa della città'} onClick={p.citta}><Icona di={IconaMappa} />{parola && <span className="parola-icona" data-spiega="mappa">Mappa</span>}</button>
         <button className="pulsante" data-azione="prossimo" onClick={p.prossimo}>Prossimo episodio<Icona di={ChevronRight} /></button>
       </div>
-      <p className="tenue" data-spiega="mappa">Mappa: rigioca gli episodi passati.</p>
+      {spento('C283V01') && nota}
     </div>
   ));
   // D-164: ultimo passo «Fine stagione N» (stelle, fili aperti), poi «Prossimo episodio» apre la stagione nuova. Rosso C164F01: niente.
@@ -98,6 +104,7 @@ export function Verbale(p: { m: Missione; esito: EsitoMissione; risultato: Risul
   return (
     <>
       <Testata numero={due(p.m.episodio)} etichetta="Verbale" titolo={<span className={tono(p.m, p.esito.esito)} data-esito={p.esito.esito.id}>{t(`esito.${p.esito.esito.id}`)}</span>} home={p.home} />
+      {p.fiducia}
       <Passi nome="Verbale" compatto={fine !== mappa} passo={passo} vai={setPasso} passi={[esito, ...bilancio, fonti, ...stagione]}
         fine={fine} />
     </>

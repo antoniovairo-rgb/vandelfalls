@@ -153,7 +153,7 @@ export async function confermaSchieramento(pagina, { premi, atteso, fotoSe, prov
     }
   }
   const messe = await sulla();
-  const libere = await pagina.evaluate(() => [...document.querySelectorAll('[data-risorsa] strong')].reduce((a, e) => a + Number(e.textContent || 0), 0));
+  const libere = await pagina.evaluate(() => [...document.querySelectorAll('[data-risorsa] strong:not([data-tutte], .posto)')].reduce((a, e) => a + Number(e.textContent || 0), 0));
   await premi('[data-azione="conferma"]');
   const riepilogo = await pagina.getAttribute('[data-riepilogo]', 'data-riepilogo', { timeout: 2000 }).catch(() => null);
   atteso(`schieramento: «Conferma» senza riepilogo di cosa va dove (PO-061)`, riepilogo !== null);

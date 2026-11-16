@@ -103,6 +103,7 @@ export function Schieramento(p: {
   // D-139 (C30-04, PO-118): il «?» nella barra fissa accanto ad annulla e ricomincia, sempre visibile: nella riga sotto le
   // unità finiva sotto la barra con la riga «i» aperta (142/142 a 1366×768). Rosso C96A01: nella riga, come prima.
   const nellaBarra = !vecchio && !spento('C96A01');
+  const parola = !vecchio && !spento('C283P01'); // D-283 (D-12): parola sotto le icone della barra
   const fisse = Object.entries(p.m.mappa.risorse).filter(([, x]) => x.fissa).map(([r]) => r);
   // C18-07: aperto col «?», l'aiuto va sotto la riga del «?» e si porta in vista: sopra le unità le spingeva sotto la
   // barra «Conferma» (375×667). Rosso C42A01: sopra le unità, come prima.
@@ -125,10 +126,16 @@ export function Schieramento(p: {
           return (
             <button key={r} type="button" className={`unita${p.scelta === r ? ' scelta' : ''}`} data-risorsa={r} disabled={libere <= 0}
               aria-pressed={p.scelta === r}
-              aria-label={`${t(`risorsa.${r}`)}: ${libere} libere${riposo ? `, ${riposo} a riposo` : ''}${montate ? `, ${montate} già montate` : ''}${fisse.includes(r) ? ', restano fino a fine serata' : ''}`}
+              aria-label={`${t(`risorsa.${r}`)}: ${libere <= 0 && !spento('C283E01') && !spento('C283E03') ? 'tutte schierate' : `${libere} libere`}${riposo ? `, ${riposo} a riposo` : ''}${montate ? `, ${montate} già montate` : ''}${fisse.includes(r) ? ', restano fino a fine serata' : ''}`}
               {...tr.gestori(r)} onClick={() => { if (!tr.eraTrascinamento()) p.scegli(r); }}>
               {fisse.includes(r) && <span className="unita-fissa" data-fissa-chip={r}><Icona di={Lock} /></span>}
-              <Icona di={iconaRisorsa(r)} /><span className="unita-nome">{t(`risorsa.${r}`)}</span><strong>{libere}</strong>
+              {/* D-283 (D-09): l'unità finita dice «tutte» con la spunta (icona: «✓» non è nei caratteri inclusi, D-257) al posto dell'icona (la riga del numero ha già i contatori: lì andava a
+                  capo e il vassoio cresceva di 20 px a 360) e non ha lo «0»; il nome per il lettore dice «tutte schierate», come a schermo (WCAG 2.5.3, rosso C283E03: «0 libere»).
+                  Al posto dello «0» resta un segnaposto invisibile: senza, con tutte le unità finite il vassoio scendeva da 70 a
+                  50 px e «Conferma» saliva sotto il dito (revisione R1; rosso C283E04: niente segnaposto).
+                  Rosso C283E01: icona e «0», sbiadita come prima */}
+              {libere <= 0 && !spento('C283E01') ? <strong className="tutte" data-tutte={r}><Icona di={Check} />tutte</strong> : <Icona di={iconaRisorsa(r)} />}
+              <span className="unita-nome">{t(`risorsa.${r}`)}</span>{(libere > 0 || spento('C283E01')) ? <strong>{libere}</strong> : !spento('C283E04') && <strong className="posto" aria-hidden="true">0</strong>}
               {riposo > 0 && <span className="unita-extra" data-riposo={r}><Icona di={Moon} />{riposo}</span>}
               {montate > 0 && <span className="unita-extra" data-montate={r}><Icona di={Lock} />{montate}</span>}
             </button>
@@ -146,10 +153,12 @@ export function Schieramento(p: {
       {!vecchio && !nellaBarra && <button type="button" className="aiuto" data-azione="aiuto" aria-pressed={aiuto} aria-label="Come si schiera" onClick={() => setAiuto(!aiuto)}><Icona di={CircleHelp} /></button>}
       </div>
       {!sopra && scatola}
-      <div className={vecchio ? 'riga azioni tre' : 'barra-schieramento'} data-barra>
-        <button className="pulsante secondario" data-azione="annulla" aria-label="Annulla l'ultima mossa" title="Annulla l'ultima mossa" disabled={!p.annulla} onClick={() => p.annulla?.()}><Icona di={Undo2} />{vecchio && 'Annulla'}</button>
-        {nellaBarra && <button type="button" className="pulsante secondario aiuto" data-azione="aiuto" aria-pressed={aiuto} aria-label="Come si schiera" title="Come si schiera" onClick={() => setAiuto(!aiuto)}><Icona di={CircleHelp} /></button>}
-        <button className="pulsante secondario" data-azione="azzera" aria-label="Ritira tutte le unità" title="Ritira tutte le unità" onClick={p.azzera}><Icona di={RotateCcw} />{vecchio && 'Ritira tutte'}</button>
+      {/* D-283 (D-12, M-2): i tre pulsanti a icona della barra hanno la parola sotto l'icona (il «title» non compare al tocco).
+          Rosso C283P01: solo l'icona, come prima. */}
+      <div className={vecchio ? 'riga azioni tre' : `barra-schieramento${parola ? ' con-parole' : ''}`} data-barra>
+        <button className="pulsante secondario" data-azione="annulla" aria-label="Annulla l'ultima mossa" title="Annulla l'ultima mossa" disabled={!p.annulla} onClick={() => p.annulla?.()}><Icona di={Undo2} />{vecchio ? 'Annulla' : parola && <span className="parola-icona">Annulla</span>}</button>
+        {nellaBarra && <button type="button" className="pulsante secondario aiuto" data-azione="aiuto" aria-pressed={aiuto} aria-label={parola ? 'Aiuto: come si schiera' : 'Come si schiera'} title="Come si schiera" onClick={() => setAiuto(!aiuto)}><Icona di={CircleHelp} />{parola && <span className="parola-icona">Aiuto</span>}</button>}
+        <button className="pulsante secondario" data-azione="azzera" aria-label={parola ? 'Azzera: ritira tutte le unità' : 'Ritira tutte le unità'} title="Ritira tutte le unità" onClick={p.azzera}><Icona di={RotateCcw} />{vecchio ? 'Ritira tutte' : parola && <span className="parola-icona">Azzera</span>}</button>
         <button className="pulsante" data-azione="conferma" aria-label={tutte ? 'Conferma lo schieramento' : 'Conferma lo schieramento, con unità libere'} onClick={() => (spento('C17C01') ? p.conferma() : setRiepilogo(true))}><Icona di={Check} />Conferma</button>
       </div>
     </div>

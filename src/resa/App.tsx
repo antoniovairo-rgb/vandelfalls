@@ -52,7 +52,7 @@ type Schermata = 'titolo' | 'crediti' | 'privacy' | 'conferma' | 'genere' | 'gui
 
 // Interruttori rossi che agiscono sul CSS (token.css): C05R06 testi a 10 px e nomi sul bordo, C05R07 etichetta
 // lunga, C05N01 stato del rapporto che va a capo sotto il nome.
-const ROSSI_CSS = ['C272S01', 'C272D02', 'C05R06', 'C05R07', 'C05N01', 'C10S03', 'C14T01', 'C35C01', 'C38A01', 'C38R01', 'C40C01', 'C40C02', 'C42V01', 'C44I02', 'C58I01', 'C60I01', 'C89C01', 'C90V01', 'C98V01', 'C113V01', 'C187C01', 'C187V01', 'C191C01', 'C193S01', 'C196V01', 'C201R01', 'C201C01', 'C203R01', 'C206I01', 'C210C01', 'C215L01', 'C218R01', 'C218S01', 'C221R01', 'C224A01', 'C230C01', 'C234V01', 'C236T01', 'C237S01', 'C237P01', 'C241N01', 'C261E01', 'C265N01', 'C265C01', 'C271T01', 'C271V01'];
+const ROSSI_CSS = ['C272S01', 'C272D02', 'C05R06', 'C05R07', 'C05N01', 'C10S03', 'C14T01', 'C35C01', 'C38A01', 'C38R01', 'C40C01', 'C40C02', 'C42V01', 'C44I02', 'C58I01', 'C60I01', 'C89C01', 'C90V01', 'C98V01', 'C113V01', 'C187C01', 'C187V01', 'C191C01', 'C193S01', 'C196V01', 'C201R01', 'C201C01', 'C203R01', 'C206I01', 'C210C01', 'C215L01', 'C218R01', 'C218S01', 'C221R01', 'C224A01', 'C230C01', 'C234V01', 'C236T01', 'C237S01', 'C237P01', 'C241N01', 'C261E01', 'C265N01', 'C265C01', 'C271T01', 'C271V01', 'C283A01', 'C283E01', 'C283E02', 'C283N01', 'C283C01', 'C283F01'];
 
 export function App() {
   const [sal, setSal] = useState<Salvataggio | null>(() => carica());
@@ -178,7 +178,10 @@ export function App() {
   else if (schermata === 'genere') corpo = <SceltaGenere scegli={nuova} indietro={() => setSchermata('titolo')} />;
   else if (schermata === 'guida' && sal) { nome = 'guida'; corpo = <Guida introduttiva chiudi={() => { segnaGuidaVista(); alla_citta(sal); }} />; }
   else if (schermata === 'verbale' && esito && sal) {
+    // D-283 (D-10, M-8): nel verbale la barra della fiducia sta sotto la testata, come nelle altre schermate (prima sopra,
+    // perché la testata del verbale è nella scena). Rosso C283V02: sopra la testata, come prima.
     corpo = <Verbale m={esito.m} esito={esito.e} risultato={esito.r} migliore={esito.migliore}
+      fiducia={!spento('C34F01') && !spento('C283V02') ? <Fiducia valore={Number(esito.ic.variabili.credito ?? 0)} max={Number(dichiarate.get('credito')?.max ?? 10)} /> : undefined}
       rigioca={() => giocaEpisodio(esito.m.id)} citta={() => alla_citta(sal)} home={home} riparti={ripartenza(esito)}
       prossimo={prossimoEpisodio(sal) ? () => giocaEpisodio(prossimoEpisodio(sal)!.id) : undefined}
       fineStagione={!esito.r.fallita && chiudeStagione(missioni, esito.m) ? fineStagione(missioni, sal.episodi, sal.variabili, dichiarate.values(), esito.m.stagione) : null}
@@ -254,7 +257,7 @@ export function App() {
   const altrove = !spento('C34F01');
   const fiducia = ic && (schermata === 'gioco' || schermata === 'rapporto') ? Number(ic.variabili.credito ?? 0)
     : altrove && !ic && sal && m && (schermata === 'sala' || schermata === 'briefing') ? Number(iniziaEpisodio(sal, m).variabili.credito ?? 0)
-    : altrove && schermata === 'verbale' && esito ? Number(esito.ic.variabili.credito ?? 0) : null;
+    : altrove && schermata === 'verbale' && esito && spento('C283V02') ? Number(esito.ic.variabili.credito ?? 0) : null;
   const chiave = (nome === 'chiamata' || nome === 'risposta') && ic ? `${nome}-${ic.ondata}-${Object.keys(ic.risposte).length}` : `${nome}-${ic?.ondata ?? 0}`;
   return (
     <MotionConfig reducedMotion="user">

@@ -3,7 +3,8 @@
 // «Rigioca», «Prossimo») stanno dentro il riquadro interno della scheda, ombra compresa, con margine ≥ --spazio-1 per lato.
 // A 640/667/760/915 di altezza, alla larghezza data, nessuna pagina scorre. Soglie dalla regola (token), non dal misurato.
 // Rossi: VALMORA_ROSSI=C237S01 (striscia fissa e mappa di prima), VALMORA_ROSSI=C237P01 (pulsanti a filo della scheda),
-// VALMORA_ROSSI=C242M01 (scheda che cresce col contenuto: la mappa salta fra gli stati, C52-01, D-243).
+// VALMORA_ROSSI=C242M01 (scheda che cresce col contenuto: la mappa salta fra gli stati, C52-01, D-243), VALMORA_ROSSI=C283F01
+// (riga «Fallito» con padding e bordo: la scheda «fallito» tagliata, D-283 D-07).
 import { join } from 'node:path';
 import { missioniDai, salvataggioTutti } from './foto-bozze.mjs';
 
@@ -16,6 +17,9 @@ const fino = (id) => { const prima = missioni.slice(0, missioni.findIndex((m) =>
 // conclusi all'avvio e con un episodio scelto (e35): la mappa resta allo stesso posto in tutti gli stati (≤ 1 px, Tripla esclusa)
 const STATI = { e19: [fino('e19'), ['[data-stagione="2"]', '[data-episodio="e19"] .settore-punto']], tripla: [fino('e19'), ['[data-stagione="2"]', '[data-episodio="e18"] .settore-punto', '[data-azione="avvia-episodio"]']],
   prossimo: [fino('e01'), ['[data-stagione="2"]']], nessuno: [fino('e19'), ['[data-stagione="1"]']], superato: [fino('e19'), ['[data-stagione="2"]', '[data-episodio="e18"] .settore-punto']],
+  // D-283 (D-07): e19 fallito una volta (registro come src/logica/episodi.ts registra): scheda con «Fallito: va rigiocato…»
+  // e «Rigioca», che a 412×915 usciva dall'altezza fissa (193 px in 171). Rosso C283F01.
+  fallito: [JSON.stringify({ ...JSON.parse(fino('e19')), episodi: { ...JSON.parse(fino('e19')).episodi, e19: { migliore: null, tentativi: 1, variabili_prima: v0, variabili_dopo: null } } }), ['[data-stagione="2"]', '[data-episodio="e19"] .settore-punto']],
   tutti36: [JSON.stringify(tutto), []], tutti36scelto: [JSON.stringify(tutto), ['[data-stagione="3"]', '[data-episodio="e35"] .settore-punto']] };
 
 const misura = (p) => p.evaluate(() => {
@@ -50,6 +54,7 @@ export async function controllaPo149(browser, url, larghezza, rossi = [], cartel
     for (const t of tocchi) { await p.click(t, { timeout: 5000 }).catch(() => male.push(`${vp} ${stato}: non trovo ${t} (PO-149)`)); await p.waitForTimeout(250); }
     await p.waitForTimeout(300); const m = await misura(p); ris.push({ vp, stato, ...m });
     if (cartella && stato === 'e19') await p.screenshot({ path: join(cartella, `${vp}-citta-po149.png`) });
+    if (cartella && stato === 'fallito') await p.screenshot({ path: join(cartella, `${vp}-citta-fallito.png`) }); // D-283 (D-07)
     if (m.ecc > 0 && stato !== 'tripla') male.push(`${vp} città ${stato}: la pagina scorre di ${m.ecc} px (PO-149, D-230)`); // la Tripla scorreva già prima: non è di PO-149
     for (const b of m.pulsanti) if (b.margine < m.minMargine) male.push(`${vp} città ${stato}: «${b.azione}» con l'ombra è a ${b.margine} px dal riquadro interno della scheda (serve ≥ ${m.minMargine}, PO-149)`);
     for (const x of m.tagli) male.push(`${vp} città ${stato}: ${x} (D-243)`);
