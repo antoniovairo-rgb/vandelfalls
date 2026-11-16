@@ -6,16 +6,15 @@
 // va dal lato libero del gruppo (in testa o in coda, con `order`), chi parte lascia il posto vuoto di C272V01. Se così il gruppo
 // esce dalla mappa o copre un disco, si prova uno scarto piccolo (entro una larghezza) dalla traslazione esatta (D-280, e08 a 360:
 // tornelli 7 px a sinistra). Il gruppo così fermato (data-fermo) è un ostacolo e il ricalcolo si rifà intorno a lui (nomi e altri
-// gruppi). Un gruppo fermo con qualcosa di vietato (pastiglie o nome fuori dalla mappa, un centro di tocco sotto un disco o sul
-// nome di un altro, il proprio disco coperto) o con più sovrapposizioni (px²) del ricalcolo libero e di quelle già viste, per sé o
-// in tutto, o che fa saltare le pastiglie rimaste o il nome di un altro settore più del ricalcolo libero e di una larghezza, prova
-// il posto candidato dopo (l'altro lato, un altro scarto: D-280); finiti i candidati si scioglie e resta il ricalcolo: è un caso
-// geometrico, contato dal guardiano spostamento-po152b. Rosso C279F01: niente, come prima.
+// gruppi), una volta sola (D-280, costo). Se così c'è qualcosa di vietato (pastiglie o nome fuori dalla mappa, un centro di tocco sotto
+// un disco o sul nome di un altro, il proprio disco coperto), più sovrapposizioni (px²) del ricalcolo libero e di quelle già viste,
+// per un fermo o in tutto, un settore che salta più del ricalcolo libero e di una larghezza, o più pastiglie coperte oltre metà da un
+// nome del ricalcolo libero (D-281), si torna al ricalcolo libero: è un caso geometrico, contato dal guardiano spostamento-po152b.
+// L'ordine dato a chi arriva resta finché dura la mossa (D-281). Rosso C279F01: niente, come prima.
 import { spento } from '../../interruttori.ts';
 import { chiaveUnita, type Prima } from './congela.ts';
 import { area, MARGINE, unisci, type Rett } from './etichette.ts';
 
-const CANDIDATI = 3; // posti tenuti per gruppo (il migliore e due di riserva): ogni riserva costa al più un ricalcolo
 const centro = (r: Rett) => [(r.left + r.right) / 2, (r.top + r.bottom) / 2] as const;
 const dentro = (p: readonly [number, number], q: Rett) => p[0] >= q.left && p[0] <= q.right && p[1] >= q.top && p[1] <= q.bottom;
 const figli = (s: Element) => [...(s.querySelector('.settore-unita')?.children ?? [])] as HTMLElement[];
@@ -26,10 +25,19 @@ const vis = (x: Element) => figli(x).flatMap((c) => { const v = c.querySelector(
 const interno = (m: Rett): Rett => ({ left: m.left + MARGINE, top: m.top + MARGINE, right: m.right - MARGINE, bottom: m.bottom - MARGINE });
 const verso = (x: number) => Math.sign(x) * Math.ceil(Math.abs(x)); // px interi, mai meno del necessario
 
-/** Prima del ricalcolo: nessun gruppo fermo e l'ordine del DOM. */
-export function sciogli(mappa: HTMLElement) {
+/** Prima del ricalcolo: nessun gruppo fermo e, fuori dalla mossa, l'ordine del DOM. */
+// D-281 (revisione 3, rilievo 2): nella mossa l'ordine dato a chi arriva («in testa») resta legato alla sua unità. Si toglieva a ogni
+// ricalcolo: con la mossa fatta coi segni ▲/▼ ancora in pagina, alla loro sparizione il ricalcolo dopo rimetteva l'arrivata in coda e
+// le rimaste saltavano di 44-88 px (e21 a 360, squadre@ex_fonderia → curva_cinderwick). Rosso C281O01: si toglie sempre, come prima
+export function sciogli(mappa: HTMLElement, tieniOrdine = false) {
   for (const s of mappa.querySelectorAll<HTMLElement>('[data-fermo]')) s.removeAttribute('data-fermo');
-  for (const c of mappa.querySelectorAll<HTMLElement>('.settore-unita > *')) c.style.removeProperty('order');
+  if (!tieniOrdine || spento('C281O01')) for (const c of mappa.querySelectorAll<HTMLElement>('.settore-unita > *')) c.style.removeProperty('order');
+}
+
+/** Le pastiglie coperte per più di metà da un nome, suo o di altri (D-281, revisione 3, rilievo 1). */
+function coperte(settori: HTMLElement[]): number {
+  const nomi = settori.map(nomeDi).filter((r): r is Rett => !!r);
+  return settori.reduce((t, s) => t + vis(s).filter((a) => nomi.some((n) => area(a, n) > ((a.right - a.left) * (a.bottom - a.top)) / 2)).length, 0);
 }
 
 /** La pastiglia rimasta più lontana dal posto di prima (px) e la traslazione media che riporta le rimaste. */
@@ -79,9 +87,8 @@ export function disponiFermi(mappa: HTMLElement, prima: Prima | null, disponi: (
 }
 
 // D-280 (revisione 2, A): ogni ricalcolo di etichette.ts costa (e12 a 360, CPU ×4: circa 2 s l'uno; erano fino a 5 per mossa, 10,9 s
-// contro 3,4 di main). RICALCOLI: quanti ricalcoli intorno ai gruppi fermi, oltre a quello libero; finiti con qualcosa di male si
-// torna al ricalcolo libero fotografato, senza rifarlo
-const RICALCOLI = 1;
+// contro 3,4 di main): un solo ricalcolo intorno ai gruppi fermi, oltre a quello libero; con qualcosa di male si torna al ricalcolo
+// libero fotografato, senza rifarlo (D-281, revisione 3, rilievo 3: tolti i candidati di riserva e i ricalcoli in più, mai raggiunti)
 // D-280 (revisione 2, E): quanto può crescere la sovrapposizione coi gruppi fermi, in frazione dell'area di una pastiglia (era 0,5 px²:
 // e02 squadre@stazione → curva_ospiti si scioglieva per +17 px² e una pastiglia saltava di 79 px). Misura 36 episodi a 360x640:
 // elementi oltre 44 px 442 (0) → 422 (0,1) → 396 (0,25) → 352 (0,5), nessun episodio peggiore; invarianti dopo ogni mossa
@@ -111,10 +118,10 @@ function vicini(settori: HTMLElement[], fermi: HTMLElement[], larga: number): Se
 }
 
 type Posto = { max: number; ordine: number; dx: number; dy: number };
-type Gruppo = { g: HTMLElement; unita: string; resto: Posto[] };
+type Gruppo = { g: HTMLElement; unita: string };
 
-/** I posti del gruppo di s dov'era (lato di chi arriva × scarto dalla traslazione esatta) senza divieti suoi, i migliori prima. */
-function candidati(s: HTMLElement, gr: Omit<Gruppo, 'resto'>, prima: Prima, m: DOMRect, settori: HTMLElement[], larga: number): Posto[] {
+/** Il posto migliore del gruppo di s dov'era (lato di chi arriva × scarto dalla traslazione esatta) senza divieti suoi. */
+function candidato(s: HTMLElement, gr: Gruppo, prima: Prima, m: DOMRect, settori: HTMLElement[], larga: number): Posto | undefined {
   const nuovi = figli(s).filter((c) => { const k = chiaveUnita(c); return k && !prima.centri.has(k); }), tutti: Posto[] = [];
   const passi = [larga / 4, larga / 2], versi = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]] as const;
   // ordine del DOM (chi arriva è già in coda: Mappa.tsx inFila) e chi arriva in testa; «in coda» era un doppione (D-280 revisione 2, B)
@@ -133,24 +140,27 @@ function candidati(s: HTMLElement, gr: Omit<Gruppo, 'resto'>, prima: Prima, m: D
     if (tutti.length === prima0) for (const r of passi) for (const [a, b] of versi) prova(d.dx + a * r, d.dy + b * r);
   }
   for (const c of nuovi) c.style.removeProperty('order');
-  return tutti.sort((a, b) => a.max - b.max).slice(0, CANDIDATI); // a parità il primo provato (sort stabile)
+  return tutti.sort((a, b) => a.max - b.max)[0]; // a parità il primo provato (sort stabile)
 }
 
-function fissa(s: HTMLElement, gr: Omit<Gruppo, 'resto'>, p: Posto, prima: Prima) {
+// chi arriva prende l'ordine del posto; le altre tengono il loro (D-281: anche quello di un arrivo di prima nella stessa mossa)
+function fissa(s: HTMLElement, gr: Gruppo, p: Posto, prima: Prima) {
   s.setAttribute('data-unita', gr.unita); muovi(gr.g, p.dx, p.dy); s.setAttribute('data-fermo', '');
-  for (const c of figli(s)) { const k = chiaveUnita(c); if (k && !prima.centri.has(k)) c.style.setProperty('order', String(p.ordine)); else c.style.removeProperty('order'); }
+  for (const c of figli(s)) { const k = chiaveUnita(c); if (k && !prima.centri.has(k)) c.style.setProperty('order', String(p.ordine)); }
 }
 
 function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: (soli?: ReadonlySet<HTMLElement>) => void, prime: Map<string, number> | undefined) {
-  sciogli(mappa); disponi();
   // solo dopo la mossa (data-mossa «fatta»): prima della mossa la disposizione resta quella di sempre (e36 a 360: tenere i gruppi già
   // all'arrivo della risposta cambiava la disposizione di partenza e la mossa poi saltava di più)
-  if (!prima || spento('C279F01') || mappa.querySelector('.radio-mappa [data-mossa]')?.getAttribute('data-mossa') !== 'fatta') return;
-  // solo a mappa della stessa misura: se cambia l'altezza (riquadro radio, costo) i dischi si spostano e tenere i pixel di prima
+  // e solo a mappa della stessa misura: se cambia l'altezza (riquadro radio, costo) i dischi si spostano e tenere i pixel di prima
   // inchioderebbe le pastiglie lontano dal loro disco, che poi saltano di più alla mossa (e03, e07, e19 a 375; e36 a 360)
-  const [lw, lh] = prima.firma.split('#'), m = mappa.getBoundingClientRect();
-  if (Number(lw) !== Math.round(m.width) || Number(lh) !== Math.round(m.height)) return;
-  const settori = [...mappa.querySelectorAll<HTMLElement>('[data-settore]')], gruppi = new Map<HTMLElement, Gruppo>();
+  const [lw, lh] = prima?.firma.split('#') ?? [], m0 = mappa.getBoundingClientRect();
+  const mossa = !!prima && !spento('C279F01') && mappa.querySelector('.radio-mappa [data-mossa]')?.getAttribute('data-mossa') === 'fatta'
+    && Number(lw) === Math.round(m0.width) && Number(lh) === Math.round(m0.height);
+  sciogli(mappa, mossa); disponi();
+  if (!prima || !mossa) return;
+  const m = mappa.getBoundingClientRect(), settori = [...mappa.querySelectorAll<HTMLElement>('[data-settore]')];
+  let tenuti = 0;
   // una larghezza: quella di un tocco, uguale per tutti i settori (D-280: per i settori senza unità era 0, e il nome di uno di loro
   // che si spostava di 37 px scioglieva il gruppo: a 360×760 in e26 nessun gruppo restava fermo)
   const larga = mappa.querySelector('.settore-unita > *')?.getBoundingClientRect().width ?? 0;
@@ -170,37 +180,27 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: (soli?: R
     const g = s.querySelector<HTMLElement>('.settore-unita'), pp = prima.posti.get(s.dataset.settore ?? ''), ora = g && pp?.unita ? scarto(s, prima, m) : null;
     if (!g || !pp?.unita || !ora || ora.max <= larga) continue;
     const prove = { unita: s.getAttribute('data-unita'), dx: g.style.getPropertyValue('--unita-dx'), dy: g.style.getPropertyValue('--unita-dy') };
-    const gr = { g, unita: pp.unita }, [primo, ...resto] = candidati(s, gr, prima, m, settori, larga);
-    if (primo) { fissa(s, gr, primo, prima); gruppi.set(s, { ...gr, resto }); continue; }
+    const gr = { g, unita: pp.unita }, primo = candidato(s, gr, prima, m, settori, larga);
+    if (primo) { fissa(s, gr, primo, prima); tenuti++; continue; }
     if (prove.unita) s.setAttribute('data-unita', prove.unita); g.style.setProperty('--unita-dx', prove.dx); g.style.setProperty('--unita-dy', prove.dy);
   }
-  if (!gruppi.size) return;
-  // il ricalcolo intorno ai gruppi fermi (al più RICALCOLI); chi resta con un divieto prova il suo candidato dopo o si scioglie. Con 0
-  // i gruppi si provano sopra il ricalcolo libero (nomi e altri gruppi restano dove sono) e chi è male torna al suo posto libero
+  if (!tenuti) return;
+  // il ricalcolo intorno ai gruppi fermi, uno; con qualcosa di male si torna al ricalcolo libero
   const fermi = () => settori.filter((s) => s.hasAttribute('data-fermo')), pa = mappa.querySelector('.settore-unita .pastiglia')?.getBoundingClientRect();
   const toll = Math.max(0.5, spento('C281T01') ? 0 : TOLLERANZA * (pa ? pa.width * pa.height : 0)); // rosso C281T01: 0,5 px² come prima
   // chi era immobile nel ricalcolo libero e il ricalcolo intorno ai fermi ha spostato torna come nel libero, se così niente di vietato
   // e le sovrapposizioni in tutto non crescono oltre la tolleranza (altrimenti resta il ricalcolo)
+  // e senza nuove pastiglie sotto un nome (D-281, revisione 3, rilievo 1: con la tolleranza un'arrivata finiva sotto il nome del suo
+  // settore, e28 a 360 steward@curva_cinderwick → magazzino_fonderie; rosso C281N01: non si guarda, come prima)
+  const nomi = !spento('C281N01'), coperte0 = coperte(settori);
   const riferma = () => { for (const s of immobili) { if (s.hasAttribute('data-fermo') || ferme(s) <= 0.5) continue;
-    const ora = fotografa([s]), prima0 = tutta((x) => pena(x, settori)); ripristina(libera.filter((f) => f.s === s));
-    if ([s, ...fermi()].some((x) => divieto(x, settori, m)) || tutta((x) => pena(x, settori)) > prima0 + toll) ripristina(ora); } };
-  for (let fatti = 0; ; ) {
-    if (RICALCOLI) { disponi(vicini(settori, fermi(), larga)); fatti++; riferma(); }
-    const ora = new Map(settori.map((s) => [s, pena(s, settori)])), cresce = (s: HTMLElement) => (ora.get(s) ?? 0) - (pena0.get(s) ?? 0);
-    const male = fermi().filter((s) => divieto(s, settori, m) || cresce(s) > toll);
-    if (!male.length && tutta((s) => ora.get(s) ?? 0) > tutta((s) => pena0.get(s) ?? 0) + toll) { // in tutto peggio: il fermo che pesa di più
-      const f = fermi().sort((a, b) => cresce(b) - cresce(a))[0]; if (f) male.push(f); }
-    const saltati = male.length ? [] : settori.filter((s) => (!s.hasAttribute('data-fermo') ? via(s) : nomeVia(s)) > (via0.get(s) ?? 0) + 0.5);
-    const punto = saltati[0]?.querySelector('.settore-punto');
-    if (punto) { // il fermo più vicino al primo settore saltato
-      const [x, y] = centro(punto.getBoundingClientRect()), d = (s: HTMLElement) => { const r = s.querySelector('.settore-punto'); if (!r) return Infinity;
-        const [a, b] = centro(r.getBoundingClientRect()); return Math.hypot(a - x, b - y); };
-      const f = fermi().sort((a, b) => d(a) - d(b))[0]; if (f) male.push(f); }
-    if (!male.length) return;
-    if (RICALCOLI && fatti >= RICALCOLI) { ripristina(libera); return; } // tetto: il ricalcolo libero, senza rifarlo
-    for (const s of male) { const gr = gruppi.get(s), dopo = gr?.resto.shift();
-      if (gr && dopo) { fissa(s, gr, dopo, prima); continue; }
-      if (RICALCOLI) { s.removeAttribute('data-fermo'); for (const c of figli(s)) c.style.removeProperty('order'); } else ripristina(libera.filter((f) => f.s === s)); }
-    if (!fermi().length) { if (RICALCOLI) ripristina(libera); return; }
-  }
+    const ora = fotografa([s]), prima0 = tutta((x) => pena(x, settori)), c0 = nomi ? coperte(settori) : 0; ripristina(libera.filter((f) => f.s === s));
+    if ([s, ...fermi()].some((x) => divieto(x, settori, m)) || tutta((x) => pena(x, settori)) > prima0 + toll || (nomi && coperte(settori) > c0)) ripristina(ora); } };
+  disponi(vicini(settori, fermi(), larga)); riferma();
+  const ora = new Map(settori.map((s) => [s, pena(s, settori)])), cresce = (s: HTMLElement) => (ora.get(s) ?? 0) - (pena0.get(s) ?? 0), quanti = fermi().length;
+  const male = fermi().some((s) => divieto(s, settori, m) || cresce(s) > toll)
+    || (quanti > 0 && tutta((s) => ora.get(s) ?? 0) > tutta((s) => pena0.get(s) ?? 0) + toll) // in tutto peggio
+    || (quanti > 0 && settori.some((s) => (!s.hasAttribute('data-fermo') ? via(s) : nomeVia(s)) > (via0.get(s) ?? 0) + 0.5)) // un settore saltato
+    || (nomi && coperte(settori) > coperte0);
+  if (male) ripristina(libera); // il ricalcolo libero, senza rifarlo
 }
