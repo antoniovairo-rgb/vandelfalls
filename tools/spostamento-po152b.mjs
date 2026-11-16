@@ -34,9 +34,9 @@ const LEGGI = () => {
   return { segni: document.querySelectorAll('.mappa [data-segno]').length, alta: Math.round(m.height), e };
 };
 const leggi = (p) => p.evaluate(LEGGI);
-// D-281 (revisione 3, rilievo 1): dopo la mossa nessuna pastiglia d'unità coperta per più di metà dal nome di un settore, suo o di altri
-// (b5293c47 a 360: e28 steward@curva_cinderwick → magazzino_fonderie, l'arrivata tutta sotto «Magazzino delle fonderie»). Tetto 0
-export const TETTO_COPERTE = 0;
+// D-281 (revisione 3, rilievo 1): le pastiglie d'unità coperte per più di metà dal nome di un settore, suo o di altri, dopo la mossa.
+// Solo contate e dichiarate: il PO ha scelto C (correggere nel lotto mappa D-283, col guardiano diviso in «proprio» e «altri»): a 360,
+// 36 episodi, b5293c47 10 sotto il proprio nome e 26 di altri, main 0 e 31; tenerle a 0 coi gruppi fermi faceva saltare le rimaste
 const COPERTE = () => { const nomi = [...document.querySelectorAll('.mappa [data-settore]')].flatMap((s) => { const n = s.querySelector('.settore-nome'); return n ? [[s.dataset.settore, n.getBoundingClientRect()]] : []; });
   const su = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
   return [...document.querySelectorAll('.mappa .settore-unita .pastiglia')].flatMap((e) => { const r = e.getBoundingClientRect(), t = e.closest('[data-presenza], [data-fissa]'), n = nomi.find(([, q]) => su(r, q) > (r.width * r.height) / 2);
@@ -142,7 +142,6 @@ export async function controllaSpostamento(browser, url, larghezza, h, rossi, da
   const tetto = tuttiEp ? TETTO_SPOSTAMENTO[larghezza] : undefined, tmax = tuttiEp ? MAX_SPOSTAMENTO[larghezza] : undefined;
   if (tetto !== undefined && (conto.oltre > tetto || conto.max > tmax)) male.push(`${vp}: spostamento su ${conto.episodi} episodi, elementi oltre ${SOGLIA_SPOSTAMENTO} px ${conto.oltre} (tetto ${tetto}), massimo ${conto.max} px (tetto ${tmax}); peggiori ${[...conto.per].sort((a, b) => b.max - a.max).slice(0, 4).map((x) => `${x.ep} ${x.peggiore}`).join('; ')} (D-278 spostamento, tetto)`);
   if (!conto.mosse) male.push(`${vp}: nessuna mossa provata ${D}`);
-  if (conto.coperte > TETTO_COPERTE) male.push(`${vp}: dopo la mossa ${conto.coperte} pastiglie coperte oltre metà da un nome (tetto ${TETTO_COPERTE}): ${conto.per.flatMap((x) => x.coperte.map((k) => `${x.ep} ${k}`)).slice(0, 6).join('; ')} (D-281 coperte)`);
   if (conto.aperte) male.push(`${vp}: ${conto.aperte} fasi non chiuse in ${FOTOGRAMMI_MAX} fotogrammi (condizione e pagina ferma per ${FERMA}) ${D}`);
   const fasi = FASI.map((f) => `${f} ${conto.fasi[f].oltre}/${conto.fasi[f].max} px`).join(', ');
   console.log(`spostamento lungo la risposta ${vp}: ${conto.episodi} episodi, ${conto.mosse} mosse, elementi oltre ${SOGLIA_SPOSTAMENTO} px ${conto.oltre}, massimo ${conto.max} px (fino all'«Avanti»); per fase (oltre/massimo) ${fasi}; riaperti ${conto.riprese}, unità non misurate ${conto.nonMisurate}, senza chiamata dopo ${conto.senzaChiamata}, fasi non chiuse ${conto.aperte}${vecchio ? ' (finestre di tempo, C281F01)' : ''}, coperte da un nome ${conto.coperte}${immediata ? ', mossa immediata' : ''};${tuttiEp ? 'tutti gli episodi' : eps.join(' ')}${tetto !== undefined ? `, tetto ${tetto} / ${tmax} px` : ''}`);
