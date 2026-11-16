@@ -157545,6 +157545,65 @@
         }
       ],
       "esito": "verde"
+    },
+    {
+      "catena": "grafica",
+      "data": "2026-11-16T01:49:28.383Z",
+      "commit": "a65d240",
+      "modifiche_non_committate": false,
+      "larghezze": "360",
+      "passi_scelti": "token,build,email,foto",
+      "passi": [
+        {
+          "passo": "token",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "build",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            1.5
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "email",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0.5
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "foto",
+          "esito": "rosso",
+          "tentativi": 3,
+          "secondi": [
+            985.5,
+            1002.8,
+            999.1
+          ],
+          "problemi": [
+            "360px: verbale: manca la riga che spiega la mappa (PO-072)"
+          ],
+          "precedenti": [
+            [
+              "360px: verbale: manca la riga che spiega la mappa (PO-072)"
+            ],
+            [
+              "360px: verbale: manca la riga che spiega la mappa (PO-072)"
+            ]
+          ]
+        }
+      ],
+      "esito": "rosso"
     }
   ]
 }

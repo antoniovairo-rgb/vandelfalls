@@ -195,7 +195,7 @@ export async function controllaD283(browser, url, larghezza, rossi = [], cartell
   // --- verbale (D-10, revisione R2/R3, opzione A del PO): all'ultimo passo «indietro», mappa e «Prossimo» sulla stessa riga, il
   // pulsante della mappa dice «Mappa» sotto l'icona (intera), nessuna nota sopra i pulsanti; «Prossimo» toccabile, fiducia sotto la testata
   const fineVerbale = (p) => p.evaluate(() => { const q = (s) => document.querySelector(s)?.getBoundingClientRect();
-    const pr = q('.passi-nav [data-azione="prossimo"]'), ind = q('.passi-nav [data-azione="indietro"]'), ci = q('.passi-nav [data-azione="citta"]'), n = document.querySelector('[data-spiega="mappa"]');
+    const pr = q('.passi-nav [data-azione="prossimo"]'), ind = q('.passi-nav [data-azione="indietro"]'), ci = q('.passi-nav [data-azione="citta"]'), n = document.querySelector('p[data-spiega="mappa"]');
     const w = document.querySelector('.passi-nav [data-azione="citta"] .parola-icona'), wr = w?.getBoundingClientRect(), f = q('.fiducia'), t = q('.testata');
     const tocco = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tocco-min'));
     return { prossimo: pr ? Math.round(Math.max(0, Math.min(innerHeight, pr.bottom) - Math.max(0, pr.top))) : null, tocco,

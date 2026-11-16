@@ -87,13 +87,13 @@ export function Verbale(p: { fiducia?: ReactNode; m: Missione; esito: EsitoMissi
   const nota = <p className="tenue" data-spiega="mappa">Mappa: rigioca gli episodi passati.</p>;
   // D-283 (D-10, revisione R2/R3, scelta del PO: opzione A): la frase non sta più sopra i pulsanti (spingeva giù «Prossimo» di 13 px
   // e lasciava «indietro» più in alto); il pulsante della mappa dice «Mappa» sotto l'icona, come i pulsanti di D-12, e la frase resta
-  // al lettore e nel title. Rosso C283V03: la nota sopra i pulsanti (com'era in 24b3678). Rosso C283V01: come main, solo icona e nota sotto.
+  // al lettore e nel title (la parola è ora la «riga che spiega la mappa» di PO-072, data-spiega). Rosso C283V03: la nota sopra i pulsanti (com'era in 24b3678). Rosso C283V01: come main, solo icona e nota sotto.
   const parola = !spento('C283V01') && !spento('C283V03'), frase = 'Mappa della città: rigioca gli episodi passati';
   const fine = epilogo ?? (spento('C18V01') || !p.prossimo || p.risultato.fallita ? mappa : (
     <div className="verbale-fine">
       {spento('C283V03') && nota}
       <div className="verbale-riga">
-        <button className={`pulsante secondario icona${parola ? ' con-parola' : ''}`} data-azione="citta" aria-label={parola ? frase : 'Mappa della città'} title={parola ? frase : 'Mappa della città'} onClick={p.citta}><Icona di={IconaMappa} />{parola && <span className="parola-icona">Mappa</span>}</button>
+        <button className={`pulsante secondario icona${parola ? ' con-parola' : ''}`} data-azione="citta" aria-label={parola ? frase : 'Mappa della città'} title={parola ? frase : 'Mappa della città'} onClick={p.citta}><Icona di={IconaMappa} />{parola && <span className="parola-icona" data-spiega="mappa">Mappa</span>}</button>
         <button className="pulsante" data-azione="prossimo" onClick={p.prossimo}>Prossimo episodio<Icona di={ChevronRight} /></button>
       </div>
       {spento('C283V01') && nota}
