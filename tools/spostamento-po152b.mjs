@@ -126,6 +126,8 @@ export async function controllaSpostamento(browser, url, larghezza, h, rossi, da
           if (px > SOGLIA_SPOSTAMENTO) { r.oltre++; r.fasi[fase].oltre++; if (!r.peggiore || px > Number(r.peggiore.split(' ')[0])) r.peggiore = `${px} px ${k} (${fase}, ${u} → ${x.sett})`; } }
         for (const [px] of Object.values(x.maxDopo)) { r.fasi.dopo.max = Math.max(r.fasi.dopo.max, px); if (px > SOGLIA_SPOSTAMENTO) r.fasi.dopo.oltre++; }
         for (const k of x.coperte) { conto.coperte++; r.coperte.push(`${u} → ${x.sett}: ${k}`); }
+        // VALMORA_SPOST_DETTAGLIO=<px>: ogni mossa con gli elementi spostati oltre quei px e la fase (verifica caso per caso, D-281)
+        if (process.env.VALMORA_SPOST_DETTAGLIO) (r.dettaglio ??= []).push(`${u} → ${x.sett}: ${Object.entries(x.max).filter(([, [px]]) => px > Number(process.env.VALMORA_SPOST_DETTAGLIO)).map(([k, [px, f]]) => `${k} ${px} ${f}`).join(', ')}`);
       } catch (e) { male.push(`${vp} ${ep} ${c.id} ${u}: mossa ${j + 1} non riuscita: ${String(e).split('\n')[0].slice(0, 120)} ${D}`); break; } } }), pagine);
       if (!r.mosse) continue;
       conto.episodi++; conto.mosse += r.mosse; conto.oltre += r.oltre; conto.max = Math.max(conto.max, r.max);
