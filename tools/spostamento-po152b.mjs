@@ -34,9 +34,14 @@ const LEGGI = () => {
   return { segni: document.querySelectorAll('.mappa [data-segno]').length, alta: Math.round(m.height), e };
 };
 const leggi = (p) => p.evaluate(LEGGI);
+// «tipo@settore sotto il nome di X» (anche con «arrivo → destinazione: » davanti): proprio se X è il settore della pastiglia
+const proprio = (k) => { const m = /([^\s@:]+)@(\S+) sotto il nome di (\S+)$/.exec(k); return !!m && m[2] === m[3]; };
 // D-281 (revisione 3, rilievo 1): le pastiglie d'unità coperte per più di metà dal nome di un settore, suo o di altri, dopo la mossa.
-// Solo contate e dichiarate: il PO ha scelto C (correggere nel lotto mappa D-283, col guardiano diviso in «proprio» e «altri»): a 360,
-// 36 episodi, b5293c47 10 sotto il proprio nome e 26 di altri, main 0 e 31; tenerle a 0 coi gruppi fermi faceva saltare le rimaste
+// Difetto residuo dichiarato (il PO ha scelto C: si corregge nel lotto mappa D-283, dove i tetti vanno a 0): tenerle a 0 coi gruppi
+// fermi faceva saltare le rimaste (a 360, e03 e10 e28 e29: 59 → 85 elementi oltre 44 px). Due conti, sui 36 episodi: «sotto il
+// proprio nome» e «sotto il nome di altri», ciascuno col tetto alla misura del codice (mai sopra main per «altri»), perché non peggiori
+// di nascosto. [proprio, altri]: TETTI_COPERTE_MISURA
+export const TETTO_COPERTE = {}; // PROVVISORIO: valori dopo la misura di C
 const COPERTE = () => { const nomi = [...document.querySelectorAll('.mappa [data-settore]')].flatMap((s) => { const n = s.querySelector('.settore-nome'); return n ? [[s.dataset.settore, n.getBoundingClientRect()]] : []; });
   const su = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
   return [...document.querySelectorAll('.mappa .settore-unita .pastiglia')].flatMap((e) => { const r = e.getBoundingClientRect(), t = e.closest('[data-presenza], [data-fissa]'), n = nomi.find(([, q]) => su(r, q) > (r.width * r.height) / 2);
@@ -61,7 +66,7 @@ const fase = (p, cond, ferma = FERMA) => p.evaluate(async ([src, cond, n, nl, ma
 // fase di sparizione); lo spostamento alla loro sparizione cade nella fase «mossa». Senza i segni al tocco del settore si riapre
 export async function controllaSpostamento(browser, url, larghezza, h, rossi, dati, insieme, pagine = 1, episodi = null, immediata = false) {
   const male = [], vp = `${larghezza}x${h}`, D = '(D-278 spostamento)', dich = new Map(dati['stato.json'].variabili.map((d) => [d.id, d])), tutte = chiamateCostruite(dati, dich);
-  const conto = { vp, giro: 'spostamento', episodi: 0, mosse: 0, oltre: 0, max: 0, fasi: Object.fromEntries(FASI.map((f) => [f, { oltre: 0, max: 0 }])), riprese: 0, nonMisurate: 0, senzaChiamata: 0, aperte: 0, coperte: 0, per: [] };
+  const conto = { vp, giro: 'spostamento', episodi: 0, mosse: 0, oltre: 0, max: 0, fasi: Object.fromEntries(FASI.map((f) => [f, { oltre: 0, max: 0 }])), riprese: 0, nonMisurate: 0, senzaChiamata: 0, aperte: 0, coperte: 0, proprie: 0, per: [] };
   const vecchio = rossi.includes('C281F01');
   const tuttiEp = !!process.env.VALMORA_SALTI_TUTTI && !episodi, eps = tuttiEp ? [...new Set(tutte.map((x) => x.ep))].sort() : [...(episodi ?? EPISODI_SPOSTAMENTO)].sort();
   const apri = async (c, ch) => { const p = await browser.newPage({ viewport: { width: larghezza, height: h }, hasTouch: true, reducedMotion: 'reduce' });
@@ -125,7 +130,7 @@ export async function controllaSpostamento(browser, url, larghezza, h, rossi, da
         for (const [k, [px, fase]] of Object.entries(x.max)) { r.max = Math.max(r.max, px); r.fasi[fase].max = Math.max(r.fasi[fase].max, px);
           if (px > SOGLIA_SPOSTAMENTO) { r.oltre++; r.fasi[fase].oltre++; if (!r.peggiore || px > Number(r.peggiore.split(' ')[0])) r.peggiore = `${px} px ${k} (${fase}, ${u} → ${x.sett})`; } }
         for (const [px] of Object.values(x.maxDopo)) { r.fasi.dopo.max = Math.max(r.fasi.dopo.max, px); if (px > SOGLIA_SPOSTAMENTO) r.fasi.dopo.oltre++; }
-        for (const k of x.coperte) { conto.coperte++; r.coperte.push(`${u} → ${x.sett}: ${k}`); }
+        for (const k of x.coperte) { conto.coperte++; if (proprio(k)) conto.proprie++; r.coperte.push(`${u} → ${x.sett}: ${k}`); }
         // VALMORA_SPOST_DETTAGLIO=<px>: ogni mossa con gli elementi spostati oltre quei px e la fase (verifica caso per caso, D-281)
         if (process.env.VALMORA_SPOST_DETTAGLIO) (r.dettaglio ??= []).push(`${u} → ${x.sett}: ${Object.entries(x.max).filter(([, [px]]) => px > Number(process.env.VALMORA_SPOST_DETTAGLIO)).map(([k, [px, f]]) => `${k} ${px} ${f}`).join(', ')}`);
       } catch (e) { male.push(`${vp} ${ep} ${c.id} ${u}: mossa ${j + 1} non riuscita: ${String(e).split('\n')[0].slice(0, 120)} ${D}`); break; } } }), pagine);
@@ -142,8 +147,11 @@ export async function controllaSpostamento(browser, url, larghezza, h, rossi, da
   const tetto = tuttiEp ? TETTO_SPOSTAMENTO[larghezza] : undefined, tmax = tuttiEp ? MAX_SPOSTAMENTO[larghezza] : undefined;
   if (tetto !== undefined && (conto.oltre > tetto || conto.max > tmax)) male.push(`${vp}: spostamento su ${conto.episodi} episodi, elementi oltre ${SOGLIA_SPOSTAMENTO} px ${conto.oltre} (tetto ${tetto}), massimo ${conto.max} px (tetto ${tmax}); peggiori ${[...conto.per].sort((a, b) => b.max - a.max).slice(0, 4).map((x) => `${x.ep} ${x.peggiore}`).join('; ')} (D-278 spostamento, tetto)`);
   if (!conto.mosse) male.push(`${vp}: nessuna mossa provata ${D}`);
+  const tc = tuttiEp ? TETTO_COPERTE[larghezza] : undefined, altri = conto.coperte - conto.proprie, elenco = (f) => conto.per.flatMap((x) => x.coperte.filter(f).map((k) => `${x.ep} ${k}`)).slice(0, 6).join('; ');
+  if (tc && conto.proprie > tc[0]) male.push(`${vp}: dopo la mossa ${conto.proprie} pastiglie sotto il proprio nome (tetto ${tc[0]}): ${elenco(proprio)} (D-281 coperte, D-283)`);
+  if (tc && altri > tc[1]) male.push(`${vp}: dopo la mossa ${altri} pastiglie sotto il nome di altri (tetto ${tc[1]}): ${elenco((k) => !proprio(k))} (D-281 coperte, D-283)`);
   if (conto.aperte) male.push(`${vp}: ${conto.aperte} fasi non chiuse in ${FOTOGRAMMI_MAX} fotogrammi (condizione e pagina ferma per ${FERMA}) ${D}`);
   const fasi = FASI.map((f) => `${f} ${conto.fasi[f].oltre}/${conto.fasi[f].max} px`).join(', ');
-  console.log(`spostamento lungo la risposta ${vp}: ${conto.episodi} episodi, ${conto.mosse} mosse, elementi oltre ${SOGLIA_SPOSTAMENTO} px ${conto.oltre}, massimo ${conto.max} px (fino all'«Avanti»); per fase (oltre/massimo) ${fasi}; riaperti ${conto.riprese}, unità non misurate ${conto.nonMisurate}, senza chiamata dopo ${conto.senzaChiamata}, fasi non chiuse ${conto.aperte}${vecchio ? ' (finestre di tempo, C281F01)' : ''}, coperte da un nome ${conto.coperte}${immediata ? ', mossa immediata' : ''};${tuttiEp ? 'tutti gli episodi' : eps.join(' ')}${tetto !== undefined ? `, tetto ${tetto} / ${tmax} px` : ''}`);
+  console.log(`spostamento lungo la risposta ${vp}: ${conto.episodi} episodi, ${conto.mosse} mosse, elementi oltre ${SOGLIA_SPOSTAMENTO} px ${conto.oltre}, massimo ${conto.max} px (fino all'«Avanti»); per fase (oltre/massimo) ${fasi}; riaperti ${conto.riprese}, unità non misurate ${conto.nonMisurate}, senza chiamata dopo ${conto.senzaChiamata}, fasi non chiuse ${conto.aperte}${vecchio ? ' (finestre di tempo, C281F01)' : ''}, coperte da un nome ${conto.coperte} (proprio ${conto.proprie}, altri ${conto.coperte - conto.proprie})${immediata ? ', mossa immediata' : ''};${tuttiEp ? 'tutti gli episodi' : eps.join(' ')}${tetto !== undefined ? `, tetto ${tetto} / ${tmax} px` : ''}`);
   return { ris: conto, male };
 }
