@@ -35,9 +35,9 @@ export function sciogli(mappa: HTMLElement, tieniOrdine = false) {
 }
 
 /** Le pastiglie coperte per più di metà da un nome, suo o di altri (D-281, revisione 3, rilievo 1). */
-function coperte(settori: HTMLElement[]): number {
+function coperte(settori: HTMLElement[], di = settori): number {
   const nomi = settori.map(nomeDi).filter((r): r is Rett => !!r);
-  return settori.reduce((t, s) => t + vis(s).filter((a) => nomi.some((n) => area(a, n) > ((a.right - a.left) * (a.bottom - a.top)) / 2)).length, 0);
+  return di.reduce((t, s) => t + vis(s).filter((a) => nomi.some((n) => area(a, n) > ((a.right - a.left) * (a.bottom - a.top)) / 2)).length, 0);
 }
 
 /** La pastiglia rimasta più lontana dal posto di prima (px) e la traslazione media che riporta le rimaste. */
@@ -123,13 +123,16 @@ type Gruppo = { g: HTMLElement; unita: string };
 /** Il posto migliore del gruppo di s dov'era (lato di chi arriva × scarto dalla traslazione esatta) senza divieti suoi. */
 function candidato(s: HTMLElement, gr: Gruppo, prima: Prima, m: DOMRect, settori: HTMLElement[], larga: number): Posto | undefined {
   const nuovi = figli(s).filter((c) => { const k = chiaveUnita(c); return k && !prima.centri.has(k); }), tutti: Posto[] = [];
+  // tentativo 2: un posto che mette una pastiglia del gruppo sotto un nome (il suo o di altri) non si prende (D-281, rilievo 1: col
+  // tentativo 1 il controllo finale tornava al ricalcolo libero e le rimaste saltavano, e21 a 360 fino a 132 px)
+  const nomi = !spento('C281N01');
   const passi = [larga / 4, larga / 2], versi = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]] as const;
   // ordine del DOM (chi arriva è già in coda: Mappa.tsx inFila) e chi arriva in testa; «in coda» era un doppione (D-280 revisione 2, B)
   for (const ordine of nuovi.length ? [0, -1] : [0]) {
     s.setAttribute('data-unita', gr.unita); muovi(gr.g, 0, 0); for (const c of nuovi) c.style.setProperty('order', String(ordine));
     const d = scarto(s, prima, m); if (!d) continue;
     const prima0 = tutti.length, prova = (dx: number, dy: number) => { muovi(gr.g, dx, dy); const dopo = scarto(s, prima, m);
-      if (dopo && dopo.max <= larga && !divieto(s, settori, m, true)) tutti.push({ max: dopo.max, ordine, dx, dy }); };
+      if (dopo && dopo.max <= larga && !divieto(s, settori, m, true) && !(nomi && coperte(settori, [s]))) tutti.push({ max: dopo.max, ordine, dx, dy }); };
     prova(d.dx, d.dy);
     // fuori dalla mappa: lo scarto che rientra (entro una larghezza); se nemmeno così, gli scarti piccoli intorno alla traslazione esatta
     const u = unisci(vis(s)), q = interno(m);
