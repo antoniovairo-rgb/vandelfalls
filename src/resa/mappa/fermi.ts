@@ -176,6 +176,9 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: (soli?: R
   const immobili = new Set(spento('C281S01') ? [] : settori.filter((s) => ferme(s) <= 0.5));
   const pena0 = new Map(settori.map((s) => [s, Math.max(pena(s, settori), prime?.get(s.dataset.settore ?? '') ?? 0)]));
   const tutta = (f: (s: HTMLElement) => number) => settori.reduce((t, s) => t + f(s), 0), libera = fotografa(settori);
+  // le coperte del ricalcolo libero, prima di fermare i gruppi: contate dopo `fissa` includevano già l'arrivata messa sotto il suo nome
+  // (D-281, revisione 3: 5 rimaste a 360, e03 e21 e28 e29; il rosso C281O01 non le cambiava, l'ordine non c'entra)
+  const nomi = !spento('C281N01'), coperte0 = coperte(settori);
   for (const s of settori) {
     const g = s.querySelector<HTMLElement>('.settore-unita'), pp = prima.posti.get(s.dataset.settore ?? ''), ora = g && pp?.unita ? scarto(s, prima, m) : null;
     if (!g || !pp?.unita || !ora || ora.max <= larga) continue;
@@ -192,7 +195,6 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: (soli?: R
   // e le sovrapposizioni in tutto non crescono oltre la tolleranza (altrimenti resta il ricalcolo)
   // e senza nuove pastiglie sotto un nome (D-281, revisione 3, rilievo 1: con la tolleranza un'arrivata finiva sotto il nome del suo
   // settore, e28 a 360 steward@curva_cinderwick → magazzino_fonderie; rosso C281N01: non si guarda, come prima)
-  const nomi = !spento('C281N01'), coperte0 = coperte(settori);
   const riferma = () => { for (const s of immobili) { if (s.hasAttribute('data-fermo') || ferme(s) <= 0.5) continue;
     const ora = fotografa([s]), prima0 = tutta((x) => pena(x, settori)), c0 = nomi ? coperte(settori) : 0; ripristina(libera.filter((f) => f.s === s));
     if ([s, ...fermi()].some((x) => divieto(x, settori, m)) || tutta((x) => pena(x, settori)) > prima0 + toll || (nomi && coperte(settori) > c0)) ripristina(ora); } };
