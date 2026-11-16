@@ -23,14 +23,16 @@
 //   senza sovrapposizioni né tocchi presi, contrasto verso il proprio fondo ≥ 3,97:1; verifica indipendente: il caso e02/e04 trovato è
 //   corretto (rosso C272D03). Guardiano schieramenti che dichiara gli schieramenti non aperti (142/142); strumento anelli che rilegge.
 //   guardiano: tools/segno-po152b.mjs, salti con tetto per episodio; rossi C272D01, C272D02, C272D03, C272A01.
-// 0.71.0 – correzioni grafiche piccole fuori dalla mappa (PO-165, D-283, collaudo grafico Fable).
+// 0.71.0 – correzioni grafiche piccole fuori dalla mappa (PO-165, D-283, collaudo grafico Fable, revisione a mente fresca).
 //   causa: barra dello schieramento a sole icone (D-12); Home e «i» senza stato premuto (D-13); unità finite e «a riposo» sotto
 //   4,5:1 (1,91-4,17:1, D-09); scheda «fallito» della città tagliata di 22 px (D-07); nota del verbale fuori schermo a 360×640 e
 //   fiducia sopra la testata (D-10); versione dei Crediti sul bordo delle schede (D-15).
-//   misura: parola sotto le icone, barra 328/343/380 px piena e alta 67 come prima; premuto con spinta 4,2 px; contrasti 18,88 /
-//   14,36 / 13,19:1, vassoio 70 px, «tutte» intero e ≥ 6,4 px dal lucchetto; scheda 0 tagli, mappa ferma (D-243); nota a 577-590 su
-//   640, «Prossimo» 50/51 px, verbali falliti alti come prima (D-187); versione in fondo ai Crediti. D-16 (costo in radio) uscito:
-//   spostava le pastiglie (860 > 818). SAVE_VERSION 4 invariata. Provini approvati dal PO; CI 10/10 (run 1462).
-//   guardiano: tools/foto-d283.mjs (giro d283 nel passo altezze, bracci a 360) e po149 (fallito); rossi C283P01, C283A01, C283E01,
-//   C283E02, C283E03, C283V01, C283V02, C283C01, C283F01.
+//   misura: parola sotto le icone, barra 328/343/380 px piena e alta 67; premuto con spinta 4,2 px; contrasti 18,88 / 14,36 /
+//   13,19:1, «tutte» intero e ≥ 6,4 px dal lucchetto; scheda 0 tagli, mappa ferma (D-243); fiducia sotto la testata, verbali falliti
+//   alti come prima (D-187); versione in fondo ai Crediti. Revisione: vassoio a 70 px anche con tutte le unità finite (R1, era 50);
+//   nel verbale «Mappa» sotto l'icona al posto della nota (opzione A del PO): «Prossimo» e «indietro» dove su main nei 36 verbali
+//   (R2/R3); barra che va a capo col testo al 130% (N1, «Conferma» usciva di 50,5 px; 142 ondate a 0). D-16 uscito (860 > 818).
+//   SAVE_VERSION 4 invariata. Provini approvati dal PO.
+//   guardiano: tools/foto-d283.mjs (giro d283 nel passo altezze, bracci a 360) e po149 (fallito); rossi C283P01, C283A01, C283E01-04,
+//   C283N01, C283V01-03, C283C01, C283F01.
 export const GAME_VERSION = '0.71.0';

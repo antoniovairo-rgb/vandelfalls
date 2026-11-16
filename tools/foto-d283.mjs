@@ -4,8 +4,8 @@
 // - D-13 stato «premuto» (forzato con CDP, senza toccare): Home, «i» e «?» cambiano aspetto (rosso C283A01); pastiglie e
 //   dischi sono della sessione della mappa;
 // - D-09 unità finita e contatore «a riposo»: contrasto ≥ 4,5:1 (colori composti con l'opacità vera), «tutte» con la spunta (rosso C283E01), dentro l'unità e staccato dal lucchetto (C283E02), «tutte» anche al lettore (C283E03);
-// - D-10 verbale a 640/667 di altezza: la nota «Mappa: …» si vede a scorrimento zero, la fiducia sta sotto la testata
-//   (rossi C283V01, C283V02);
+// - D-10 verbale (opzione A del PO dopo la revisione R2/R3): «Mappa» sotto l'icona, «indietro»/mappa/«Prossimo» sulla stessa riga sui 36 verbali, nessuna nota sopra; fiducia sotto la testata
+//   (rossi C283V01, C283V02, C283V03);
 // - D-15 Crediti: la versione non sta sopra le schede ed è in fondo alla pagina (rosso C283C01).
 // D-07 (scheda «fallito» della città) lo guarda tools/foto-po149.mjs. D-16 (radio) è uscito dal lotto: docs/foto/d283/d16/APPUNTI.md.
 // Uso a mano: node tools/foto-d283.mjs <build> <cartella-foto> [larghezze] (stampa le misure in JSON). Rossi: VALMORA_ROSSI.
@@ -30,6 +30,14 @@ export const verbaleSuperato = () => { const dati = leggiDati('data'), dich = ne
   for (let seme = 1; seme <= 500; seme++) { const caso = creaCaso(`d283:${seme}`), g = gioca(m, dich, { schiera: att.schiera, scegli: (mm, st, c) => caso.scegli(opzioniValide(c, st, mm)).id }, v0);
     if (g.esito === 'contenuto_a_fatica') return { ...base, missioni_concluse: [], episodi: {}, in_corso: g.ic, rapporto_aperto: g.ic.rapporti.at(-1).n }; }
   throw new Error('D-283: nessun seme porta e01 a «Contenuto a fatica»'); };
+
+// R2/R3: i 36 verbali del bot attento, episodio dopo episodio con le variabili in catena, aperti all'ultimo rapporto
+let verbali36 = null;
+export const verbaliAttenti = () => verbali36 ??= (() => { const dati = leggiDati('data'), dich = new Map(dati['stato.json'].variabili.map((d) => [d.id, d])), out = []; let v = v0;
+  for (const [i, m] of missioni.entries()) { const g = gioca(m, dich, attenta(creaCaso(1), dich), v), prima = missioni.slice(0, i).map((x) => x.id);
+    out.push({ ep: m.id, sal: JSON.stringify({ ...base, variabili: v, missioni_concluse: prima, episodi: Object.fromEntries(prima.map((x) => [x, base.episodi[x]])), in_corso: g.ic, rapporto_aperto: g.ic.rapporti.at(-1).n }) });
+    v = g.variabili; }
+  return out; })();
 
 // contrasto WCAG del testo dell'elemento: colori composti con le opacità degli antenati sul fondo pieno sotto
 const contrasto = (p, sel) => p.evaluate((sel) => {
@@ -184,7 +192,23 @@ export async function controllaD283(browser, url, larghezza, rossi = [], cartell
     if (!(await p.waitForSelector('[data-barra]', { timeout: 15000 }).then(() => true, () => false))) male.push(`${dove}: lo schieramento non si apre (D-283)`);
     else { await quieta(p); await tutteFinite(p, dove, await posa(p), 'e01-tutte'); }
     await p.close(); }
-  // --- verbale (D-10): ultimo passo a 640 e 667 (dove la nota finiva sotto la barra) e alla larghezza a 760
+  // --- verbale (D-10, revisione R2/R3, opzione A del PO): all'ultimo passo «indietro», mappa e «Prossimo» sulla stessa riga, il
+  // pulsante della mappa dice «Mappa» sotto l'icona (intera), nessuna nota sopra i pulsanti; «Prossimo» toccabile, fiducia sotto la testata
+  const fineVerbale = (p) => p.evaluate(() => { const q = (s) => document.querySelector(s)?.getBoundingClientRect();
+    const pr = q('.passi-nav [data-azione="prossimo"]'), ind = q('.passi-nav [data-azione="indietro"]'), ci = q('.passi-nav [data-azione="citta"]'), n = document.querySelector('[data-spiega="mappa"]');
+    const w = document.querySelector('.passi-nav [data-azione="citta"] .parola-icona'), wr = w?.getBoundingClientRect(), f = q('.fiducia'), t = q('.testata');
+    const tocco = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tocco-min'));
+    return { prossimo: pr ? Math.round(Math.max(0, Math.min(innerHeight, pr.bottom) - Math.max(0, pr.top))) : null, tocco,
+      scarto: pr && ind ? Math.round((ind.top - pr.top) * 10) / 10 : null, scartoMappa: pr && ci ? Math.round((ci.top - pr.top) * 10) / 10 : null,
+      parola: w ? w.textContent : null, taglio: w && ci ? Math.round(Math.max(0, ci.left - wr.left, wr.right - ci.right, w.scrollWidth - w.clientWidth) * 10) / 10 : null,
+      nota: !!n && n.getClientRects().length > 0 && n.closest('.verbale-fine')?.firstElementChild === n, fiduciaSotto: f && t ? f.top >= t.bottom - 0.5 : null }; });
+  const controllaFine = (v, dove) => {
+    if (v.prossimo === null) return; // fine senza «Prossimo» (epilogo, fallito): fuori da R2/R3
+    if (v.nota) male.push(`${dove}: la nota «Mappa: rigioca…» sta sopra i pulsanti e li spinge giù (D-283 R2)`);
+    if (v.scarto !== null && Math.abs(v.scarto) > 0.5) male.push(`${dove}: «indietro» a ${v.scarto} px da «Prossimo», non sulla stessa riga (D-283 R3)`);
+    if (v.scartoMappa !== null && Math.abs(v.scartoMappa) > 0.5) male.push(`${dove}: il pulsante della mappa a ${v.scartoMappa} px da «Prossimo» (D-283 R3)`);
+    if (v.parola !== 'Mappa') male.push(`${dove}: il pulsante della mappa non dice «Mappa» sotto l'icona (D-283 D-10)`);
+    else if (v.taglio > 0) male.push(`${dove}: «Mappa» tagliata di ${v.taglio} px (D-283 D-10)`); };
   { const sal = JSON.stringify(verbaleSuperato());
     for (const h of [640, 667, 760]) { const p = await nuova(browser, larghezza, h, rossi), dove = `${larghezza}x${h} verbale e01`;
       await p.goto(url); await p.evaluate(([k, v]) => localStorage.setItem(k, v), [CHIAVE, sal]); await p.reload();
@@ -193,24 +217,22 @@ export async function controllaD283(browser, url, larghezza, rossi = [], cartell
       if (!(await p.waitForSelector('.scena[data-scena="verbale"]', { timeout: 30000 }).then(() => true, () => false))) { male.push(`${dove}: il verbale non si apre (D-283)`); await p.close(); continue; }
       await quieta(p); await foto(p, `verbale-${h}-primo`);
       await avanzaFino(p, '[data-azione="prossimo"]', () => p.waitForTimeout(150)); await quieta(p);
-      const v = await p.evaluate(() => { const n = document.querySelector('[data-spiega="mappa"]'), r = n?.getBoundingClientRect(), f = document.querySelector('.fiducia')?.getBoundingClientRect(), t = document.querySelector('.testata')?.getBoundingClientRect();
-        const vista = !!r && r.top >= 0 && r.bottom <= innerHeight && document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)?.closest('[data-spiega]') === n;
-        // e non sta sopra un'altra scheda o la sua ombra (piatta, in basso a destra)
-        const ombra = (e) => { const m = getComputedStyle(e).boxShadow.match(/(-?[\d.]+)px (-?[\d.]+)px/); return m ? Math.max(0, Number(m[2])) : 0; };
-        const sopra = !r ? [] : [...document.querySelectorAll('.passo:not([hidden]) .scheda, .passo:not([hidden]) .pulsante, .passi-nav .pulsante')].filter((e) => { const q = e.getBoundingClientRect(), b = q.bottom + ombra(e);
-          return Math.min(r.right, q.right) - Math.max(r.left, q.left) > 0.5 && Math.min(r.bottom, b) - Math.max(r.top, q.top) > 0.5; }).length;
-        // e la nota sopra non spinge «Prossimo episodio» fuori dalla finestra: a scorrimento zero se ne tocca almeno --tocco-min
-        const pr = document.querySelector('[data-azione="prossimo"]')?.getBoundingClientRect(), tocco = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tocco-min'));
-        const prossimo = pr ? Math.round(Math.max(0, Math.min(innerHeight, pr.bottom) - Math.max(0, pr.top))) : 0;
-        return { nota: !!n, vista, sopra, prossimo, tocco, notaSu: r ? Math.round(r.top) : null, notaGiu: r ? Math.round(r.bottom) : null, finestra: innerHeight, pagina: document.documentElement.scrollHeight, fiduciaSotto: f && t ? f.top >= t.bottom - 0.5 : null };
-      });
-      mis[`verbale${h}`] = v;
-      if (!v.nota) male.push(`${dove}: manca la nota «Mappa: rigioca…» (D-283 D-10)`);
-      else if (!v.vista) male.push(`${dove}: a scorrimento zero la nota «Mappa: rigioca…» non si vede (${v.notaSu}-${v.notaGiu} su ${v.finestra}, D-283 D-10)`);
-      if (v.sopra) male.push(`${dove}: la nota «Mappa: rigioca…» sta sopra ${v.sopra} schede o pulsanti, ombra compresa (D-283 D-10)`);
-      if (v.prossimo < Math.min(v.tocco, 44)) male.push(`${dove}: «Prossimo episodio» si vede per ${v.prossimo} px a scorrimento zero (serve ≥ ${v.tocco}, D-283 D-10)`);
+      const v = await fineVerbale(p); mis[`verbale${h}`] = v; controllaFine(v, dove);
+      if (v.prossimo !== null && v.prossimo < Math.min(v.tocco, 44)) male.push(`${dove}: «Prossimo episodio» si vede per ${v.prossimo} px a scorrimento zero (serve ≥ ${v.tocco}, D-283 D-10)`);
       if (v.fiduciaSotto === false) male.push(`${dove}: la fiducia sta sopra la testata, altrove sotto (D-283 D-10)`);
       await foto(p, `verbale-${h}`); await p.close(); } }
+  // --- R2/R3 sui 36 verbali del bot attento (variabili in catena), all'altezza del telefono piccolo di ogni larghezza
+  { const h = { 360: 640, 375: 667 }[larghezza] ?? 760, coda = [...verbaliAttenti()]; let n = 0;
+    await Promise.all([0, 1, 2].map(async () => { while (coda.length) { const c = coda.shift(), p = await nuova(browser, larghezza, h, rossi), dove = `${larghezza}x${h} verbale ${c.ep}`;
+      try { await p.goto(url); await p.evaluate(([k, v]) => localStorage.setItem(k, v), [CHIAVE, c.sal]); await p.reload();
+        await p.getByRole('button', { name: 'Riprendi' }).click(); await p.waitForSelector('.scena[data-scena="rapporto"]', { timeout: 30000 }).catch(() => {});
+        await p.click('[data-azione="avanti"]', { timeout: 30000 }).catch(() => {});
+        if (!(await p.waitForSelector('.scena[data-scena="verbale"]', { timeout: 30000 }).then(() => true, () => false))) { male.push(`${dove}: il verbale non si apre (D-283)`); continue; }
+        await avanzaFino(p, ':is([data-azione="prossimo"], [data-azione="epilogo"])', () => p.waitForTimeout(120)); await quieta(p);
+        controllaFine(await fineVerbale(p), dove); n++;
+        if (cartella && ['e08', 'e24'].includes(c.ep)) await foto(p, `verbale-${c.ep}-${h}`);
+      } finally { await p.close(); } } }));
+    mis.verbali36 = n; if (n < 36) male.push(`${larghezza}x${h}: misurati ${n} verbali su 36 (D-283 R2)`); }
   // --- Crediti (D-15)
   for (const h of [640, 915]) { const p = await nuova(browser, larghezza, h, rossi), dove = `${larghezza}x${h} crediti`;
     await p.goto(url); await p.evaluate(() => localStorage.clear()); await p.reload();
@@ -243,7 +265,8 @@ export const BRACCI_D283 = {
   C283E04: { segno: '(D-283 R1)', almeno: 2 }, // tutte finite senza segnaposto: vassoio 70 → 50 px e barra 20 px più su
   C283N01: { segno: '(D-283 N1)', almeno: 1 }, // 130%: «Conferma» fuori dalla barra di 50,5 px a 360
   C283E03: { segno: 'al lettore (D-283 D-09)', almeno: 3 }, // «0 libere» al lettore: squadre, mediatore, transenne
-  C283V01: { segno: 'la nota «Mappa: rigioca…» non si vede', almeno: 1 }, // 360×640, titolo su due righe
+  C283V01: { segno: 'non dice «Mappa» sotto l\'icona (D-283 D-10)', almeno: 36 }, // come main: solo icona (3 verbali e01 + 35 dei 36 a 360)
+  C283V03: { segno: '(D-283 R', almeno: 30 }, // nota sopra i pulsanti: «indietro» 13 px più su e nota sopra, nei verbali con «Prossimo»
   C283V02: { segno: 'la fiducia sta sopra la testata', almeno: 3 }, // 640, 667, 760
   C283C01: { segno: 'D-283 D-15)', almeno: 4 }, // 640 e 915: sul bordo delle schede e niente versione in fondo
 };
