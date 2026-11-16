@@ -8,8 +8,8 @@
 // tornelli 7 px a sinistra). Il gruppo così fermato (data-fermo) è un ostacolo e il ricalcolo si rifà intorno a lui (nomi e altri
 // gruppi), una volta sola (D-280, costo). Se così c'è qualcosa di vietato (pastiglie o nome fuori dalla mappa, un centro di tocco sotto
 // un disco o sul nome di un altro, il proprio disco coperto), più sovrapposizioni (px²) del ricalcolo libero e di quelle già viste,
-// per un fermo o in tutto, un settore che salta più del ricalcolo libero e di una larghezza, o più pastiglie coperte oltre metà da un
-// nome del ricalcolo libero (D-281), si torna al ricalcolo libero: è un caso geometrico, contato dal guardiano spostamento-po152b.
+// per un fermo o in tutto, o un settore che salta più del ricalcolo libero e di una larghezza, si torna al ricalcolo libero: è un caso
+// geometrico, contato dal guardiano spostamento-po152b. Le pastiglie sotto un nome restano un difetto dichiarato (D-283).
 // L'ordine dato a chi arriva resta finché dura la mossa (D-281). Rosso C279F01: niente, come prima.
 import { spento } from '../../interruttori.ts';
 import { chiaveUnita, type Prima } from './congela.ts';
@@ -32,12 +32,6 @@ const verso = (x: number) => Math.sign(x) * Math.ceil(Math.abs(x)); // px interi
 export function sciogli(mappa: HTMLElement, tieniOrdine = false) {
   for (const s of mappa.querySelectorAll<HTMLElement>('[data-fermo]')) s.removeAttribute('data-fermo');
   if (!tieniOrdine || spento('C281O01')) for (const c of mappa.querySelectorAll<HTMLElement>('.settore-unita > *')) c.style.removeProperty('order');
-}
-
-/** Le pastiglie coperte per più di metà da un nome, suo o di altri (D-281, revisione 3, rilievo 1). */
-function coperte(settori: HTMLElement[], di = settori): number {
-  const nomi = settori.map(nomeDi).filter((r): r is Rett => !!r);
-  return di.reduce((t, s) => t + vis(s).filter((a) => nomi.some((n) => area(a, n) > ((a.right - a.left) * (a.bottom - a.top)) / 2)).length, 0);
 }
 
 /** La pastiglia rimasta più lontana dal posto di prima (px) e la traslazione media che riporta le rimaste. */
@@ -123,16 +117,13 @@ type Gruppo = { g: HTMLElement; unita: string };
 /** Il posto migliore del gruppo di s dov'era (lato di chi arriva × scarto dalla traslazione esatta) senza divieti suoi. */
 function candidato(s: HTMLElement, gr: Gruppo, prima: Prima, m: DOMRect, settori: HTMLElement[], larga: number): Posto | undefined {
   const nuovi = figli(s).filter((c) => { const k = chiaveUnita(c); return k && !prima.centri.has(k); }), tutti: Posto[] = [];
-  // tentativo 2: un posto che mette una pastiglia del gruppo sotto un nome (il suo o di altri) non si prende (D-281, rilievo 1: col
-  // tentativo 1 il controllo finale tornava al ricalcolo libero e le rimaste saltavano, e21 a 360 fino a 132 px)
-  const nomi = !spento('C281N01');
   const passi = [larga / 4, larga / 2], versi = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]] as const;
   // ordine del DOM (chi arriva è già in coda: Mappa.tsx inFila) e chi arriva in testa; «in coda» era un doppione (D-280 revisione 2, B)
   for (const ordine of nuovi.length ? [0, -1] : [0]) {
     s.setAttribute('data-unita', gr.unita); muovi(gr.g, 0, 0); for (const c of nuovi) c.style.setProperty('order', String(ordine));
     const d = scarto(s, prima, m); if (!d) continue;
     const prima0 = tutti.length, prova = (dx: number, dy: number) => { muovi(gr.g, dx, dy); const dopo = scarto(s, prima, m);
-      if (dopo && dopo.max <= larga && !divieto(s, settori, m, true) && !(nomi && coperte(settori, [s]))) tutti.push({ max: dopo.max, ordine, dx, dy }); };
+      if (dopo && dopo.max <= larga && !divieto(s, settori, m, true)) tutti.push({ max: dopo.max, ordine, dx, dy }); };
     prova(d.dx, d.dy);
     // fuori dalla mappa: lo scarto che rientra (entro una larghezza); se nemmeno così, gli scarti piccoli intorno alla traslazione esatta
     const u = unisci(vis(s)), q = interno(m);
@@ -179,9 +170,6 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: (soli?: R
   const immobili = new Set(spento('C281S01') ? [] : settori.filter((s) => ferme(s) <= 0.5));
   const pena0 = new Map(settori.map((s) => [s, Math.max(pena(s, settori), prime?.get(s.dataset.settore ?? '') ?? 0)]));
   const tutta = (f: (s: HTMLElement) => number) => settori.reduce((t, s) => t + f(s), 0), libera = fotografa(settori);
-  // le coperte del ricalcolo libero, prima di fermare i gruppi: contate dopo `fissa` includevano già l'arrivata messa sotto il suo nome
-  // (D-281, revisione 3: 5 rimaste a 360, e03 e21 e28 e29; il rosso C281O01 non le cambiava, l'ordine non c'entra)
-  const nomi = !spento('C281N01'), coperte0 = coperte(settori);
   for (const s of settori) {
     const g = s.querySelector<HTMLElement>('.settore-unita'), pp = prima.posti.get(s.dataset.settore ?? ''), ora = g && pp?.unita ? scarto(s, prima, m) : null;
     if (!g || !pp?.unita || !ora || ora.max <= larga) continue;
@@ -196,16 +184,13 @@ function fermiDentro(mappa: HTMLElement, prima: Prima | null, disponi: (soli?: R
   const toll = Math.max(0.5, spento('C281T01') ? 0 : TOLLERANZA * (pa ? pa.width * pa.height : 0)); // rosso C281T01: 0,5 px² come prima
   // chi era immobile nel ricalcolo libero e il ricalcolo intorno ai fermi ha spostato torna come nel libero, se così niente di vietato
   // e le sovrapposizioni in tutto non crescono oltre la tolleranza (altrimenti resta il ricalcolo)
-  // e senza nuove pastiglie sotto un nome (D-281, revisione 3, rilievo 1: con la tolleranza un'arrivata finiva sotto il nome del suo
-  // settore, e28 a 360 steward@curva_cinderwick → magazzino_fonderie; rosso C281N01: non si guarda, come prima)
   const riferma = () => { for (const s of immobili) { if (s.hasAttribute('data-fermo') || ferme(s) <= 0.5) continue;
-    const ora = fotografa([s]), prima0 = tutta((x) => pena(x, settori)), c0 = nomi ? coperte(settori) : 0; ripristina(libera.filter((f) => f.s === s));
-    if ([s, ...fermi()].some((x) => divieto(x, settori, m)) || tutta((x) => pena(x, settori)) > prima0 + toll || (nomi && coperte(settori) > c0)) ripristina(ora); } };
+    const ora = fotografa([s]), prima0 = tutta((x) => pena(x, settori)); ripristina(libera.filter((f) => f.s === s));
+    if ([s, ...fermi()].some((x) => divieto(x, settori, m)) || tutta((x) => pena(x, settori)) > prima0 + toll) ripristina(ora); } };
   disponi(vicini(settori, fermi(), larga)); riferma();
   const ora = new Map(settori.map((s) => [s, pena(s, settori)])), cresce = (s: HTMLElement) => (ora.get(s) ?? 0) - (pena0.get(s) ?? 0), quanti = fermi().length;
   const male = fermi().some((s) => divieto(s, settori, m) || cresce(s) > toll)
     || (quanti > 0 && tutta((s) => ora.get(s) ?? 0) > tutta((s) => pena0.get(s) ?? 0) + toll) // in tutto peggio
-    || (quanti > 0 && settori.some((s) => (!s.hasAttribute('data-fermo') ? via(s) : nomeVia(s)) > (via0.get(s) ?? 0) + 0.5)) // un settore saltato
-    || (nomi && coperte(settori) > coperte0);
+    || (quanti > 0 && settori.some((s) => (!s.hasAttribute('data-fermo') ? via(s) : nomeVia(s)) > (via0.get(s) ?? 0) + 0.5)) // un settore saltato;
   if (male) ripristina(libera); // il ricalcolo libero, senza rifarlo
 }
