@@ -157604,6 +157604,53 @@
         }
       ],
       "esito": "rosso"
+    },
+    {
+      "catena": "grafica",
+      "data": "2026-11-16T02:46:08.554Z",
+      "commit": "618efac",
+      "modifiche_non_committate": false,
+      "larghezze": "360",
+      "passi_scelti": "token,build,email,foto",
+      "passi": [
+        {
+          "passo": "token",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "build",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            1.6
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "email",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            0.6
+          ],
+          "problemi": []
+        },
+        {
+          "passo": "foto",
+          "esito": "verde",
+          "tentativi": 1,
+          "secondi": [
+            872.6
+          ],
+          "problemi": []
+        }
+      ],
+      "esito": "verde"
     }
   ]
 }
