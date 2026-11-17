@@ -104,7 +104,7 @@ const stato = (p) => p.evaluate(() => {
 /** Problemi alla larghezza data, alle altezze di ALTEZZE_PO152B. */
 // D-270: `solo` restringe un braccio rosso ai giri (e01, radio, previsione, fermo, versione) e agli episodi del giro radio dove il suo rosso si vede
 export async function controllaPo152b(browser, url, larghezza, rossi = [], cartella = '', dati, dich, solo = {}) {
-  const giri = solo.giri ?? ['e01', 'radio', 'previsione', 'fermo', 'versione', 'salti', 'segno', 'spostamento']; // D-278: «spostamento»; D-271: «versione» (versione-svanisce.mjs); D-272 passo 4: «segno»
+  const giri = solo.giri ?? ['e01', 'radio', 'previsione', 'fermo', 'versione', 'salti', 'segno', 'spostamento', 'immediata']; // D-281: «immediata»; D-278: «spostamento»; D-271: «versione» (versione-svanisce.mjs); D-272 passo 4: «segno»
   // lotto «altezze» (S-11): il verde gira radio, previsione e fermo su PAGINE_RADIO pagine insieme; i bracci (5 processi insieme,
   // pochi episodi) su una: con 4 anche lì, in 1 giro su 3, C269A01 ha dato 0 problemi e C269P01 un'attesa scaduta di 15 s
   const pagine = solo.giri ? 1 : PAGINE_RADIO;
@@ -183,6 +183,9 @@ export async function controllaPo152b(browser, url, larghezza, rossi = [], carte
   if (hr && giri.includes('salti')) { const r = await controllaSalti(browser, url, larghezza, hr, rossi, dati, insieme, pagine, solo.episodi); male.push(...r.male); ris.push(r.ris); } // D-272 passo 2
   if (hr && giri.includes('segno')) { const r = await controllaSegno(browser, url, larghezza, hr, rossi, dati, insieme, pagine, solo.episodi); male.push(...r.male); ris.push(r.ris); } // D-272 passo 4
   if (hr && giri.includes('spostamento')) { const r = await (await import('./spostamento-po152b.mjs')).controllaSpostamento(browser, url, larghezza, hr, rossi, dati, insieme, pagine, solo.episodi); male.push(...r.male); ris.push(r.ris); } // D-278
+  // D-281 (revisione 3, rilievo 2): la mossa coi segni ▲/▼ ancora in pagina, solo dove ha un tetto (e21 a 360)
+  if (hr && giri.includes('immediata')) { const s = await import('./spostamento-po152b.mjs'); if (s.TETTO_EPISODIO_IMMEDIATA[larghezza]) {
+    const r = await s.controllaSpostamento(browser, url, larghezza, hr, rossi, dati, insieme, pagine, solo.episodi ?? s.EPISODI_IMMEDIATA, true); male.push(...r.male); ris.push(r.ris); } }
   if (giri.includes('versione')) male.push(...await (await import('./versione-svanisce.mjs')).controllaVersioneSvanisce(browser, url, larghezza, rossi, chiamateCostruite(dati, dich)[0].sal)); // D-271
   if (FERMO_VP[larghezza] && giri.includes('fermo')) { const r = await controllaFermo(browser, url, larghezza, FERMO_VP[larghezza], rossi, dati, dich, pagine); male.push(...r.male); ris.push(r.ris); }
   return { ris, male };

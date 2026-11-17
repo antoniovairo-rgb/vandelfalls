@@ -15,6 +15,9 @@ export const SOGLIA_SPOSTAMENTO = 44; // --tocco-min, come i salti
 export const EPISODI_SPOSTAMENTO = ['e21', 'e26'];
 // D-279: e26 stretto al verde coi gruppi fermi (fermi.ts; prima 30/176, 31/176, 8/91 di main 834bea62), così il braccio C279F01 vede il
 // ritorno a main. D-281 (main d561f76, ricalcolo leggero l1 + tolleranza 0,5 di fermi.ts): e21 stretto alla misura (prima 20/132, 72/132, 19/70)
+// D-281 (revisione 3, rilievo 2): giro «immediata» (mossa coi segni ▲/▼ ancora in pagina) su e21 a 360, tetto al più alto di 3 prove
+// verdi su a953f676 (8/83, 8/83, 8/83); rosso C281O01 (l'ordine dell'arrivata tolto a ogni ricalcolo, come prima) 14/83 in 3 prove su 3
+export const EPISODI_IMMEDIATA = ['e21'], TETTO_EPISODIO_IMMEDIATA = { 360: { e21: [8, 83] } };
 export const TETTO_EPISODIO_SPOSTAMENTO = { 360: { e21: [4, 47], e26: [1, 67] }, 375: { e21: [56, 132], e26: [9, 79] }, 412: { e21: [0, 22], e26: [0, 22] } };
 // D-279: totali stretti al verde coi gruppi fermi (prima 818/199, 596/176, 246/134 di main). 360: catena «completa» su 5cf1c59e,
 // 385/176 (zz-spost 384/176); 375 e 412: zz-spost su a8f146bb, 1 prova (e10 a 375 rifatta da sola, 4 prove 19/134), 408/134 e 64/134
@@ -40,8 +43,9 @@ const proprio = (k) => { const m = /([^\s@:]+)@(\S+) sotto il nome di (\S+)$/.ex
 // Difetto residuo dichiarato (il PO ha scelto C: si corregge nel lotto mappa D-283, dove i tetti vanno a 0): tenerle a 0 coi gruppi
 // fermi faceva saltare le rimaste (a 360, e03 e10 e28 e29: 59 → 85 elementi oltre 44 px). Due conti, sui 36 episodi: «sotto il
 // proprio nome» e «sotto il nome di altri», ciascuno col tetto alla misura del codice (mai sopra main per «altri»), perché non peggiori
-// di nascosto. [proprio, altri]: TETTI_COPERTE_MISURA
-export const TETTO_COPERTE = {}; // PROVVISORIO: valori dopo la misura di C
+// di nascosto. [proprio, altri]: zz-spost su a953f676 (C), 36 episodi, 4 pagine: 360 10/26 (come b5293c47; main 0/31), 375 0/20 (main
+// 0/20, tutte e06), 412 0/0. Senza braccio: lo aggiunge D-283 con la correzione vera
+export const TETTO_COPERTE = { 360: [10, 26], 375: [0, 20], 412: [0, 0] };
 const COPERTE = () => { const nomi = [...document.querySelectorAll('.mappa [data-settore]')].flatMap((s) => { const n = s.querySelector('.settore-nome'); return n ? [[s.dataset.settore, n.getBoundingClientRect()]] : []; });
   const su = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
   return [...document.querySelectorAll('.mappa .settore-unita .pastiglia')].flatMap((e) => { const r = e.getBoundingClientRect(), t = e.closest('[data-presenza], [data-fissa]'), n = nomi.find(([, q]) => su(r, q) > (r.width * r.height) / 2);
@@ -138,7 +142,7 @@ export async function controllaSpostamento(browser, url, larghezza, h, rossi, da
       conto.episodi++; conto.mosse += r.mosse; conto.oltre += r.oltre; conto.max = Math.max(conto.max, r.max);
       for (const f of FASI) { conto.fasi[f].oltre += r.fasi[f].oltre; conto.fasi[f].max = Math.max(conto.fasi[f].max, r.fasi[f].max); }
       conto.per.push(r); fatto = true;
-      const te = !tuttiEp && TETTO_EPISODIO_SPOSTAMENTO[larghezza]?.[ep];
+      const te = !tuttiEp && (immediata ? TETTO_EPISODIO_IMMEDIATA : TETTO_EPISODIO_SPOSTAMENTO)[larghezza]?.[ep];
       if (te && (r.oltre > te[0] || r.max > te[1])) male.push(`${vp} ${ep} ${c.id}: elementi oltre ${SOGLIA_SPOSTAMENTO} px ${r.oltre} (tetto ${te[0]}), massimo ${r.max} px (tetto ${te[1]}); peggiore ${r.peggiore} (D-278 spostamento, tetto episodio)`);
       break;
     }
