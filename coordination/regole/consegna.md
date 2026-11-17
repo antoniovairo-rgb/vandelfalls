@@ -14,6 +14,7 @@ Il messaggio di consegna contiene questa lista, compilata. Una riga mancante blo
 | Pre-push | verde, con la durata dei test |
 | Verde locale | i guardiani dell'area toccata, a 360, 375 e 412 px, con il numero di problemi |
 | Rossi locali | ogni rosso nuovo e i bracci della larghezza 360 (`VALMORA_LARGHEZZE=360 VALMORA_PASSI=build,bracci-rossi-grafica node tools/catena.mjs grafica`), nessun cieco |
+| Braccio provato per la sua strada | ogni braccio nuovo si prova passando da `tools/passi-grafica.mjs` (o dalla catena), mai chiamando direttamente la funzione del guardiano: tre bracci (salti nella «completa», C272A01, C281O01) sono risultati ciechi solo in CI perché la prova locale saltava la strada del braccio (D-284) |
 | Catena grafica a 360 | `VALMORA_LARGHEZZE=360 node tools/catena.mjs grafica`, tutti i passi, verde; le altre larghezze le copre la CI (aggiunta 07/11: lo schieramento C33-04 era rimasto fuori) |
 | Salti mappa (solo lotti che toccano la mappa) | giro «salti» su tutti i 36 episodi a 360/375/412, con il tetto in vigore (D-272: 95/47/33 elementi oltre 44 px, massimo 176/176/120) |
 | Segno della mossa (solo lotti che toccano la mappa) | giro «segno» su e02, e03, e04, e05 ed e13 con tutte le mosse, a 360/375/412: 0 sovrapposizioni, 0 tocchi presi (D-272 passo 4) |
